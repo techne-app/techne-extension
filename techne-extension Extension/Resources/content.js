@@ -1,32 +1,32 @@
-
-const subtextElements = document.querySelectorAll('td.subtext .subline');
-
-//const story_ids = [41247023, 41248104, 41245159];
-
 const athingElements = document.querySelectorAll('tr.athing');
-const story_ids = Array.from(athingElements).map(athingElements => Number(athingElements.getAttribute('id')));
-const teche_url = "https://techne.app/story-tags/"
+const story_ids = Array.from(athingElements).map(element => Number(element.getAttribute('id')));
+const techne_url = "https://techne.app/story-tags/";
 
-console.log(story_ids)
+console.log("Number of athing elements:", athingElements.length);
+console.log("Story IDs:", story_ids);
 
+// Create a map to store the relation between story IDs and their corresponding subtext elements
+const storySubtextMap = new Map();
 
-function findValidTagAndAnchor(tags, tagAnchors) {
-    for (let i = 0; i < tags.length; i++) {
-        if (tags[i].length > 0 && tags[i].length < 20) {
-            return {
-                tag_to_add: tags[i],
-                anchor_to_use: tagAnchors[i]
-            };
+athingElements.forEach((athingElement) => {
+    const storyId = Number(athingElement.getAttribute('id'));
+    // Find the next sibling that contains the subtext
+    let subtextElement = athingElement.nextElementSibling;
+    if (subtextElement) {
+        const sublineElement = subtextElement.querySelector('.subline');
+        if (sublineElement) {
+            storySubtextMap.set(storyId, sublineElement);
+        } else {
+            console.warn(`No .subline found for story ID ${storyId}`);
         }
+    } else {
+        console.warn(`No sibling element found for story ID ${storyId}`);
     }
-    
-    // If no valid tag is found, return null or a default value
-    return null;
-}
+});
 
+console.log("Number of matched story-subtext pairs:", storySubtextMap.size);
 
-// Make the POST request with the fixed IDs
-fetch(teche_url, {
+fetch(techne_url, {
     method: 'POST',
     headers: {
         'Content-Type': 'application/json',
@@ -35,65 +35,48 @@ fetch(teche_url, {
 })
 .then(response => response.json())
 .then(data => {
-        
-    // Process the response, which contains tags and tagAnchors for each ID
-    subtextElements.forEach((subtextElement, index) => {
-        // Assuming the response data contains arrays of tags and links corresponding to the IDs
-        const tags = data[index].tags;  // Adjust according to API response structure
-        const tagAnchors = data[index].tag_anchors;  // New array containing links
+    console.log("API response length:", data.length);
 
-        console.log(index);
-        console.log(tags);
-        console.log(tagAnchors);
+    data.forEach((story) => {
+        const storyId = story.id;
+        console.log(`Processing story ID ${storyId}`);
         
-        if (tags !== null && tagAnchors !== null && tags.length === tagAnchors.length) {
-            // Add a new element containing a tag
-            const tagsElement = document.createElement('span');
+        const subtextElement = storySubtextMap.get(storyId);
+        
+        if (!subtextElement) {
+            console.warn(`No matching subtext element found for story ID ${storyId}`);
+            return;
+        }
+        
+        if (!story.tags || !story.tag_anchors) {
+            console.warn(`Missing tags or tag_anchors for story ID ${storyId}`);
+            return;
+        }
+
+        const tags = story.tags;
+        const tagAnchors = story.tag_anchors;
+
+        if (tags.length === tagAnchors.length && tags.length > 0) {
+            const tagsContainer = document.createElement('span');
+            tagsContainer.style.color = 'blue';
             
-            tagsElement.style.color = 'blue';
-            tagsElement.textContent = ' | ';
-            
-            const result = findValidTagAndAnchor(tags, tagAnchors);
-            
-            if (result) {
-                // Create an anchor element for the link
+            const tagCount = Math.min(tags.length, 3);
+            for (let i = 0; i < tagCount; i++) {
                 const anchorElement = document.createElement('a');
-                anchorElement.href = result.anchor_to_use;
-                anchorElement.textContent = result.tag_to_add;
+                anchorElement.href = tagAnchors[i];
+                anchorElement.textContent = ' | ' + tags[i];
                 anchorElement.style.color = 'blue';
                 anchorElement.style.textDecoration = 'none';
-                
-                // Append the link to the tagsElement
-                tagsElement.appendChild(anchorElement);
-                
-                // Append the new span to the subtextElement
-                subtextElement.appendChild(tagsElement);
+                tagsContainer.appendChild(anchorElement);
             }
+            
+            subtextElement.appendChild(tagsContainer);
+            console.log(`Added ${tagCount} tags to story ID ${storyId}`);
+        } else {
+            console.warn(`story ID ${storyId} -- tags.length: ${tags.length}, tagAnchors.length: ${tagAnchors.length}`);
         }
     });
-    
 })
 .catch(error => {
     console.error('Error fetching tags:', error);
-
-    // Handle the error for each element
-    subtextElements.forEach(subtextElement => {
-        const tagsElement = document.createElement('span');
-        tagsElement.style.color = 'blue';
-        tagsElement.textContent = ' | Error fetching tag';
-        subtextElement.appendChild(tagsElement);
-    });
 });
-
-
-//
-//const subtextElements = document.querySelectorAll('td.subtext .subline');
-//
-//subtextElements.forEach((subtextElement) => {
-//    // Add a new element containing a tag
-//    const tagsElement = document.createElement('span');
-//    tagsElement.style.color = 'blue';
-//    tagsElement.textContent = ' |  ';
-//    subtextElement.appendChild(tagsElement);
-//});
-//
