@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "DOM Modifier",
+  "name": "HNav",
   "version": "1.0",
-  "description": "An extension that modifies the DOM of the current page.",
+  "description": "An extension that helps navigate Hacker News with AI generated tags.",
   "permissions": ["activeTab"],
   "icons": {
     "48": "images/icon-48.png"
@@ -13,12 +13,5 @@
       "js": ["content.js"]
     }
   ],
-  "action": {
-    "default_popup": "popup.html",
-    "default_icon": "images/icon-48.png"
-  },
-  "default_locale": "en",
-  "background": {
-    "service_worker": "background.js"
-  }
+  "default_locale": "en"
 }
