@@ -1,12 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "HNav",
+  "name": "Techne",
   "version": "1.0",
   "description": "An extension that helps navigate Hacker News with AI generated tags.",
-  "permissions": ["activeTab"],
-  "host_permissions": [
-    "https://techne.app/*"
-  ],
   "icons": {
     "48": "images/icon-48.png"
   },
