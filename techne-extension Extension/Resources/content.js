@@ -1,6 +1,7 @@
 const athingElements = document.querySelectorAll('tr.athing');
 const story_ids = Array.from(athingElements).map(element => Number(element.getAttribute('id')));
 const techne_url = "https://techne.app/story-tags/";
+//const techne_url = "https://techne-backend-3pmb75btvq3vw-app-service-dev.azurewebsites.net/story-tags/";
 
 console.log("Number of athing elements:", athingElements.length);
 console.log("Story IDs:", story_ids);
