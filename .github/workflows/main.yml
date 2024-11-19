@@ -13,27 +13,18 @@ jobs:
     
     steps:
     - uses: actions/checkout@v1
-    
-    - uses: actions/setup-node@v1
-      with:
-        node-version: 20
-        
-    - name: Build
-      run: |
-        npm ci
-        npm run build
         
     - name: Create ZIP file
       run: |
         cd "techne-extension Extension/"
         zip -r ../extension.zip Resources
-        ls ../
+        ls -la ../extension.zip
         
     - name: Upload & release
       uses: mnao305/chrome-extension-upload@v5.0.0
       with:
         file-path: extension.zip
-        extension-id: ${{ secrets.EXTENSION_ID }}
-        client-id: ${{ secrets.CLIENT_ID }}
-        client-secret: ${{ secrets.CLIENT_SECRET }}
-        refresh-token: ${{ secrets.REFRESH_TOKEN }}
+        extension-id: ${{ secrets.GOOGLE_WEBSTORE_EXTENSION_ID }}
+        client-id: ${{ secrets.GOOGLE_WEBSTORE_CLIENT_ID }}
+        client-secret: ${{ secrets.GOOGLE_WEBSTORE_CLIENT_SECRET }}
+        refresh-token: ${{ secrets.GOOGLE_WEBSTORE_REFRESH_TOKEN }}
