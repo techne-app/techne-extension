@@ -1,56 +1,38 @@
-const athingElements = document.querySelectorAll('tr.athing');
-const story_ids = Array.from(athingElements).map(element => Number(element.getAttribute('id')));
-const techne_url = "https://techne.app/story-tags/";
-//const techne_url = "https://techne-backend-3pmb75btvq3vw-app-service-dev.azurewebsites.net/story-tags/";
-
-console.log("Number of athing elements:", athingElements.length);
-console.log("Story IDs:", story_ids);
-
-// Create a map to store the relation between story IDs and their corresponding subtext elements
-const storySubtextMap = new Map();
-
-athingElements.forEach((athingElement) => {
-    const storyId = Number(athingElement.getAttribute('id'));
-    // Find the next sibling that contains the subtext
-    let subtextElement = athingElement.nextElementSibling;
-    if (subtextElement) {
-        const sublineElement = subtextElement.querySelector('.subline');
-        if (sublineElement) {
-            storySubtextMap.set(storyId, sublineElement);
-        } else {
-            console.warn(`No .subline found for story ID ${storyId}`);
-        }
-    } else {
-        console.warn(`No sibling element found for story ID ${storyId}`);
+(function() {
+    // Get the single story submission
+    const storyElement = document.querySelector('tr.athing.submission');
+    if (!storyElement) {
+        console.log("No story found on this page");
+        return;
     }
-});
 
-console.log("Number of matched story-subtext pairs:", storySubtextMap.size);
+    const story_id = Number(storyElement.getAttribute('id'));
+    const subtextElement = storyElement.closest('table.fatitem')?.querySelector('.subtext .subline');
 
-fetch(techne_url, {
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({story_ids: story_ids}),
-})
-.then(response => response.json())
-.then(data => {
-    console.log("API response length:", data.length);
+    if (!subtextElement) {
+        console.log("No subtext element found for story");
+        return;
+    }
 
-    data.forEach((story) => {
-        const storyId = story.id;
-        console.log(`Processing story ID ${storyId}`);
-        
-        const subtextElement = storySubtextMap.get(storyId);
-        
-        if (!subtextElement) {
-            console.warn(`No matching subtext element found for story ID ${storyId}`);
+    console.log("Processing story ID:", story_id);
+
+    fetch("https://techne.app/story-tags/", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({story_ids: [story_id]}),
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (!data || data.length === 0) {
+            console.log("No tags returned from API");
             return;
         }
         
+        const story = data[0];
         if (!story.tags || !story.tag_anchors) {
-            console.warn(`Missing tags or tag_anchors for story ID ${storyId}`);
+            console.log("Missing tags or tag_anchors in API response");
             return;
         }
 
@@ -72,12 +54,10 @@ fetch(techne_url, {
             }
             
             subtextElement.appendChild(tagsContainer);
-            console.log(`Added ${tagCount} tags to story ID ${storyId}`);
-        } else {
-            console.warn(`story ID ${storyId} -- tags.length: ${tags.length}, tagAnchors.length: ${tagAnchors.length}`);
+            console.log(`Added ${tagCount} tags to story`);
         }
+    })
+    .catch(error => {
+        console.error('Error fetching tags:', error);
     });
-})
-.catch(error => {
-    console.error('Error fetching tags:', error);
-});
+})();
