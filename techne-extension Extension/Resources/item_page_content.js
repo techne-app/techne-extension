@@ -1,5 +1,7 @@
 (function() {
-    // First part - handle the story (keeping existing code)
+    const BASE_URL = "https://techne.app";
+
+    // First part - handle the story
     const storyElement = document.querySelector('tr.athing.submission');
     if (!storyElement) {
         console.log("No story found on this page");
@@ -16,8 +18,7 @@
 
     console.log("Processing story ID:", story_id);
 
-    // Story tags fetch
-    fetch("https://techne.app/story-tags/", {
+    fetch(`${BASE_URL}/story-tags/`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -71,11 +72,8 @@
 
     const comment_ids = Array.from(commentElements).map(element => Number(element.getAttribute('id')));
     console.log(`Processing ${comment_ids.length} comments`);
-    console.log(comment_ids);
 
-
-    // Comment tags fetch
-    fetch("https://techne.app/comment-tags/", {
+    fetch(`${BASE_URL}/comment-tags/`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -93,7 +91,6 @@
                 return;
             }
 
-            // Find the comhead element where we'll insert the tags
             const comheadElement = commentElement.querySelector('.comhead');
             if (!comheadElement) {
                 console.warn(`Comhead not found for comment ${commentId}`);
@@ -112,7 +109,7 @@
                 const tagsContainer = document.createElement('span');
                 tagsContainer.style.color = 'blue';
                 
-                const tagCount = Math.min(tags.length, 2); // Showing fewer tags for comments
+                const tagCount = Math.min(tags.length, 2);
                 for (let i = 0; i < tagCount; i++) {
                     const anchorElement = document.createElement('a');
                     anchorElement.href = tagAnchors[i];
