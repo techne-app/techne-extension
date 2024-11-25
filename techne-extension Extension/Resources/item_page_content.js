@@ -1,91 +1,121 @@
 (function() {
-    const BASE_URL = "https://techne.app";
-    function addTagsToElement(element, tags) {
-        if (!element || !tags || tags.length === 0) return;
-        
-        const comheadElement = element.querySelector('.comhead');
-        if (!comheadElement) return;
+    const CONFIG = {
+        BASE_URL: "https://techne.app",
+        ENDPOINTS: {
+            STORY_TAGS: "/story-tags/",
+            THREAD_TAGS: "/thread-tags/",
+            COMMENT_TAGS: "/comment-tags/"
+        },
+        STYLES: {
+            STORY_TAG: { color: 'blue', textDecoration: 'none' },
+            COMMENT_TAG: { 
+                backgroundColor: '#FF6600',
+                color: 'black',
+                padding: '1px 3px',
+                borderRadius: '2px',
+                marginLeft: '4px'
+            }
+        },
+        MAX_STORY_TAGS: 3
+    };
 
-        const tagsContainer = document.createElement('span');
-        tagsContainer.style.color = 'blue';
-        const tagText = document.createTextNode(` | ${tags[0]}`);
-        tagsContainer.appendChild(tagText);
-        comheadElement.appendChild(tagsContainer);
-    }
+    class TagManager {
+        static async fetchTags(endpoint, ids, idField = 'ids') {
+            try {
+                const response = await fetch(`${CONFIG.BASE_URL}${endpoint}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ [idField]: ids })
+                });
+                return await response.json();
+            } catch (error) {
+                console.error(`Error fetching tags from ${endpoint}:`, error);
+                return [];
+            }
+        }
 
-    // Story handling
-    const storyElement = document.querySelector('tr.athing.submission');
-    if (storyElement) {
-        const story_id = Number(storyElement.getAttribute('id'));
-        const subtextElement = storyElement.closest('table.fatitem')?.querySelector('.subtext .subline');
+        static addCommentTag(element, tags) {
+            if (!element || !tags?.length) return;
+            
+            const comheadElement = element.querySelector('.comhead');
+            if (!comheadElement) return;
 
-        if (subtextElement) {
-            fetch(`${BASE_URL}/story-tags/`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({story_ids: [story_id]}),
-            })
-            .then(response => response.json())
-            .then(data => {
-                const story = data[0];
-                if (story?.tags && story?.tag_anchors && story.tags.length === story.tag_anchors.length) {
-                    const tagsContainer = document.createElement('span');
-                    tagsContainer.style.color = 'blue';
-                    
-                    const tagCount = Math.min(story.tags.length, 3);
-                    for (let i = 0; i < tagCount; i++) {
-                        const anchorElement = document.createElement('a');
-                        anchorElement.href = story.tag_anchors[i];
-                        anchorElement.textContent = ' | ' + story.tags[i];
-                        anchorElement.style.color = 'blue';
-                        anchorElement.style.textDecoration = 'none';
-                        tagsContainer.appendChild(anchorElement);
-                    }
-                    subtextElement.appendChild(tagsContainer);
-                }
-            })
-            .catch(error => console.error('Error fetching story tags:', error));
+            const tagsContainer = document.createElement('span');
+            Object.assign(tagsContainer.style, CONFIG.STYLES.COMMENT_TAG);
+            // Removed the ' | ' separator since we're using padding and margin now
+            tagsContainer.textContent = tags[0];
+            comheadElement.appendChild(tagsContainer);
+        }
+
+        static addStoryTags(subtextElement, storyData) {
+            if (!subtextElement || !storyData?.tags?.length || !storyData?.tag_anchors?.length) return;
+
+            const tagsContainer = document.createElement('span');
+            tagsContainer.style.color = CONFIG.STYLES.STORY_TAG.color;
+            
+            const tagCount = Math.min(storyData.tags.length, CONFIG.MAX_STORY_TAGS);
+            for (let i = 0; i < tagCount; i++) {
+                const anchorElement = document.createElement('a');
+                Object.assign(anchorElement.style, CONFIG.STYLES.STORY_TAG);
+                anchorElement.href = storyData.tag_anchors[i];
+                anchorElement.textContent = ' | ' + storyData.tags[i];
+                tagsContainer.appendChild(anchorElement);
+            }
+            subtextElement.appendChild(tagsContainer);
         }
     }
 
-    // Comments handling
-    const allComments = document.querySelectorAll('tr[class="athing comtr"]');
-    const [threadComments, nonThreadComments] = Array.from(allComments).reduce((acc, comment) => {
-        const indentElement = comment.querySelector('td.ind img');
-        (indentElement?.width === 0 ? acc[0] : acc[1]).push(comment);
-        return acc;
-    }, [[], []]);
-
-    const threadIds = threadComments.map(el => Number(el.getAttribute('id')));
-    const commentIds = nonThreadComments.map(el => Number(el.getAttribute('id')));
-
-    // Fetch thread tags
-    if (threadIds.length > 0) {
-        fetch(`${BASE_URL}/thread-tags/`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({thread_ids: threadIds}),
-        })
-        .then(response => response.json())
-        .then(data => data.forEach(thread => {
-            const element = document.getElementById(thread.id);
-            addTagsToElement(element, thread.tags);
-        }))
-        .catch(error => console.error('Error fetching thread tags:', error));
+    class CommentSorter {
+        static categorizeComments(comments) {
+            return Array.from(comments).reduce((acc, comment) => {
+                const indentElement = comment.querySelector('td.ind img');
+                const id = Number(comment.getAttribute('id'));
+                if (!isNaN(id)) {
+                    (indentElement?.width === 0 ? acc.threadIds : acc.commentIds).push(id);
+                }
+                return acc;
+            }, { threadIds: [], commentIds: [] });
+        }
     }
 
-    // Fetch comment tags
-    if (commentIds.length > 0) {
-        fetch(`${BASE_URL}/comment-tags/`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({comment_ids: commentIds}),
-        })
-        .then(response => response.json())
-        .then(data => data.forEach(comment => {
-            const element = document.getElementById(comment.id);
-            addTagsToElement(element, comment.tags);
-        }))
-        .catch(error => console.error('Error fetching comment tags:', error));
+    async function init() {
+        // Handle story tags
+        const storyElement = document.querySelector('tr.athing.submission');
+        if (storyElement) {
+            const story_id = Number(storyElement.getAttribute('id'));
+            const subtextElement = storyElement.closest('table.fatitem')?.querySelector('.subtext .subline');
+            
+            if (subtextElement && !isNaN(story_id)) {
+                const storyData = await TagManager.fetchTags(CONFIG.ENDPOINTS.STORY_TAGS, [story_id], 'story_ids');
+                if (storyData?.[0]) {
+                    TagManager.addStoryTags(subtextElement, storyData[0]);
+                }
+            }
+        }
+
+        // Handle comments and threads
+        const allComments = document.querySelectorAll('tr[class="athing comtr"]');
+        const { threadIds, commentIds } = CommentSorter.categorizeComments(allComments);
+
+        // Process threads
+        if (threadIds.length) {
+            const threadData = await TagManager.fetchTags(CONFIG.ENDPOINTS.THREAD_TAGS, threadIds, 'thread_ids');
+            threadData.forEach(thread => {
+                const element = document.getElementById(thread.id);
+                TagManager.addCommentTag(element, thread.tags);
+            });
+        }
+
+        // Process comments
+        if (commentIds.length) {
+            const commentData = await TagManager.fetchTags(CONFIG.ENDPOINTS.COMMENT_TAGS, commentIds, 'comment_ids');
+            commentData.forEach(comment => {
+                const element = document.getElementById(comment.id);
+                TagManager.addCommentTag(element, comment.tags);
+            });
+        }
     }
+
+    // Start the script
+    init().catch(error => console.error('Error initializing tag system:', error));
 })();
