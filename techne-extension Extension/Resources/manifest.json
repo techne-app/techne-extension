@@ -16,6 +16,10 @@
       "js": ["main_page_content.js"]
     },
     {
+      "matches": ["https://news.ycombinator.com/?p=*"],
+      "js": ["main_page_content.js"]
+    },
+    {
       "matches": ["https://news.ycombinator.com/item?id=*"],
       "js": ["item_page_content.js"]
     }
