@@ -1,12 +1,18 @@
 {
   "compilerOptions": {
     "jsx": "react",
-    "module": "es6", 
+    "module": "es6",
     "target": "es6",
     "moduleResolution": "node",
     "strict": true,
-    "outDir": "./dist",
-    "rootDir": "./src",
+    "outDir": "./techne-extension Extension/Resources",
+    "rootDir": "./techne-extension Extension/Resources/src",
     "noImplicitAny": false
-  }
+  },
+  "include": [
+    "./techne-extension Extension/Resources/src/**/*"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }
