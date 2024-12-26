@@ -7,7 +7,9 @@
     "strict": true,
     "outDir": "./techne-extension Extension/Resources",
     "rootDir": "./techne-extension Extension/Resources/src",
-    "noImplicitAny": false
+    "noImplicitAny": false,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true
   },
   "include": [
     "./techne-extension Extension/Resources/src/**/*"
