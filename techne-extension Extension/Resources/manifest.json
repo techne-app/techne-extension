@@ -6,6 +6,12 @@
   "icons": {
     "48": "images/icon-48.png"
   },
+  "action": {
+    "default_icon": {
+      "48": "images/icon-48.png"
+    },
+    "default_popup": "index.html"
+  },
   "content_scripts": [
     {
       "matches": ["https://news.ycombinator.com/"],
