@@ -13,6 +13,8 @@ interface Embedding {
 interface DbWrapper {
   open(): Promise<IDBDatabase>;
   getAllEmbeddings(): Promise<Embedding[]>;
+  addEmbedding(data: Omit<Embedding, 'id'>): Promise<void>;
+  clearEmbeddings(): Promise<void>;
 }
 
 // IndexedDB wrapper implementation
@@ -50,6 +52,32 @@ const db: DbWrapper = {
       request.onerror = () => reject(request.error);
       request.onsuccess = () => resolve(request.result);
     });
+  },
+
+  // Add new embedding to store
+  async addEmbedding(data: Omit<Embedding, 'id'>): Promise<void> {
+    const db = await this.open();
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction(['embeddings'], 'readwrite');
+      const store = transaction.objectStore('embeddings');
+      const request = store.add(data);
+
+      request.onerror = () => reject(request.error);
+      request.onsuccess = () => resolve();
+    });
+  },
+
+  // Clear all embeddings from store
+  async clearEmbeddings(): Promise<void> {
+    const db = await this.open();
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction(['embeddings'], 'readwrite');
+      const store = transaction.objectStore('embeddings');
+      const request = store.clear();
+
+      request.onerror = () => reject(request.error);
+      request.onsuccess = () => resolve();
+    });
   }
 };
 
@@ -59,21 +87,56 @@ export const VectorViewer: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Load embeddings on component mount
+  // Load embeddings function
+  const loadEmbeddings = async () => {
+    try {
+      const records = await db.getAllEmbeddings();
+      setEmbeddings(records);
+    } catch (err) {
+      console.error('Failed to load embeddings:', err);
+      setError(err instanceof Error ? err.message : 'Unknown error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle clear all embeddings
+  const handleClearAll = async () => {
+    try {
+      await db.clearEmbeddings();
+      setEmbeddings([]);
+    } catch (err) {
+      console.error('Failed to clear embeddings:', err);
+      setError(err instanceof Error ? err.message : 'Unknown error');
+    }
+  };
+
+  // Load embeddings on component mount and set up message listener
   useEffect(() => {
-    const loadEmbeddings = async () => {
-      try {
-        const records = await db.getAllEmbeddings();
-        setEmbeddings(records);
-      } catch (err) {
-        console.error('Failed to load embeddings:', err);
-        setError(err instanceof Error ? err.message : 'Unknown error');
-      } finally {
-        setLoading(false);
+    loadEmbeddings();
+
+    const messageListener = async (message: any) => {
+      if (message.type === 'NEW_EMBEDDING') {
+        try {
+          await db.addEmbedding({
+            tag: message.data.tag,
+            vectorData: message.data.vectorData,
+            timestamp: Date.now()
+          });
+          loadEmbeddings(); // Refresh the list
+        } catch (err) {
+          console.error('Failed to add new embedding:', err);
+          setError(err instanceof Error ? err.message : 'Unknown error');
+        }
       }
     };
 
-    loadEmbeddings();
+    chrome.runtime.onMessage.addListener(messageListener);
+
+    // Cleanup listener on unmount
+    return () => {
+      chrome.runtime.onMessage.removeListener(messageListener);
+    };
   }, []);
 
   // Format vector data for display, showing first 3 values
@@ -110,9 +173,18 @@ export const VectorViewer: React.FC = () => {
     <div className="w-96 p-4">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-xl font-bold">Stored Embeddings</h1>
-        <span className="text-sm text-gray-500">
-          {embeddings.length} total
-        </span>
+        <div className="flex items-center gap-2">
+          <button 
+            onClick={handleClearAll}
+            className="text-red-600 hover:text-red-800"
+            title="Clear all embeddings"
+          >
+            🗑️
+          </button>
+          <span className="text-sm text-gray-500">
+            {embeddings.length} total
+          </span>
+        </div>
       </div>
       
       {embeddings.length === 0 ? (

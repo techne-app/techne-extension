@@ -67,6 +67,21 @@ fetch(techne_url, {
                 anchorElement.textContent = ' | ' + tags[i];
                 anchorElement.style.color = 'blue';
                 anchorElement.style.textDecoration = 'none';
+                
+                // Add click handler to send message to VectorViewer
+                anchorElement.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    chrome.runtime.sendMessage({
+                        type: 'NEW_EMBEDDING',
+                        data: {
+                            tag: tags[i],
+                            vectorData: new Float32Array([0.1, 0.2, 0.3]), // Example vector data
+                            timestamp: Date.now()
+                        }
+                    });
+                    window.open(tagAnchors[i], '_blank');
+                });
+                
                 tagsContainer.appendChild(anchorElement);
             }
             
