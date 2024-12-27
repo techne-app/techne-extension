@@ -1,5 +1,7 @@
+// React component to display vector embeddings stored in IndexedDB
 import React, { useState, useEffect } from 'react';
 
+// Types for vector embedding data
 interface Embedding {
   id: number;
   tag: string;
@@ -7,11 +9,13 @@ interface Embedding {
   timestamp: number;
 }
 
+// Interface for IndexedDB wrapper
 interface DbWrapper {
   open(): Promise<IDBDatabase>;
   getAllEmbeddings(): Promise<Embedding[]>;
 }
 
+// IndexedDB wrapper implementation
 const db: DbWrapper = {
   async open() {
     return new Promise((resolve, reject) => {
@@ -20,6 +24,7 @@ const db: DbWrapper = {
       request.onerror = () => reject(request.error);
       request.onsuccess = () => resolve(request.result);
       
+      // Create schema on first load
       request.onupgradeneeded = (event: IDBVersionChangeEvent) => {
         const db = (event.target as IDBOpenDBRequest).result;
         if (!db.objectStoreNames.contains('embeddings')) {
@@ -34,6 +39,7 @@ const db: DbWrapper = {
     });
   },
 
+  // Fetch all embeddings from the store
   async getAllEmbeddings(): Promise<Embedding[]> {
     const db = await this.open();
     return new Promise((resolve, reject) => {
@@ -48,10 +54,12 @@ const db: DbWrapper = {
 };
 
 export const VectorViewer: React.FC = () => {
+  // State for embeddings data, loading state and errors
   const [embeddings, setEmbeddings] = useState<Embedding[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Load embeddings on component mount
   useEffect(() => {
     const loadEmbeddings = async () => {
       try {
@@ -68,6 +76,7 @@ export const VectorViewer: React.FC = () => {
     loadEmbeddings();
   }, []);
 
+  // Format vector data for display, showing first 3 values
   const formatVector = (vectorData: Float32Array | undefined): string => {
     if (!vectorData) return 'No data';
     const array = Array.from(vectorData);
@@ -75,16 +84,19 @@ export const VectorViewer: React.FC = () => {
            (array.length > 3 ? '...' : '');
   };
 
+  // Format timestamp to locale string
   const formatDate = (timestamp: number): string => {
     return new Date(timestamp).toLocaleString();
   };
 
+  // Loading state
   if (loading) {
     return (
       <div className="p-4 text-gray-600">Loading embeddings...</div>
     );
   }
 
+  // Error state
   if (error) {
     return (
       <div className="p-4 text-red-600">
@@ -93,6 +105,7 @@ export const VectorViewer: React.FC = () => {
     );
   }
 
+  // Main render with list of embeddings
   return (
     <div className="w-96 p-4">
       <div className="flex justify-between items-center mb-4">
