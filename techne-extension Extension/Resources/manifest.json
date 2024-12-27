@@ -35,11 +35,12 @@
       "js": ["item_page_content.js"]
     }
   ],
-  "default_locale": "en",
   "web_accessible_resources": [{
     "resources": [
       "index.html",
-      "index.js"
+      "assets/*",
+      "*.js",
+      "*.css"
     ],
     "matches": ["<all_urls>"]
   }]
