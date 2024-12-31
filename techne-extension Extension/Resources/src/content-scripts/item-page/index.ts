@@ -1,4 +1,4 @@
-import { CommentCategories, StoryData, ThreadData, CommentData } from './types';
+import { CommentCategories, StoryData, ThreadData, CommentData } from '../../types';
 
 (function() {
    const CONFIG = {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { vectorDb, type Embedding } from '../db';
+import { vectorDb, type Embedding } from '../../background/db';
 
 export const VectorViewer: React.FC = () => {
   // State for embeddings data, loading state and errors

@@ -2,10 +2,10 @@ const path = require('path');
 
 module.exports = {
   entry: {
-    main_page_content: './techne-extension Extension/Resources/src/main_page_content.ts',
-    item_page_content: './techne-extension Extension/Resources/src/item_page_content.ts',
-    background: './techne-extension Extension/Resources/src/background.ts',
-    index: './techne-extension Extension/Resources/src/index.tsx'
+    'content-scripts/main-page/index': './techne-extension Extension/Resources/src/content-scripts/main-page/index.ts',
+    'content-scripts/item-page/index': './techne-extension Extension/Resources/src/content-scripts/item-page/index.ts',
+    'background/index': './techne-extension Extension/Resources/src/background/index.ts',
+    'popup/index': './techne-extension Extension/Resources/src/popup/index.tsx'
   },
   output: {
     path: path.resolve(__dirname, 'techne-extension Extension/Resources'),
