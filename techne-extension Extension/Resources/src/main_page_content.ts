@@ -71,14 +71,16 @@ fetch(techne_url, {
                 // Add click handler to send message to VectorViewer
                 anchorElement.addEventListener('click', (e) => {
                     e.preventDefault();
-                    chrome.runtime.sendMessage({
+                    const msg = {
                         type: 'NEW_EMBEDDING',
                         data: {
                             tag: tags[i],
-                            vectorData: new Float32Array([0.1, 0.2, 0.3]), // Example vector data
+                            // Convert to regular array
+                            vectorData: Array.from(new Float32Array([0.1, 0.2, 0.3])),  
                             timestamp: Date.now()
                         }
-                    });
+                    }
+                    chrome.runtime.sendMessage(msg);
                     window.open(tagAnchors[i], '_blank');
                 });
                 

@@ -120,7 +120,7 @@ export const VectorViewer: React.FC = () => {
         try {
           await db.addEmbedding({
             tag: message.data.tag,
-            vectorData: message.data.vectorData,
+            vectorData: new Float32Array(message.data.vectorData), 
             timestamp: Date.now()
           });
           loadEmbeddings(); // Refresh the list
