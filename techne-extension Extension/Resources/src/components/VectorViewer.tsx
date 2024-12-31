@@ -1,85 +1,5 @@
-// React component to display vector embeddings stored in IndexedDB
 import React, { useState, useEffect } from 'react';
-
-// Types for vector embedding data
-interface Embedding {
-  id: number;
-  tag: string;
-  vectorData: Float32Array;
-  timestamp: number;
-}
-
-// Interface for IndexedDB wrapper
-interface DbWrapper {
-  open(): Promise<IDBDatabase>;
-  getAllEmbeddings(): Promise<Embedding[]>;
-  addEmbedding(data: Omit<Embedding, 'id'>): Promise<void>;
-  clearEmbeddings(): Promise<void>;
-}
-
-// IndexedDB wrapper implementation
-const db: DbWrapper = {
-  async open() {
-    return new Promise((resolve, reject) => {
-      const request = indexedDB.open('VectorDB', 1);
-      
-      request.onerror = () => reject(request.error);
-      request.onsuccess = () => resolve(request.result);
-      
-      // Create schema on first load
-      request.onupgradeneeded = (event: IDBVersionChangeEvent) => {
-        const db = (event.target as IDBOpenDBRequest).result;
-        if (!db.objectStoreNames.contains('embeddings')) {
-          const store = db.createObjectStore('embeddings', { 
-            keyPath: 'id', 
-            autoIncrement: true 
-          });
-          store.createIndex('tag', 'tag');
-          store.createIndex('timestamp', 'timestamp');
-        }
-      };
-    });
-  },
-
-  // Fetch all embeddings from the store
-  async getAllEmbeddings(): Promise<Embedding[]> {
-    const db = await this.open();
-    return new Promise((resolve, reject) => {
-      const transaction = db.transaction(['embeddings'], 'readonly');
-      const store = transaction.objectStore('embeddings');
-      const request = store.getAll();
-      
-      request.onerror = () => reject(request.error);
-      request.onsuccess = () => resolve(request.result);
-    });
-  },
-
-  // Add new embedding to store
-  async addEmbedding(data: Omit<Embedding, 'id'>): Promise<void> {
-    const db = await this.open();
-    return new Promise((resolve, reject) => {
-      const transaction = db.transaction(['embeddings'], 'readwrite');
-      const store = transaction.objectStore('embeddings');
-      const request = store.add(data);
-
-      request.onerror = () => reject(request.error);
-      request.onsuccess = () => resolve();
-    });
-  },
-
-  // Clear all embeddings from store
-  async clearEmbeddings(): Promise<void> {
-    const db = await this.open();
-    return new Promise((resolve, reject) => {
-      const transaction = db.transaction(['embeddings'], 'readwrite');
-      const store = transaction.objectStore('embeddings');
-      const request = store.clear();
-
-      request.onerror = () => reject(request.error);
-      request.onsuccess = () => resolve();
-    });
-  }
-};
+import { vectorDb, type Embedding } from '../db';
 
 export const VectorViewer: React.FC = () => {
   // State for embeddings data, loading state and errors
@@ -90,7 +10,7 @@ export const VectorViewer: React.FC = () => {
   // Load embeddings function
   const loadEmbeddings = async () => {
     try {
-      const records = await db.getAllEmbeddings();
+      const records = await vectorDb.getAllEmbeddings();
       setEmbeddings(records);
     } catch (err) {
       console.error('Failed to load embeddings:', err);
@@ -103,7 +23,7 @@ export const VectorViewer: React.FC = () => {
   // Handle clear all embeddings
   const handleClearAll = async () => {
     try {
-      await db.clearEmbeddings();
+      await vectorDb.clearEmbeddings();
       setEmbeddings([]);
     } catch (err) {
       console.error('Failed to clear embeddings:', err);
@@ -115,25 +35,14 @@ export const VectorViewer: React.FC = () => {
   useEffect(() => {
     loadEmbeddings();
 
-    const messageListener = async (message: any) => {
-      if (message.type === 'NEW_EMBEDDING') {
-        try {
-          await db.addEmbedding({
-            tag: message.data.tag,
-            vectorData: new Float32Array(message.data.vectorData), 
-            timestamp: Date.now()
-          });
-          loadEmbeddings(); // Refresh the list
-        } catch (err) {
-          console.error('Failed to add new embedding:', err);
-          setError(err instanceof Error ? err.message : 'Unknown error');
-        }
+    const messageListener = (message: any) => {
+      if (message.type === 'EMBEDDINGS_UPDATED') {
+        loadEmbeddings();
       }
     };
 
     chrome.runtime.onMessage.addListener(messageListener);
 
-    // Cleanup listener on unmount
     return () => {
       chrome.runtime.onMessage.removeListener(messageListener);
     };

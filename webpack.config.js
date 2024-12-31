@@ -4,7 +4,8 @@ module.exports = {
   entry: {
     'main_page_content': './techne-extension Extension/Resources/src/main_page_content.ts',
     'item_page_content': './techne-extension Extension/Resources/src/item_page_content.ts',
-    'index': './techne-extension Extension/Resources/src/index.tsx' 
+    'index': './techne-extension Extension/Resources/src/index.tsx',
+    'background': './techne-extension Extension/Resources/background.js'
   },
   output: {
     path: path.resolve(__dirname, 'techne-extension Extension/Resources'),
