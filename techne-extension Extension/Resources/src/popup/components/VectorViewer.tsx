@@ -81,7 +81,7 @@ export const VectorViewer: React.FC = () => {
   return (
     <div className="w-96 p-4">
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-xl font-bold">Stored Embeddings</h1>
+        <h1 className="text-xl font-bold">Navigation History</h1>
         <div className="flex items-center gap-2">
           <button 
             onClick={handleClearAll}
@@ -112,9 +112,9 @@ export const VectorViewer: React.FC = () => {
                   {formatDate(emb.timestamp)}
                 </span>
               </div>
-              <div className="mt-2 text-sm font-mono text-gray-600 overflow-hidden">
+              {/* <div className="mt-2 text-sm font-mono text-gray-600 overflow-hidden">
                 [{formatVector(emb.vectorData)}]
-              </div>
+              </div> */}
             </div>
           ))}
         </div>
