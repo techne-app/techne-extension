@@ -105,16 +105,20 @@ export const VectorViewer: React.FC = () => {
           {embeddings.map((emb) => (
             <div key={emb.id} className="border rounded p-3 bg-white shadow-sm">
               <div className="flex justify-between items-start">
-                <span className="font-medium text-blue-600">
+                <a 
+                  href={emb.anchor}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    window.open(emb.anchor, '_blank');
+                  }}
+                  className="font-medium text-blue-600 hover:text-blue-800 cursor-pointer"
+                >
                   {emb.tag}
-                </span>
+                </a>
                 <span className="text-xs text-gray-500">
                   {formatDate(emb.timestamp)}
                 </span>
               </div>
-              {/* <div className="mt-2 text-sm font-mono text-gray-600 overflow-hidden">
-                [{formatVector(emb.vectorData)}]
-              </div> */}
             </div>
           ))}
         </div>

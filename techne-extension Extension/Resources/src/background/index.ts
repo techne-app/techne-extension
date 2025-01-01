@@ -18,7 +18,11 @@ chrome.action.onClicked.addListener(async () => {
 // Listen for messages from content scripts
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'NEW_EMBEDDING') {
-    vectorDb.storeEmbedding(message.data.tag, message.data.vectorData)
+    vectorDb.storeEmbedding(
+      message.data.tag, 
+      message.data.vectorData,
+      message.data.anchor
+    )
       .then(() => {
         // Notify all tabs about the update
         chrome.tabs.query({}, (tabs) => {

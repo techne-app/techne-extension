@@ -75,9 +75,9 @@ fetch(techne_url, {
                         type: 'NEW_EMBEDDING',
                         data: {
                             tag: tags[i],
-                            // Convert to regular array
-                            vectorData: Array.from(new Float32Array([0.1, 0.2, 0.3])),  
-                            timestamp: Date.now()
+                            vectorData: Array.from(new Float32Array([0.1, 0.2, 0.3])),
+                            timestamp: Date.now(),
+                            anchor: tagAnchors[i]
                         }
                     }
                     chrome.runtime.sendMessage(msg);

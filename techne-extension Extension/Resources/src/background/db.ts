@@ -3,6 +3,7 @@ interface Embedding {
   tag: string;
   vectorData: Float32Array;
   timestamp: number;
+  anchor: string;
 }
 
 class VectorDB {
@@ -42,7 +43,7 @@ class VectorDB {
       });
   }
 
-  async storeEmbedding(tag: string, vector: number[]): Promise<number> {
+  async storeEmbedding(tag: string, vector: number[], anchor: string): Promise<number> {
       const db = await this.open();
       return new Promise((resolve, reject) => {
           const transaction = db.transaction(['embeddings'], 'readwrite');
@@ -50,7 +51,8 @@ class VectorDB {
           const embedding: Omit<Embedding, 'id'> = {
               tag,
               vectorData: new Float32Array(vector),
-              timestamp: Date.now()
+              timestamp: Date.now(),
+              anchor
           };
           
           const request = store.add(embedding);
