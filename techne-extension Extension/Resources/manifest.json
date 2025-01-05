@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Techne",
   "version": "1.5.1",
-  "description": "An extension that helps navigate Hacker News with AI-generated tags.",
+  "description": "An extension that helps navigate Hacker News with AI-generated tags using Techne. Techne is a navigator that helps navigate complexity. It understands human context and surfaces personalized and actionable insights. It does all that privately.",
   "icons": {
     "48": "images/icon-48.png"
   },
