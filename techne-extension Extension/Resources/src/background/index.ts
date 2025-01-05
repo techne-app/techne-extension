@@ -1,4 +1,5 @@
 import { vectorDb } from './db';
+import { CONFIG } from '../config';
 
 // Handle extension icon clicks
 chrome.action.onClicked.addListener(async () => {
@@ -18,24 +19,34 @@ chrome.action.onClicked.addListener(async () => {
 // Listen for messages from content scripts
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'NEW_EMBEDDING') {
-    vectorDb.storeEmbedding(
-      message.data.tag, 
-      message.data.vectorData,
-      message.data.anchor
-    )
-      .then(() => {
-        // Notify all tabs about the update
-        chrome.tabs.query({}, (tabs) => {
-          tabs.forEach((tab) => {
-            chrome.tabs.sendMessage(tab.id!, {
-              type: 'EMBEDDINGS_UPDATED'
+    try {
+      vectorDb.storeEmbedding(
+        message.data.tag, 
+        Array.from(new Float32Array(message.data.vectorData)), // Convert Float32Array to regular array
+        message.data.anchor
+      )
+        .then(() => {
+          // 1. Notify popup if it's open
+          chrome.tabs.query({url: chrome.runtime.getURL("index.html")}, (tabs) => {
+            tabs.forEach((tab) => {
+              if (tab.id) {
+                chrome.tabs.sendMessage(tab.id, {
+                  type: 'EMBEDDINGS_UPDATED'
+                });
+              }
             });
           });
+          
+          // 2. Notify content scripts on relevant pages (if you need to)
+          // chrome.tabs.query({url: "https://your-site.com/*"}, ...);
+        })
+        .catch((error) => {
+          console.error('Error storing embedding:', error);
         });
-      })
-      .catch((error) => {
-        console.error('Error storing embedding:', error);
-      });
+    } catch (error) {
+      console.error('Error processing message:', error);
+    }
+    return true; // Indicate async response
   }
 });
 

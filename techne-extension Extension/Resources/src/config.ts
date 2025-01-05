@@ -1,0 +1,24 @@
+export const CONFIG = {
+    BASE_URL: process.env.NODE_ENV === 'development' 
+        ? "http://localhost:8000"
+        : "https://techne.app",
+    ENDPOINTS: {
+        STORY_TAGS: "/story-tags/",
+        THREAD_TAGS: "/thread-tags/",
+        COMMENT_TAGS: "/comment-tags/"
+    },
+    STYLES: {
+        STORY_TAG: { 
+            color: 'blue', 
+            textDecoration: 'none' 
+        },
+        COMMENT_TAG: { 
+            backgroundColor: '#FF6600',
+            color: 'black',
+            padding: '1px 3px',
+            borderRadius: '2px',
+            marginLeft: '4px'
+        }
+    },
+    MAX_STORY_TAGS: 3
+}; 
