@@ -1,20 +1,27 @@
 import { CONFIG } from '../config';
 import { StoryData } from '../types';
 
-export async function fetchTags<T>(endpoint: string, ids: number[], idField = 'ids'): Promise<T[]> {
+export async function fetchTags<T>(
+    endpoint: string, 
+    ids: number[], 
+    idField = 'ids',
+    limitTagsPerStory = false
+): Promise<T[]> {
     try {
         const response = await fetch(`${CONFIG.BASE_URL}${endpoint}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ [idField]: ids })
+            body: JSON.stringify({ 
+                [idField]: ids,
+                limit_tags_per_story: limitTagsPerStory 
+            })
         });
         return await response.json();
     } catch (error) {
         console.error(`Error fetching tags from ${endpoint}:`, error);
         return [];
     }
-}
-
+} 
 export function addStoryTags(subtextElement: Element, storyData: StoryData): void {
     if (!subtextElement || !storyData?.tags?.length || !storyData?.tag_anchors?.length) return;
 
@@ -49,14 +56,24 @@ export function addStoryTags(subtextElement: Element, storyData: StoryData): voi
     subtextElement.appendChild(tagsContainer);
 }
 
-export function addCommentTag(element: HTMLElement | null, tags: string[]): void {
+export function addCommentTag(element: HTMLElement | null, tags: string[], isThread: boolean): void {
     if (!element || !tags?.length) return;
     
     const comheadElement = element.querySelector('.comhead');
     if (!comheadElement) return;
 
-    const tagsContainer = document.createElement('span');
-    Object.assign(tagsContainer.style, CONFIG.STYLES.COMMENT_TAG);
-    tagsContainer.textContent = tags[0];
-    comheadElement.appendChild(tagsContainer);
-} 
+    // Clear any existing tags
+    const existingTags = comheadElement.querySelectorAll('.techne-tag');
+    existingTags.forEach(tag => tag.remove());
+
+    // For non-thread comments, only show the first tag
+    const tagsToShow = isThread ? tags : [tags[0]];
+    
+    tagsToShow.forEach(tag => {
+        const tagElement = document.createElement('span');
+        tagElement.className = 'techne-tag';
+        Object.assign(tagElement.style, CONFIG.STYLES.COMMENT_TAG);
+        tagElement.textContent = tag;
+        comheadElement.appendChild(tagElement);
+    });
+}

@@ -5,7 +5,7 @@ interface StoryData {
 }
 
 interface ThreadData {
-    id: string;
+    id: number;
     tags: string[];
 }
 

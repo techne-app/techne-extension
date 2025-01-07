@@ -6,12 +6,20 @@ function categorizeComments(comments: NodeListOf<Element>): CommentCategories {
     return Array.from(comments).reduce((acc: CommentCategories, comment: Element) => {
         const indentElement = comment.querySelector('td.ind img') as HTMLImageElement | null;
         const id = Number(comment.getAttribute('id'));
+        // A thread is a comment with zero indentation (width=0)
+        const isThread = indentElement?.width === 0;
+        
         if (!isNaN(id)) {
-            (indentElement?.width === 0 ? acc.threadIds : acc.commentIds).push(id);
+            if (isThread) {
+                acc.threadIds.push(id);
+            } else {
+                acc.commentIds.push(id);
+            }
         }
         return acc;
     }, { threadIds: [], commentIds: [] });
 }
+
 
 async function init(): Promise<void> {
     // Handle story tags
@@ -33,20 +41,22 @@ async function init(): Promise<void> {
     const { threadIds, commentIds } = categorizeComments(allComments);
 
     if (threadIds.length) {
-        const threadData = await fetchTags<ThreadData>(CONFIG.ENDPOINTS.THREAD_TAGS, threadIds, 'thread_ids');
+        const threadData = await fetchTags<ThreadData>(CONFIG.ENDPOINTS.THREAD_TAGS, threadIds, 'thread_ids', true);
         threadData.forEach(thread => {
-            const element = document.getElementById(thread.id);
-            addCommentTag(element, thread.tags);
+            const element = document.getElementById(String(thread.id));
+            // Pass true to indicate this is a thread-level comment
+            addCommentTag(element, thread.tags, true);
         });
     }
 
     if (commentIds.length) {
         const commentData = await fetchTags<CommentData>(CONFIG.ENDPOINTS.COMMENT_TAGS, commentIds, 'comment_ids');
         commentData.forEach(comment => {
-            const element = document.getElementById(comment.id);
-            addCommentTag(element, comment.tags);
+            const element = document.getElementById(String(comment.id));
+            // Pass false to indicate this is not a thread-level comment
+            addCommentTag(element, comment.tags, false);
         });
     }
 }
 
-init().catch(error => console.error('Error initializing tag system:', error));
+init().catch(error => console.error('Error initializing tag system:', error)); 
