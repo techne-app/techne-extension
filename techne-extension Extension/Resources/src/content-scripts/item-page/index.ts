@@ -36,8 +36,8 @@ async function init(): Promise<void> {
         }
     }
 
-    // Handle comments
-    const allComments = document.querySelectorAll('tr[class="athing comtr"]');
+    // Handle comments - including collapsed threads
+    const allComments = document.querySelectorAll('tr[class="athing comtr"], tr[class="athing comtr coll"]');
     const { threadIds, commentIds } = categorizeComments(allComments);
 
     if (threadIds.length) {
