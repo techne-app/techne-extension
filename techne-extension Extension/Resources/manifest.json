@@ -29,6 +29,10 @@
     {
       "matches": ["https://news.ycombinator.com/item?id=*"],
       "js": ["content-scripts/item-page/index.js"]
+    },
+    {
+      "matches": ["https://news.ycombinator.com/threads?id=*"],
+      "js": ["content-scripts/profile-page/index.js"]
     }
   ],
   "web_accessible_resources": [{

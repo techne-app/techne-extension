@@ -1,3 +1,8 @@
+interface Tag {
+    text: string;
+    type: 'expertise' | 'topic';
+}
+
 interface StoryData {
     id: number;
     tags: string[];
@@ -9,9 +14,15 @@ interface ThreadData {
     tags: string[];
 }
 
+interface ProfileCommentData {
+    id: string;
+    tags: Tag[];
+}
+
 interface CommentData {
     id: string;
-    tags: string[];
+    tags: string[] | null;
+    tag_types: string[] | null;
 }
 
 interface CommentCategories {
@@ -19,4 +30,11 @@ interface CommentCategories {
     commentIds: number[];
 }
 
-export { StoryData, ThreadData, CommentData, CommentCategories };
+export { 
+    Tag, 
+    StoryData, 
+    ThreadData, 
+    ProfileCommentData,
+    CommentData, 
+    CommentCategories 
+};

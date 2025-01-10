@@ -1,11 +1,12 @@
 import { CONFIG } from '../config';
-import { StoryData } from '../types';
+import { StoryData, Tag } from '../types';
 
 export async function fetchTags<T>(
     endpoint: string, 
     ids: number[], 
     idField = 'ids',
-    limitTagsPerStory = false
+    limitTagsPerStory = false,
+    tagTypes?: string[]
 ): Promise<T[]> {
     try {
         const response = await fetch(`${CONFIG.BASE_URL}${endpoint}`, {
@@ -13,7 +14,8 @@ export async function fetchTags<T>(
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
                 [idField]: ids,
-                limit_tags_per_story: limitTagsPerStory 
+                limit_tags_per_story: limitTagsPerStory,
+                tag_types: tagTypes
             })
         });
         return await response.json();
@@ -56,7 +58,7 @@ export function addStoryTags(subtextElement: Element, storyData: StoryData): voi
     subtextElement.appendChild(tagsContainer);
 }
 
-export function addCommentTag(element: HTMLElement | null, tags: string[], isThread: boolean): void {
+export function addCommentTag(element: HTMLElement | null, tags: Tag[], isThread: boolean): void {
     if (!element || !tags?.length) return;
     
     const comheadElement = element.querySelector('.comhead');
@@ -65,15 +67,12 @@ export function addCommentTag(element: HTMLElement | null, tags: string[], isThr
     // Clear any existing tags
     const existingTags = comheadElement.querySelectorAll('.techne-tag');
     existingTags.forEach(tag => tag.remove());
-
-    // For non-thread comments, only show the first tag
-    const tagsToShow = isThread ? tags : [tags[0]];
     
-    tagsToShow.forEach(tag => {
+    tags.forEach(tag => {
         const tagElement = document.createElement('span');
-        tagElement.className = 'techne-tag';
+        tagElement.className = `techne-tag ${tag.type}`;
         Object.assign(tagElement.style, CONFIG.STYLES.COMMENT_TAG);
-        tagElement.textContent = tag;
+        tagElement.textContent = tag.text;
         comheadElement.appendChild(tagElement);
     });
 }

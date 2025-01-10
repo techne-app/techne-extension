@@ -5,6 +5,7 @@ module.exports = {
   entry: {
     'content-scripts/main-page/index': './techne-extension Extension/Resources/src/content-scripts/main-page/index.ts',
     'content-scripts/item-page/index': './techne-extension Extension/Resources/src/content-scripts/item-page/index.ts',
+    'content-scripts/profile-page/index': './techne-extension Extension/Resources/src/content-scripts/profile-page/index.ts',
     'background/index': './techne-extension Extension/Resources/src/background/index.ts',
     'popup/index': './techne-extension Extension/Resources/src/popup/index.tsx'
   },

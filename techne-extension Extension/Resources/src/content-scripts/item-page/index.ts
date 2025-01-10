@@ -1,6 +1,6 @@
 import { CONFIG } from '../../config';
-import { fetchTags, addStoryTags, addCommentTag } from '../../utils/tag-utils';
-import { StoryData, ThreadData, CommentData, CommentCategories } from '../../types';
+import { fetchTags, addCommentTag } from '../../utils/tag-utils';
+import { StoryData, ThreadData, CommentData, CommentCategories, Tag } from '../../types';
 
 function categorizeComments(comments: NodeListOf<Element>): CommentCategories {
     return Array.from(comments).reduce((acc: CommentCategories, comment: Element) => {
@@ -20,32 +20,22 @@ function categorizeComments(comments: NodeListOf<Element>): CommentCategories {
     }, { threadIds: [], commentIds: [] });
 }
 
-
 async function init(): Promise<void> {
-    // Handle story tags
-    const storyElement = document.querySelector('tr.athing.submission');
-    if (storyElement) {
-        const story_id = Number(storyElement.getAttribute('id'));
-        const subtextElement = storyElement.closest('table.fatitem')?.querySelector('.subtext .subline');
-        
-        if (subtextElement && !isNaN(story_id)) {
-            const storyData = await fetchTags<StoryData>(CONFIG.ENDPOINTS.STORY_TAGS, [story_id], 'story_ids');
-            if (storyData?.[0]) {
-                addStoryTags(subtextElement, storyData[0]);
-            }
-        }
-    }
-
-    // Handle comments - including collapsed threads
-    const allComments = document.querySelectorAll('tr[class="athing comtr"], tr[class="athing comtr coll"]');
-    const { threadIds, commentIds } = categorizeComments(allComments);
+    const comments = document.querySelectorAll('tr.athing.comtr');
+    const { threadIds, commentIds } = categorizeComments(comments);
 
     if (threadIds.length) {
-        const threadData = await fetchTags<ThreadData>(CONFIG.ENDPOINTS.THREAD_TAGS, threadIds, 'thread_ids', true);
+        const threadData = await fetchTags<ThreadData>(CONFIG.ENDPOINTS.THREAD_TAGS, threadIds, 'thread_ids');
         threadData.forEach(thread => {
             const element = document.getElementById(String(thread.id));
-            // Pass true to indicate this is a thread-level comment
-            addCommentTag(element, thread.tags, true);
+            if (element && thread.tags) {
+                // For threads, show up to 2 tags
+                const tagObjects: Tag[] = thread.tags.slice(0, 2).map(tag => ({
+                    text: tag,
+                    type: 'topic'
+                }));
+                addCommentTag(element, tagObjects, true);
+            }
         });
     }
 
@@ -53,8 +43,14 @@ async function init(): Promise<void> {
         const commentData = await fetchTags<CommentData>(CONFIG.ENDPOINTS.COMMENT_TAGS, commentIds, 'comment_ids');
         commentData.forEach(comment => {
             const element = document.getElementById(String(comment.id));
-            // Pass false to indicate this is not a thread-level comment
-            addCommentTag(element, comment.tags, false);
+            if (element && comment.tags) {
+                // For regular comments, show only 1 tag
+                const tagObjects: Tag[] = comment.tags.slice(0, 1).map(tag => ({
+                    text: tag,
+                    type: 'topic'
+                }));
+                addCommentTag(element, tagObjects, false);
+            }
         });
     }
 }
