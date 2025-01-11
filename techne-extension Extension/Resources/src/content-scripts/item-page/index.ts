@@ -1,5 +1,5 @@
 import { CONFIG } from '../../config';
-import { fetchTags, addCommentTag } from '../../utils/tag-utils';
+import { fetchTags, addStoryTags, addCommentTag } from '../../utils/tag-utils';
 import { StoryData, ThreadData, CommentData, CommentCategories, Tag } from '../../types';
 
 function categorizeComments(comments: NodeListOf<Element>): CommentCategories {
@@ -21,38 +21,63 @@ function categorizeComments(comments: NodeListOf<Element>): CommentCategories {
 }
 
 async function init(): Promise<void> {
-    const comments = document.querySelectorAll('tr.athing.comtr');
-    const { threadIds, commentIds } = categorizeComments(comments);
+    try {
+        // Get story ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const storyId = Number(urlParams.get('id'));
+        
+        if (!storyId) {
+            console.error('Techne: No story ID found in URL');
+            return;
+        }
 
-    if (threadIds.length) {
-        const threadData = await fetchTags<ThreadData>(CONFIG.ENDPOINTS.THREAD_TAGS, threadIds, 'thread_ids');
-        threadData.forEach(thread => {
-            const element = document.getElementById(String(thread.id));
-            if (element && thread.tags) {
-                // For threads, show up to 2 tags
-                const tagObjects: Tag[] = thread.tags.slice(0, 2).map(tag => ({
-                    text: tag,
-                    type: 'topic'
-                }));
-                addCommentTag(element, tagObjects, true);
+        // Fetch story tags
+        const storyData = await fetchTags<StoryData>(CONFIG.ENDPOINTS.STORY_TAGS, [storyId], 'story_ids');
+        if (storyData.length > 0) {
+            // Find the story title element
+            const titleRow = document.querySelector('tr.athing');
+            if (titleRow?.nextElementSibling) {
+                const subtext = titleRow.nextElementSibling.querySelector('.subline');
+                if (subtext) {
+                    addStoryTags(subtext, storyData[0]);
+                }
             }
-        });
-    }
+        }
 
-    if (commentIds.length) {
-        const commentData = await fetchTags<CommentData>(CONFIG.ENDPOINTS.COMMENT_TAGS, commentIds, 'comment_ids');
-        commentData.forEach(comment => {
-            const element = document.getElementById(String(comment.id));
-            if (element && comment.tags) {
-                // For regular comments, show only 1 tag
-                const tagObjects: Tag[] = comment.tags.slice(0, 1).map(tag => ({
-                    text: tag,
-                    type: 'topic'
-                }));
-                addCommentTag(element, tagObjects, false);
-            }
-        });
+        // Rest of the existing code for comments
+        const comments = document.querySelectorAll('tr.athing.comtr');
+        const { threadIds, commentIds } = categorizeComments(comments);
+
+        if (threadIds.length) {
+            const threadData = await fetchTags<ThreadData>(CONFIG.ENDPOINTS.THREAD_TAGS, threadIds, 'thread_ids');
+            threadData.forEach(thread => {
+                const element = document.getElementById(String(thread.id));
+                if (element && thread.tags) {
+                    const tagObjects: Tag[] = thread.tags.slice(0, 2).map(tag => ({
+                        text: tag,
+                        type: 'topic'
+                    }));
+                    addCommentTag(element, tagObjects, true);
+                }
+            });
+        }
+
+        if (commentIds.length) {
+            const commentData = await fetchTags<CommentData>(CONFIG.ENDPOINTS.COMMENT_TAGS, commentIds, 'comment_ids');
+            commentData.forEach(comment => {
+                const element = document.getElementById(String(comment.id));
+                if (element && comment.tags) {
+                    const tagObjects: Tag[] = comment.tags.slice(0, 1).map(tag => ({
+                        text: tag,
+                        type: 'topic'
+                    }));
+                    addCommentTag(element, tagObjects, false);
+                }
+            });
+        }
+    } catch (error) {
+        console.error('Techne: Error in item page initialization:', error);
     }
 }
 
-init().catch(error => console.error('Error initializing tag system:', error)); 
+init(); 
