@@ -4,7 +4,3 @@ package-lock.json
 *.js
 
 .DS_Store
-**/.DS_Store
-xcuserdata/
-techne-extension Extension/Resources/index.js.LICENSE.txt
-techne-extension Extension/Resources/popup
