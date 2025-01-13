@@ -1,4 +1,4 @@
-import { vectorDb } from './db';
+import { tagDb } from './db';
 import { CONFIG } from '../config';
 import { ExtensionServiceWorkerMLCEngineHandler } from "@mlc-ai/web-llm";
 
@@ -35,8 +35,9 @@ chrome.action.onClicked.addListener(async () => {
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'NEW_EMBEDDING') {
     try {
-      vectorDb.storeEmbedding(
+      tagDb.storeTag(
         message.data.tag, 
+        message.data.type,
         Array.from(new Float32Array(message.data.vectorData)), // Convert Float32Array to regular array
         message.data.anchor
       )

@@ -44,6 +44,7 @@ export function addStoryTags(subtextElement: Element, storyData: StoryData): voi
                 type: 'NEW_EMBEDDING',
                 data: {
                     tag: storyData.tags[i],
+                    type: storyData.tag_types[i],
                     vectorData: Array.from(new Float32Array([0.1, 0.2, 0.3])),
                     timestamp: Date.now(),
                     anchor: storyData.tag_anchors[i]

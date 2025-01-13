@@ -6,6 +6,7 @@ interface Tag {
 interface StoryData {
     id: number;
     tags: string[];
+    tag_types: string[];
     tag_anchors: string[];
 }
 

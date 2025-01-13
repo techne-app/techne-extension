@@ -1,6 +1,6 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import { VectorViewer } from './components/VectorViewer';
+import { TagViewer } from './components/TagViewer';
 import { ChatInterface } from './components/ChatInterface';
 
 console.log("Popup script starting...");
@@ -14,7 +14,7 @@ if (container) {
   root.render(
     <>
       <ChatInterface />
-      <VectorViewer />
+      <TagViewer />
     </>
   );
 }

@@ -1,43 +1,42 @@
 import React, { useState, useEffect } from 'react';
-import { vectorDb, type Embedding } from '../../background/db';
+import { tagDb, type Tag } from '../../background/db';
 
-export const VectorViewer: React.FC = () => {
-  // State for embeddings data, loading state and errors
-  const [embeddings, setEmbeddings] = useState<Embedding[]>([]);
+export const TagViewer: React.FC = () => {
+  const [tags, setTags] = useState<Tag[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Load embeddings function
-  const loadEmbeddings = async () => {
+  // Load tags function
+  const loadTags = async () => {
     try {
-      const records = await vectorDb.getAllEmbeddings();
-      setEmbeddings(records);
+      const records = await tagDb.getAllTags();
+      setTags(records);
     } catch (err) {
-      console.error('Failed to load embeddings:', err);
+      console.error('Failed to load tags:', err);
       setError(err instanceof Error ? err.message : 'Unknown error');
     } finally {
       setLoading(false);
     }
   };
 
-  // Handle clear all embeddings
+  // Handle clear all tags
   const handleClearAll = async () => {
     try {
-      await vectorDb.clearEmbeddings();
-      setEmbeddings([]);
+      await tagDb.clearTags();
+      setTags([]);
     } catch (err) {
       console.error('Failed to clear embeddings:', err);
       setError(err instanceof Error ? err.message : 'Unknown error');
     }
   };
 
-  // Load embeddings on component mount and set up message listener
+  // Load tags on component mount and set up message listener
   useEffect(() => {
-    loadEmbeddings();
+    loadTags();
 
     const messageListener = (message: any) => {
       if (message.type === 'EMBEDDINGS_UPDATED') {
-        loadEmbeddings();
+        loadTags();
       }
     };
 
@@ -64,7 +63,7 @@ export const VectorViewer: React.FC = () => {
   // Loading state
   if (loading) {
     return (
-      <div className="p-4 text-gray-600">Loading embeddings...</div>
+      <div className="p-4 text-gray-600">Loading tags...</div>
     );
   }
 
@@ -72,7 +71,7 @@ export const VectorViewer: React.FC = () => {
   if (error) {
     return (
       <div className="p-4 text-red-600">
-        Error loading embeddings: {error}
+        Error loading tags: {error}
       </div>
     );
   }
@@ -91,32 +90,32 @@ export const VectorViewer: React.FC = () => {
             🗑️
           </button>
           <span className="text-sm text-gray-500">
-            {embeddings.length} total
+            {tags.length} total
           </span>
         </div>
       </div>
       
-      {embeddings.length === 0 ? (
+      {tags.length === 0 ? (
         <div className="text-gray-500 text-center py-8">
           No embeddings stored yet
         </div>
       ) : (
         <div className="space-y-4">
-          {embeddings.map((emb) => (
-            <div key={emb.id} className="border rounded p-3 bg-white shadow-sm">
+          {tags.map((tag) => (
+            <div key={tag.id} className="border rounded p-3 bg-white shadow-sm">
               <div className="flex justify-between items-start">
                 <a 
-                  href={emb.anchor}
+                  href={tag.anchor}
                   onClick={(e) => {
                     e.preventDefault();
-                    window.open(emb.anchor, '_blank');
+                    window.open(tag.anchor, '_blank');
                   }}
                   className="font-medium text-blue-600 hover:text-blue-800 cursor-pointer"
                 >
-                  {emb.tag}
+                  {tag.tag}
                 </a>
                 <span className="text-xs text-gray-500">
-                  {formatDate(emb.timestamp)}
+                  {formatDate(tag.timestamp)}
                 </span>
               </div>
             </div>

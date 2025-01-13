@@ -1,13 +1,14 @@
-interface Embedding {
+interface Tag {
   id: number;
   tag: string;
+  type: string;
   vectorData: Float32Array;
   timestamp: number;
   anchor: string;
 }
 
-class VectorDB {
-  private dbName = 'VectorDB';
+class TagDB {
+  private dbName = 'TagDB';
   private version = 1;
 
   async open(): Promise<IDBDatabase> {
@@ -31,7 +32,7 @@ class VectorDB {
       });
   }
 
-  async getAllEmbeddings(): Promise<Embedding[]> {
+  async getAllTags(): Promise<Tag[]> {
       const db = await this.open();
       return new Promise((resolve, reject) => {
           const transaction = db.transaction(['embeddings'], 'readonly');
@@ -43,25 +44,26 @@ class VectorDB {
       });
   }
 
-  async storeEmbedding(tag: string, vector: number[], anchor: string): Promise<number> {
+  async storeTag(tag: string, type: string, vector: number[], anchor: string): Promise<number> {
       const db = await this.open();
       return new Promise((resolve, reject) => {
           const transaction = db.transaction(['embeddings'], 'readwrite');
           const store = transaction.objectStore('embeddings');
-          const embedding: Omit<Embedding, 'id'> = {
+          const tag_data: Omit<Tag, 'id'> = {
               tag,
+              type,
               vectorData: new Float32Array(vector),
               timestamp: Date.now(),
               anchor
           };
           
-          const request = store.add(embedding);
+          const request = store.add(tag_data);
           request.onerror = () => reject(request.error);
           request.onsuccess = () => resolve(request.result as number);
       });
   }
 
-  async clearEmbeddings(): Promise<void> {
+  async clearTags(): Promise<void> {
       const db = await this.open();
       return new Promise((resolve, reject) => {
           const transaction = db.transaction(['embeddings'], 'readwrite');
@@ -74,5 +76,5 @@ class VectorDB {
   }
 }
 
-export const vectorDb = new VectorDB();
-export type { Embedding };
+export const tagDb = new TagDB();
+export type { Tag };
