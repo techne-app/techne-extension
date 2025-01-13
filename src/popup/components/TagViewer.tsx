@@ -104,16 +104,21 @@ export const TagViewer: React.FC = () => {
           {tags.map((tag) => (
             <div key={tag.id} className="border rounded p-3 bg-white shadow-sm">
               <div className="flex justify-between items-start">
-                <a 
-                  href={tag.anchor}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    window.open(tag.anchor, '_blank');
-                  }}
-                  className="font-medium text-blue-600 hover:text-blue-800 cursor-pointer"
-                >
-                  {tag.tag}
-                </a>
+                <div className="flex flex-col">
+                  <a 
+                    href={tag.anchor}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      window.open(tag.anchor, '_blank');
+                    }}
+                    className="font-medium text-blue-600 hover:text-blue-800 cursor-pointer"
+                  >
+                    {tag.tag}
+                  </a>
+                  <span className="text-xs text-gray-500 mt-1">
+                    Type: {tag.type}
+                  </span>
+                </div>
                 <span className="text-xs text-gray-500">
                   {formatDate(tag.timestamp)}
                 </span>
