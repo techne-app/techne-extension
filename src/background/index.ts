@@ -1,5 +1,20 @@
 import { vectorDb } from './db';
 import { CONFIG } from '../config';
+import { ExtensionServiceWorkerMLCEngineHandler } from "@mlc-ai/web-llm";
+
+let mlcHandler: ExtensionServiceWorkerMLCEngineHandler | undefined;
+
+// Handle MLCBot connections
+chrome.runtime.onConnect.addListener(function (port) {
+  if (port.name === "web_llm_service_worker") {
+    if (mlcHandler === undefined) {
+      mlcHandler = new ExtensionServiceWorkerMLCEngineHandler(port);
+    } else {
+      mlcHandler.setPort(port);
+    }
+    port.onMessage.addListener(mlcHandler.onmessage.bind(mlcHandler));
+  }
+});
 
 // Handle extension icon clicks
 chrome.action.onClicked.addListener(async () => {

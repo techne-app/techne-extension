@@ -1,9 +1,20 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { VectorViewer } from './components/VectorViewer';
+import { ChatInterface } from './components/ChatInterface';
+
+console.log("Popup script starting...");
 
 const container = document.getElementById('root');
+console.log("Container element:", container);
+
 if (container) {
   const root = createRoot(container);
-  root.render(<VectorViewer />);
+  console.log("Root created, rendering components...");
+  root.render(
+    <>
+      <ChatInterface />
+      <VectorViewer />
+    </>
+  );
 }
