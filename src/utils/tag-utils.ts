@@ -1,5 +1,6 @@
 import { CONFIG } from '../config';
 import { StoryData, Tag } from '../types';
+import { computeEmbeddings } from './embedding-utils';
 
 export async function fetchTags<T>(
     endpoint: string, 
@@ -24,6 +25,22 @@ export async function fetchTags<T>(
         return [];
     }
 } 
+
+const handleTagClick = async (tag: string, anchor: string) => {
+    const embeddings = await computeEmbeddings([tag]);
+    const msg = {
+        type: 'NEW_EMBEDDING',
+        data: {
+            tag,
+            vectorData: embeddings[0],
+            timestamp: Date.now(),
+            anchor
+        }
+    };
+    chrome.runtime.sendMessage(msg);
+    window.open(anchor, '_blank');
+};
+
 export function addStoryTags(subtextElement: Element, storyData: StoryData): void {
     if (!subtextElement || !storyData?.tags?.length || !storyData?.tag_anchors?.length) return;
 
@@ -38,19 +55,9 @@ export function addStoryTags(subtextElement: Element, storyData: StoryData): voi
         anchorElement.textContent = ' | ' + storyData.tags[i];
         
         // Add click handler
-        anchorElement.addEventListener('click', (e) => {
+        anchorElement.addEventListener('click', async (e) => {
             e.preventDefault();
-            const msg = {
-                type: 'NEW_EMBEDDING',
-                data: {
-                    tag: storyData.tags[i],
-                    vectorData: Array.from(new Float32Array([0.1, 0.2, 0.3])),
-                    timestamp: Date.now(),
-                    anchor: storyData.tag_anchors[i]
-                }
-            };
-            chrome.runtime.sendMessage(msg);
-            window.open(storyData.tag_anchors[i], '_blank');
+            await handleTagClick(storyData.tags[i], storyData.tag_anchors[i]);
         });
         
         tagsContainer.appendChild(anchorElement);
