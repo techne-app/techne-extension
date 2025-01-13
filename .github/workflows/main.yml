@@ -19,8 +19,8 @@ jobs:
         
     - name: Create ZIP file
       run: |
-        cd "techne-extension Extension/"
-        zip -r ../extension.zip Resources
+        cd dist
+        zip -r ../extension.zip .
         
     - name: Upload & release
       uses: mnao305/chrome-extension-upload@v5.0.0
