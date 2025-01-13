@@ -72,4 +72,47 @@ chrome.runtime.onInstalled.addListener((details) => {
   } else if (details.reason === 'update') {
     console.log('Extension updated');
   }
+});
+
+// Handle messages from content scripts
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.type === 'CHAT_COMPLETION' && mlcHandler) {
+    (async () => {
+      try {
+        const completion = await mlcHandler.engine.chat.completions.create({
+          messages: message.messages,
+          stream: true,
+          temperature: message.temperature || 1.0,
+          max_tokens: message.max_tokens || 256
+        });
+
+        if (message.stream) {
+          // Handle streaming response
+          let fullResponse = '';
+          const stream = await completion;
+          for await (const chunk of stream) {
+            const delta = chunk.choices[0]?.delta?.content;
+            if (delta) {
+              fullResponse += delta;
+              // Send intermediate chunks
+              sendResponse({ type: 'STREAM_CHUNK', content: delta });
+            }
+          }
+          // Send final response
+          sendResponse({ type: 'COMPLETE', content: fullResponse });
+        } else {
+          // Handle non-streaming response
+          let fullResponse = '';
+          for await (const chunk of completion) {
+            fullResponse += chunk.choices[0]?.delta?.content || '';
+          }
+          sendResponse({ type: 'COMPLETE', content: fullResponse });
+        }
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+        sendResponse({ type: 'ERROR', error: errorMessage });
+      }
+    })();
+    return true; // Required for async response
+  }
 }); 
