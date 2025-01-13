@@ -5,14 +5,14 @@
     "target": "es6",
     "moduleResolution": "node",
     "strict": true,
-    "outDir": "./techne-extension Extension/Resources",
-    "rootDir": "./techne-extension Extension/Resources/src",
+    "outDir": "./dist",
+    "rootDir": "./src",
     "noImplicitAny": false,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true
   },
   "include": [
-    "./techne-extension Extension/Resources/src/**/*"
+    "./src/**/*"
   ],
   "exclude": [
     "node_modules"

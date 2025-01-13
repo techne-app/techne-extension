@@ -3,14 +3,14 @@ const webpack = require('webpack');
 
 module.exports = {
   entry: {
-    'content-scripts/main-page/index': './techne-extension Extension/Resources/src/content-scripts/main-page/index.ts',
-    'content-scripts/item-page/index': './techne-extension Extension/Resources/src/content-scripts/item-page/index.ts',
-    'content-scripts/profile-page/index': './techne-extension Extension/Resources/src/content-scripts/profile-page/index.ts',
-    'background/index': './techne-extension Extension/Resources/src/background/index.ts',
-    'popup/index': './techne-extension Extension/Resources/src/popup/index.tsx'
+    'content-scripts/main-page/index': './src/content-scripts/main-page/index.ts',
+    'content-scripts/item-page/index': './src/content-scripts/item-page/index.ts',
+    'content-scripts/profile-page/index': './src/content-scripts/profile-page/index.ts',
+    'background/index': './src/background/index.ts',
+    'popup/index': './src/popup/index.tsx'
   },
   output: {
-    path: path.resolve(__dirname, 'techne-extension Extension/Resources'),
+    path: path.resolve(__dirname, 'dist'),
     filename: '[name].js'
   },
   module: {
