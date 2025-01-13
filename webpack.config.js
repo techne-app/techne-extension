@@ -1,5 +1,6 @@
 const path = require('path');
 const webpack = require('webpack');
+const CopyPlugin = require('copy-webpack-plugin');
 
 module.exports = {
   entry: {
@@ -38,6 +39,12 @@ module.exports = {
   plugins: [
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'production')
-    })
+    }),
+    new CopyPlugin({
+      patterns: [
+        { from: "public", to: "." },
+        { from: "manifest.json", to: "." }
+      ],
+    }),
   ]
 };
