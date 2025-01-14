@@ -44,6 +44,7 @@ export const ChatInterface: React.FC = () => {
   const [selectedModel, setSelectedModel] = useState(MODEL_OPTIONS[0].value);
   const [error, setError] = useState<string | null>(null);
   const progressBarRef = useRef<Line | null>(null);
+  const [loadedModelName, setLoadedModelName] = useState<string>('');
 
   const initEngine = async () => {
     try {
@@ -86,6 +87,7 @@ export const ChatInterface: React.FC = () => {
       
       console.log('Model initialized successfully:', mlcEngine);
       setEngine(mlcEngine);
+      setLoadedModelName(MODEL_OPTIONS.find(m => m.value === selectedModel)?.name || selectedModel);
     } catch (err) {
       console.error('Detailed error initializing engine:', {
         error: err,
@@ -173,6 +175,9 @@ export const ChatInterface: React.FC = () => {
         </div>
       ) : (
         <>
+          <div className="text-center mb-4 text-gray-600">
+            Loaded model: {loadedModelName}
+          </div>
           <div className="input-container flex gap-2 mb-4">
             <input
               type="text"

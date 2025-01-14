@@ -32,12 +32,23 @@ async function init(): Promise<void> {
         console.log('Techne: Fetched story tags:', data);
 
         // Get historical tags once at the start
-        const historicalTags = await new Promise<Tag[]>((resolve) => {
-            chrome.runtime.sendMessage({ type: 'GET_ALL_TAGS' }, (response) => {
-                resolve(response.tags || []);
+        let historicalTags: Tag[] = [];
+        try {
+            historicalTags = await new Promise<Tag[]>((resolve, reject) => {
+                const listener = (response: any) => {
+                    if (chrome.runtime.lastError) {
+                        reject(chrome.runtime.lastError);
+                        return;
+                    }
+                    resolve(response?.tags || []);
+                };
+                chrome.runtime.sendMessage({ type: 'GET_ALL_TAGS' }, listener);
             });
-        });
-        console.log('Techne: Historical tags found:', historicalTags.map(t => t.tag));
+            console.log('Techne: Historical tags found:', historicalTags.map(t => t.tag));
+        } catch (error) {
+            console.log('Techne: Failed to get historical tags:', error);
+            // Continue with empty historical tags
+        }
 
         console.log('Techne: Starting tag processing for stories:', data.length);
         
@@ -56,15 +67,25 @@ async function init(): Promise<void> {
                         anchors: story.tag_anchors.slice(0, 3)
                     };
                 } else {
-                    selectedTags = await selectRelevantTags(
-                        story.tags,
-                        story.tag_types,
-                        story.tag_anchors,
-                        historicalTags
-                    );
+                    try {
+                        selectedTags = await selectRelevantTags(
+                            story.tags,
+                            story.tag_types,
+                            story.tag_anchors,
+                            historicalTags
+                        );
+                    } catch (error) {
+                        console.log('Techne: Failed to get LLM recommendations, using first 3 tags:', error);
+                        selectedTags = {
+                            tags: story.tags.slice(0, 3),
+                            types: story.tag_types.slice(0, 3),
+                            anchors: story.tag_anchors.slice(0, 3)
+                        };
+                    }
                 }
                 
-                console.log(`Techne: Selected tags for story ${story.id}:`, selectedTags.tags);
+                // Log the alternative universe (first 3 tags)
+                console.log(`Techne: First 3 tags for story ${story.id}:`, story.tags.slice(0, 3));
                 
                 // Add tags to DOM immediately after processing each story
                 console.log(`Techne: Adding tags to DOM for story ${story.id}:`, selectedTags.tags);
@@ -96,24 +117,28 @@ async function selectRelevantTags(
 }> {
     const historicalTagStrings = historicalTags.map(t => t.tag).join(', ');
 
-    const prompt = `You are a tag recommender system. 
-    
+    const prompt = `You are a tag recommender system. You match incoming tags to the user's historical interests.
     Given a user's historical interests: [${historicalTagStrings}] 
-    And a story's tags: [${storyTags.join(', ')}]
+    And an incoming story's tags: [${storyTags.join(', ')}]
     Select the three (3) most relevant stroy tags that are most similar to the user's historical interests.
 
     Only respond with the exact stroy tags separated by commas.`;
 
-    console.log('Techne: LLM prompt:', prompt);
+    //console.log('Techne: LLM prompt:', prompt);
 
     try {
         const response = await getChatCompletion([
             { role: 'user', content: prompt }
         ]) as string;
-        console.log('Techne: LLM response:', response);
+        
+        if (!response) {
+            throw new Error('Empty response from LLM');
+        }
+        
+        //console.log('Techne: LLM response:', response);
 
         const selectedTags = response.split(',').map(t => t.trim());
-        console.log('Techne: Parsed selected tags:', selectedTags);
+        //console.log('Techne: Parsed selected tags:', selectedTags);
         
         // If LLM returned more than 3 tags, just use first 3 from original list
         if (selectedTags.length > 3) {
@@ -140,6 +165,15 @@ async function selectRelevantTags(
                 result.anchors.push(tagAnchors[index]);
             }
         });
+
+        // If no valid tags were found, fallback to first 3
+        if (result.tags.length === 0) {
+            return {
+                tags: storyTags.slice(0, 3),
+                types: tagTypes.slice(0, 3),
+                anchors: tagAnchors.slice(0, 3)
+            };
+        }
 
         return result;
     } catch (error) {
