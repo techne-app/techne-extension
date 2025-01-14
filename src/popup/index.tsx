@@ -12,9 +12,11 @@ if (container) {
   const root = createRoot(container);
   console.log("Root created, rendering components...");
   root.render(
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="w-1/2 max-w-3xl flex flex-col gap-4">
+    <div className="min-h-screen flex items-stretch">
+      <div className="w-1/2 p-4 border-r">
         <TagViewer />
+      </div>
+      <div className="w-1/2 p-4">
         <ChatInterface />
       </div>
     </div>

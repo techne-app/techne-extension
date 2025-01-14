@@ -17,6 +17,16 @@ const MODEL_OPTIONS = [
     id: "llama",
     name: "Llama-3.2-3B (Powerful)",
     value: "Llama-3.2-3B-Instruct-q4f16_1-MLC"
+  },
+  {
+    id: "gemma",
+    name:"gemma-2-2B", 
+    value: "gemma-2-2b-it-q4f16_1-MLC"  
+  },
+  {
+    id: "Phi",
+    name: "Phi-3.5-mini",
+    value: "Phi-3.5-mini-instruct-q4f16_1-MLC"
   }
 ];
 
