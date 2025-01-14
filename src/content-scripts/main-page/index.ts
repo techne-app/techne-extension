@@ -2,6 +2,7 @@ import { CONFIG } from '../../config';
 import { fetchTags, addStoryTags } from '../../utils/tag-utils';
 import { StoryData } from '../../types';
 import { getChatCompletion } from '../../utils/llm-utils';
+import { tagDb } from '../../background/db';
 
 async function init(): Promise<void> {
     try {
@@ -30,24 +31,93 @@ async function init(): Promise<void> {
         const data = await fetchTags<StoryData>(CONFIG.ENDPOINTS.STORY_TAGS, story_ids, 'story_ids');
         console.log('Techne: Fetched story tags:', data);
 
-        data.forEach((story) => {
+        console.log('Techne: Starting tag processing for stories:', data.length);
+        
+        const tagPromises = data.map(async (story) => {
             const subtextElement = storySubtextMap.get(story.id);
-            if (subtextElement) {
-                addStoryTags(subtextElement, story);
+            if (subtextElement && story.tags?.length) {
+                console.log(`Techne: Processing story ${story.id} with original tags:`, story.tags);
+                const selectedTags = await selectRelevantTags(
+                    story.tags,
+                    story.tag_types,
+                    story.tag_anchors
+                );
+                console.log(`Techne: Selected tags for story ${story.id}:`, selectedTags.tags);
+                return { subtextElement, story, selectedTags };
+            }
+            console.log(`Techne: Skipping story ${story.id} - no tags or subtext element`);
+            return null;
+        });
+
+        const results = await Promise.all(tagPromises);
+        console.log('Techne: Processed all stories, adding tags to DOM');
+        
+        results.forEach(result => {
+            if (result) {
+                const { subtextElement, story, selectedTags } = result;
+                console.log(`Techne: Adding tags to DOM for story ${story.id}:`, selectedTags.tags);
+                addStoryTags(subtextElement, {
+                    ...story,
+                    tags: selectedTags.tags,
+                    tag_types: selectedTags.types,
+                    tag_anchors: selectedTags.anchors
+                });
             }
         });
 
-        // Add test chat completion
-        try {
-            const response = await getChatCompletion([
-                { role: 'user', content: 'Hello, how are you? Also, what is your name?' }
-            ]);
-            console.log('AI Response:', response);
-        } catch (error) {
-            console.error('Chat completion error:', error);
-        }
     } catch (error) {
         console.error('Techne: Error in main page initialization:', error);
+    }
+}
+
+async function selectRelevantTags(storyTags: string[], tagTypes: string[], tagAnchors: string[]): Promise<{
+    tags: string[],
+    types: string[],
+    anchors: string[]
+}> {
+    const historicalTags = await tagDb.getAllTags();
+    console.log('Techne: Historical tags found:', historicalTags.map(t => t.tag));
+    const historicalTagStrings = historicalTags.map(t => t.tag).join(', ');
+
+    const prompt = `Given a user's historical interests: [${historicalTagStrings}]
+    And a story's tags: [${storyTags.join(', ')}]
+    Select the 3 most relevant tags that would interest this user based on their history.
+    Only respond with the exact tag names separated by commas. If there are less than 3 tags, return all of them.`;
+
+    console.log('Techne: Sending prompt to LLM with tags:', storyTags);
+    try {
+        const response = await getChatCompletion([
+            { role: 'user', content: prompt }
+        ]) as string;
+        console.log('Techne: LLM response:', response);
+
+        const selectedTags = response.split(',').map(t => t.trim());
+        console.log('Techne: Parsed selected tags:', selectedTags);
+        
+        const result = {
+            tags: [] as string[],
+            types: [] as string[],
+            anchors: [] as string[]
+        };
+
+        selectedTags.forEach(selectedTag => {
+            const index = storyTags.findIndex(t => t === selectedTag);
+            if (index !== -1) {
+                result.tags.push(storyTags[index]);
+                result.types.push(tagTypes[index]);
+                result.anchors.push(tagAnchors[index]);
+            }
+        });
+
+        return result;
+    } catch (error) {
+        console.error('Error getting tag recommendations:', error);
+        // Fallback to first 3 tags if LLM fails
+        return {
+            tags: storyTags.slice(0, 3),
+            types: tagTypes.slice(0, 3),
+            anchors: tagAnchors.slice(0, 3)
+        };
     }
 }
 
