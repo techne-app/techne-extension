@@ -116,4 +116,20 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     })();
     return true; // Required for async response
   }
+});
+
+// Add this to your existing message listener
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.type === 'GET_ALL_TAGS') {
+    tagDb.getAllTags()
+      .then(tags => {
+        sendResponse({ tags });
+      })
+      .catch(error => {
+        console.error('Error fetching tags:', error);
+        sendResponse({ tags: [] });
+      });
+    return true; // Will respond asynchronously
+  }
+  // ... your existing message handlers
 }); 
