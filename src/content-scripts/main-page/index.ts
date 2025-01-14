@@ -96,12 +96,16 @@ async function selectRelevantTags(
 }> {
     const historicalTagStrings = historicalTags.map(t => t.tag).join(', ');
 
-    const prompt = `Given a user's historical interests: [${historicalTagStrings}]
+    const prompt = `You are a tag recommender system. 
+    
+    Given a user's historical interests: [${historicalTagStrings}] 
     And a story's tags: [${storyTags.join(', ')}]
-    Select the three (3) most relevant stroy tags that would interest this user based on their history.
+    Select the three (3) most relevant stroy tags that are most similar to the user's historical interests.
+
     Only respond with the exact stroy tags separated by commas.`;
 
-    console.log('Techne: Sending prompt to LLM with tags:', storyTags);
+    console.log('Techne: LLM prompt:', prompt);
+
     try {
         const response = await getChatCompletion([
             { role: 'user', content: prompt }
