@@ -78,9 +78,11 @@ export const TagViewer: React.FC = () => {
 
   // Main render with list of embeddings
   return (
-    <div className="w-96 p-4">
-      <div className="flex justify-between items-center mb-4">
+    <div className="w-full">
+      <div className="flex justify-center items-center mb-4">
         <h1 className="text-xl font-bold">Navigation History</h1>
+      </div>
+      <div className="flex justify-between items-center mb-4">
         <div className="flex items-center gap-2">
           <button 
             onClick={handleClearAll}
@@ -97,7 +99,7 @@ export const TagViewer: React.FC = () => {
       
       {tags.length === 0 ? (
         <div className="text-gray-500 text-center py-8">
-          No embeddings stored yet
+          No tags stored yet
         </div>
       ) : (
         <div className="space-y-4">
