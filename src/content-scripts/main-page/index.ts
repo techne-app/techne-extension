@@ -56,7 +56,7 @@ async function init(): Promise<void> {
         for (const story of data) {
             const subtextElement = storySubtextMap.get(story.id);
             if (subtextElement && story.tags?.length) {
-                console.log(`Techne: Processing story ${story.id} with original tags:`, story.tags);
+                //console.log(`Techne: Processing story ${story.id} with original tags:`, story.tags);
                 
                 let selectedTags;
                 // If 3 or fewer tags or no historical tags, use them directly without LLM processing
@@ -117,12 +117,12 @@ async function selectRelevantTags(
 }> {
     const historicalTagStrings = historicalTags.map(t => t.tag).join(', ');
 
-    const prompt = `You are a tag recommender system. You match incoming tags to the user's historical interests.
-    Given a user's historical interests: [${historicalTagStrings}] 
-    And an incoming story's tags: [${storyTags.join(', ')}]
-    Select the three (3) most relevant stroy tags that are most similar to the user's historical interests.
+    const prompt = `Given:
+                    Historical tags: [${historicalTagStrings}]
+                    Story tags: [${storyTags.join(', ')}]
 
-    Only respond with the exact stroy tags separated by commas.`;
+                    Select exactly 3 story tags most similar to historical tags.
+                    Reply only with tags separated by commas.`;
 
     //console.log('Techne: LLM prompt:', prompt);
 
