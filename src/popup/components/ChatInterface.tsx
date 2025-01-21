@@ -4,11 +4,6 @@ import Line from 'progressbar.js/src/line';
 
 const MODEL_OPTIONS = [
   {
-    id: "SmolLM",
-    name: "SmolLM2-360M (Fast)",
-    value: "SmolLM2-360M-Instruct-q4f16_1-MLC"
-  },
-  {
     id: "qwen",
     name: "Qwen2-0.5B (Balanced)", 
     value: "Qwen2-0.5B-Instruct-q4f16_1-MLC"
@@ -27,11 +22,6 @@ const MODEL_OPTIONS = [
     id: "Phi",
     name: "Phi-3.5-mini",
     value: "Phi-3.5-mini-instruct-q4f16_1-MLC"
-  },
-  {
-    id: "Mistral",
-    name: "Mistral-7B",
-    value: "Mistral-7B-Instruct-v0.2-q4f16_1-MLC"
   }
 ];
 
