@@ -2,6 +2,7 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { TagViewer } from './components/TagViewer';
 import { ChatInterface } from './components/ChatInterface';
+import { isFeatureEnabled } from '../utils/featureFlags';
 
 console.log("Popup script starting...");
 
@@ -17,7 +18,7 @@ if (container) {
         <TagViewer />
       </div>
       <div className="w-1/2 p-4">
-        <ChatInterface />
+        {isFeatureEnabled('personalize') && <ChatInterface />}
       </div>
     </div>
   );
