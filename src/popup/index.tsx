@@ -18,7 +18,7 @@ if (container) {
         <TagViewer />
       </div>
       <div className="w-1/2 p-4">
-        {isFeatureEnabled('personalize') && <ChatInterface />}
+        {isFeatureEnabled('use_webllm') && <ChatInterface />}
       </div>
     </div>
   );

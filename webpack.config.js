@@ -8,7 +8,7 @@ function modifyManifest() {
   const manifestPath = path.resolve(__dirname, 'manifest.json');
   const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
 
-  if (featureFlags.personalize) {
+  if (featureFlags.use_webllm) {
     manifest.content_security_policy = {
       extension_pages: "style-src-elem 'self' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; font-src 'self' https://cdnjs.cloudflare.com; script-src 'self' 'wasm-unsafe-eval'; default-src 'self' data:; connect-src 'self' data: https://huggingface.co https://cdn-lfs.huggingface.co https://cdn-lfs-us-1.huggingface.co https://raw.githubusercontent.com https://cdn-lfs-us-1.hf.co"
     };

@@ -24,7 +24,7 @@ async function init(): Promise<void> {
             return getDefaultTags(story);
         };
 
-        if (isFeatureEnabled('personalize')) {
+        if (isFeatureEnabled('use_webllm')) {
             const historicalTags = await getHistoricalTags();
             if (historicalTags.length > 0) {
                 tagSelector = async (story: StoryData) => {
