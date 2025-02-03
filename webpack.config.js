@@ -14,6 +14,12 @@ function modifyManifest() {
     };
   }
 
+  if (featureFlags.use_tjs) {
+    manifest.content_security_policy = {
+      extension_pages: ""
+    };
+  }
+
   const modifiedManifestPath = path.resolve(__dirname, 'dist/manifest.json');
   fs.writeFileSync(modifiedManifestPath, JSON.stringify(manifest, null, 2));
 }
