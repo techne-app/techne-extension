@@ -19,9 +19,14 @@ const MODEL_OPTIONS = [
     value: "gemma-2-2b-it-q4f16_1-MLC"  
   },
   {
-    id: "Phi",
+    id: "phi",
     name: "Phi-3.5-mini",
     value: "Phi-3.5-mini-instruct-q4f16_1-MLC"
+  },
+  {
+    id: "r1-qwen",
+    name: "DeepSeek-R1-Distill-Qwen", 
+    value: "DeepSeek-R1-Distill-Qwen-7B-q4f16_1-MLC"
   }
 ];
 
