@@ -1,6 +1,10 @@
 interface Tag {
-    text: string;
-    type: 'expertise' | 'topic';
+    id?: number;
+    tag?: string;
+    text?: string;
+    type: string;
+    timestamp?: number;
+    anchor?: string;
 }
 
 interface StoryData {

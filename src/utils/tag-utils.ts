@@ -41,12 +41,10 @@ export function addStoryTags(subtextElement: Element, storyData: StoryData): voi
         anchorElement.addEventListener('click', (e) => {
             e.preventDefault();
             const msg = {
-                type: 'NEW_EMBEDDING',
+                type: 'NEW_TAG',
                 data: {
                     tag: storyData.tags[i],
                     type: storyData.tag_types[i],
-                    vectorData: Array.from(new Float32Array([0.1, 0.2, 0.3])),
-                    timestamp: Date.now(),
                     anchor: storyData.tag_anchors[i]
                 }
             };
@@ -73,7 +71,7 @@ export function addCommentTag(element: HTMLElement | null, tags: Tag[], isThread
         const tagElement = document.createElement('span');
         tagElement.className = `techne-tag ${tag.type}`;
         Object.assign(tagElement.style, CONFIG.STYLES.COMMENT_TAG);
-        tagElement.textContent = tag.text;
+        tagElement.textContent = tag.text || tag.tag || '';
         comheadElement.appendChild(tagElement);
     });
 }

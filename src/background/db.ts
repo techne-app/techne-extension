@@ -2,7 +2,6 @@ interface Tag {
   id: number;
   tag: string;
   type: string;
-  vectorData: Float32Array;
   timestamp: number;
   anchor: string;
 }
@@ -20,8 +19,8 @@ class TagDB {
           
           request.onupgradeneeded = (event: IDBVersionChangeEvent) => {
               const db = (event.target as IDBOpenDBRequest).result;
-              if (!db.objectStoreNames.contains('embeddings')) {
-                  const store = db.createObjectStore('embeddings', { 
+              if (!db.objectStoreNames.contains('tags')) {
+                  const store = db.createObjectStore('tags', { 
                       keyPath: 'id', 
                       autoIncrement: true 
                   });
@@ -35,8 +34,8 @@ class TagDB {
   async getAllTags(): Promise<Tag[]> {
       const db = await this.open();
       return new Promise((resolve, reject) => {
-          const transaction = db.transaction(['embeddings'], 'readonly');
-          const store = transaction.objectStore('embeddings');
+          const transaction = db.transaction(['tags'], 'readonly');
+          const store = transaction.objectStore('tags');
           const request = store.getAll();
           
           request.onerror = () => reject(request.error);
@@ -44,15 +43,14 @@ class TagDB {
       });
   }
 
-  async storeTag(tag: string, type: string, vector: number[], anchor: string): Promise<number> {
+  async storeTag(tag: string, type: string, anchor: string): Promise<number> {
       const db = await this.open();
       return new Promise((resolve, reject) => {
-          const transaction = db.transaction(['embeddings'], 'readwrite');
-          const store = transaction.objectStore('embeddings');
+          const transaction = db.transaction(['tags'], 'readwrite');
+          const store = transaction.objectStore('tags');
           const tag_data: Omit<Tag, 'id'> = {
               tag,
               type,
-              vectorData: new Float32Array(vector),
               timestamp: Date.now(),
               anchor
           };
@@ -66,8 +64,8 @@ class TagDB {
   async clearTags(): Promise<void> {
       const db = await this.open();
       return new Promise((resolve, reject) => {
-          const transaction = db.transaction(['embeddings'], 'readwrite');
-          const store = transaction.objectStore('embeddings');
+          const transaction = db.transaction(['tags'], 'readwrite');
+          const store = transaction.objectStore('tags');
           const request = store.clear();
 
           request.onerror = () => reject(request.error);

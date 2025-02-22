@@ -33,31 +33,27 @@ chrome.action.onClicked.addListener(async () => {
 
 // Listen for messages from content scripts
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.type === 'NEW_EMBEDDING') {
+  if (message.type === 'NEW_TAG') {
     try {
       tagDb.storeTag(
         message.data.tag, 
         message.data.type,
-        Array.from(new Float32Array(message.data.vectorData)), // Convert Float32Array to regular array
         message.data.anchor
       )
         .then(() => {
-          // 1. Notify popup if it's open
+          // Notify popup if it's open
           chrome.tabs.query({url: chrome.runtime.getURL("index.html")}, (tabs) => {
             tabs.forEach((tab) => {
               if (tab.id) {
                 chrome.tabs.sendMessage(tab.id, {
-                  type: 'EMBEDDINGS_UPDATED'
+                  type: 'TAGS_UPDATED'
                 });
               }
             });
           });
-          
-          // 2. Notify content scripts on relevant pages (if you need to)
-          // chrome.tabs.query({url: "https://your-site.com/*"}, ...);
         })
         .catch((error) => {
-          console.error('Error storing embedding:', error);
+          console.error('Error storing tag:', error);
         });
     } catch (error) {
       console.error('Error processing message:', error);
