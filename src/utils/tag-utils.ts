@@ -1,5 +1,6 @@
 import { CONFIG } from '../config';
 import { StoryData, Tag } from '../types';
+import { MessageType, NewTagRequest } from '../types/messages';
 
 export async function fetchTags<T>(
     endpoint: string, 
@@ -40,8 +41,8 @@ export function addStoryTags(subtextElement: Element, storyData: StoryData): voi
         // Add click handler
         anchorElement.addEventListener('click', (e) => {
             e.preventDefault();
-            const msg = {
-                type: 'NEW_TAG',
+            const msg: NewTagRequest = {
+                type: MessageType.NEW_TAG,
                 data: {
                     tag: storyData.tags[i],
                     type: storyData.tag_types[i],

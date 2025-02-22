@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { tagDb, type Tag } from '../../background/db';
+import { MessageType, ExtensionResponse } from '../../types/messages';
 
 export const TagViewer: React.FC = () => {
   const [tags, setTags] = useState<Tag[]>([]);
@@ -34,8 +35,8 @@ export const TagViewer: React.FC = () => {
   useEffect(() => {
     loadTags();
 
-    const messageListener = (message: any) => {
-      if (message.type === 'TAGS_UPDATED') {
+    const messageListener = (message: ExtensionResponse) => {
+      if (message.type === MessageType.TAGS_UPDATED) {
         loadTags();
       }
     };
