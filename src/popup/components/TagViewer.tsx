@@ -69,14 +69,14 @@ export const TagViewer: React.FC = () => {
   // Empty state
   if (!tags.length) {
     return (
-      <div className="p-4 text-gray-600">No tags saved yet.</div>
+      <div className="p-4 text-gray-600">No threads visited yet. Try some.</div>
     );
   }
 
   return (
     <div className="p-4">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold">Saved Tags</h2>
+        <h2 className="text-xl font-bold">Visited Threads</h2>
         <button
           onClick={handleClearAll}
           className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
@@ -89,8 +89,6 @@ export const TagViewer: React.FC = () => {
           <div key={tag.id} className="border p-3 rounded">
             <div className="font-medium">{tag.tag}</div>
             <div className="text-sm text-gray-500">
-              Type: {tag.type}
-              <br />
               Added: {formatDate(tag.timestamp)}
               <br />
               <a 
@@ -99,7 +97,7 @@ export const TagViewer: React.FC = () => {
                 rel="noopener noreferrer"
                 className="text-blue-500 hover:underline"
               >
-                View Source
+                Go to thread
               </a>
             </div>
           </div>
