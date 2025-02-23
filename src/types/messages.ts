@@ -3,8 +3,10 @@ export enum MessageType {
   CHAT_COMPLETION = 'CHAT_COMPLETION',
   NEW_TAG = 'NEW_TAG',
   GET_ALL_TAGS = 'GET_ALL_TAGS',
+  RANK_TAGS = 'RANK_TAGS',
   
   // Responses
+  RANK_TAGS_COMPLETE = 'RANK_TAGS_COMPLETE',
   TAGS_UPDATED = 'TAGS_UPDATED',
   ERROR = 'ERROR',
   STREAM_CHUNK = 'STREAM_CHUNK',
@@ -42,6 +44,15 @@ export interface GetAllTagsRequest extends BaseMessage {
   data: Record<string, never>; // empty object for consistent structure
 }
 
+interface RankTagsRequest {
+  type: MessageType.RANK_TAGS;
+  data: {
+    storyTags: string[];
+    tagTypes: string[];
+    tagAnchors: string[];
+  };
+}
+
 // Response message types
 export interface ErrorResponse extends BaseMessage {
   type: MessageType.ERROR;
@@ -69,13 +80,26 @@ export interface TagsUpdatedResponse extends BaseMessage {
   data: Record<string, never>; // empty object for consistent structure
 }
 
+interface RankTagsCompleteResponse {
+  type: MessageType.RANK_TAGS_COMPLETE;
+  data: {
+    result: {
+      tags: string[];
+      types: string[];
+      anchors: string[];
+    };
+  };
+}
+
 export type ExtensionRequest = 
   | ChatCompletionRequest 
   | NewTagRequest 
-  | GetAllTagsRequest;
+  | GetAllTagsRequest 
+  | RankTagsRequest;
 
 export type ExtensionResponse = 
   | ErrorResponse 
   | CompleteResponse 
   | StreamChunkResponse 
-  | TagsUpdatedResponse; 
+  | TagsUpdatedResponse 
+  | RankTagsCompleteResponse; 

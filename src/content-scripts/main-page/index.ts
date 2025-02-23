@@ -4,6 +4,7 @@ import { StoryData } from '../../types';
 import { getChatCompletion } from '../../utils/llm-utils';
 import { Tag } from '../../background/db';
 import { isFeatureEnabled } from '../../utils/featureFlags';
+import { ExtensionResponse, MessageType } from '../../types/messages';
 
 async function init(): Promise<void> {
     try {
@@ -17,34 +18,10 @@ async function init(): Promise<void> {
         const data = await fetchTags<StoryData>(CONFIG.ENDPOINTS.STORY_TAGS, storyIds, 'story_ids');
         console.log('Techne: Fetched story tags:', data);
 
-        let tagSelector: (story: StoryData) => Promise<{ tags: string[]; types: string[]; anchors: string[] }>;
-
-        // Initialize with async version of getDefaultTags
-        tagSelector = async (story: StoryData) => {
-            return getDefaultTags(story);
-        };
+        let tagSelector = getDefaultTags;
 
         if (isFeatureEnabled('use_webllm')) {
-            const historicalTags = await getHistoricalTags();
-            if (historicalTags.length > 0) {
-                tagSelector = async (story: StoryData) => {
-                    if (story.tags.length > 3) {
-                        try {
-                            const selectedTags = await selectRelevantTags(
-                                story.tags,
-                                story.tag_types,
-                                story.tag_anchors,
-                                historicalTags
-                            );
-                            return selectedTags;
-                        } catch (error) {
-                            console.log('Techne: Failed to get LLM recommendations, using default tags:', error);
-                            return getDefaultTags(story);
-                        }
-                    }
-                    return getDefaultTags(story);
-                };
-            }
+            tagSelector = selectRelevantTags;
         }
 
         console.log('Techne: Starting tag processing for stories:', data.length);
@@ -77,24 +54,6 @@ function mapStorySubtextElements(): Map<number, HTMLElement> {
     return map;
 }
 
-async function getHistoricalTags(): Promise<Tag[]> {
-    try {
-        return await new Promise<Tag[]>((resolve, reject) => {
-            const listener = (response: any) => {
-                if (chrome.runtime.lastError) {
-                    reject(chrome.runtime.lastError);
-                    return;
-                }
-                resolve(response?.tags || []);
-            };
-            chrome.runtime.sendMessage({ type: 'GET_ALL_TAGS' }, listener);
-        });
-    } catch (error) {
-        console.log('Techne: Failed to get historical tags:', error);
-        return [];
-    }
-}
-
 async function processStory(
     story: StoryData,
     storySubtextMap: Map<number, HTMLElement>,
@@ -111,7 +70,7 @@ async function processStory(
     addStoryTags(subtextElement, { ...story, ...selectedTags });
 }
 
-function getDefaultTags(story: StoryData) {
+async function getDefaultTags(story: StoryData) {
     return {
         tags: story.tags.slice(0, 3),
         types: story.tag_types.slice(0, 3),
@@ -119,50 +78,33 @@ function getDefaultTags(story: StoryData) {
     };
 }
 
-async function selectRelevantTags(
-    storyTags: string[],
-    tagTypes: string[],
-    tagAnchors: string[],
-    historicalTags: Tag[]
-): Promise<{ tags: string[]; types: string[]; anchors: string[] }> {
-    const historicalTagStrings = historicalTags.map(t => t.tag).join(', ');
-    const prompt = `Given:
-                    Historical tags: [${historicalTagStrings}]
-                    Story tags: [${storyTags.join(', ')}]
-
-                    Select exactly 3 story tags most similar to historical tags.
-                    Reply only with tags separated by commas.`;
-
+async function selectRelevantTags(story: StoryData): Promise<{ tags: string[]; types: string[]; anchors: string[] }> {
     try {
-        const response = await getChatCompletion([{ role: 'user', content: prompt }]) as string;
-        const selectedTags = parseSelectedTags(response, storyTags, tagTypes, tagAnchors);
-        return selectedTags || getDefaultTags({ tags: storyTags, tag_types: tagTypes, tag_anchors: tagAnchors } as StoryData);
+        const response = await new Promise<ExtensionResponse>((resolve, reject) => {
+            chrome.runtime.sendMessage({
+                type: MessageType.RANK_TAGS,
+                data: {
+                    storyTags: story.tags,
+                    tagTypes: story.tag_types,
+                    tagAnchors: story.tag_anchors
+                }
+            }, (response) => {
+                if (chrome.runtime.lastError) {
+                    reject(chrome.runtime.lastError);
+                } else {
+                    resolve(response);
+                }
+            });
+        });
+
+        if (response.type === MessageType.RANK_TAGS_COMPLETE) {
+            return response.data.result;
+        }
+        throw new Error('Unexpected response type');
     } catch (error) {
         console.error('Error getting tag recommendations:', error);
-        return getDefaultTags({ tags: storyTags, tag_types: tagTypes, tag_anchors: tagAnchors } as StoryData);
+        return getDefaultTags(story);
     }
-}
-
-function parseSelectedTags(
-    response: string,
-    storyTags: string[],
-    tagTypes: string[],
-    tagAnchors: string[]
-): { tags: string[]; types: string[]; anchors: string[] } | null {
-    const selectedTags = response.split(',').map(t => t.trim());
-    if (selectedTags.length > 3) return null;
-
-    const result = { tags: [] as string[], types: [] as string[], anchors: [] as string[] };
-    selectedTags.forEach(tag => {
-        const index = storyTags.findIndex(t => t === tag);
-        if (index !== -1) {
-            result.tags.push(storyTags[index]);
-            result.types.push(tagTypes[index]);
-            result.anchors.push(tagAnchors[index]);
-        }
-    });
-
-    return result.tags.length ? result : null;
 }
 
 init();
