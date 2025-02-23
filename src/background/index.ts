@@ -4,8 +4,7 @@ import { ExtensionServiceWorkerMLCEngineHandler } from "@mlc-ai/web-llm";
 import { 
   MessageType, 
   ExtensionRequest, 
-  ExtensionResponse,
-  ChatCompletionRequest 
+  ExtensionResponse
 } from '../types/messages';
 
 let mlcHandler: ExtensionServiceWorkerMLCEngineHandler | undefined;
@@ -68,54 +67,6 @@ chrome.runtime.onMessage.addListener((
     } catch (error) {
       console.error('Error processing message:', error);
     }
-    return true;
-  }
-
-  if (message.type === MessageType.CHAT_COMPLETION && mlcHandler) {
-    (async () => {
-      try {
-        const completion = await mlcHandler.engine.chat.completions.create({
-          messages: message.data.messages,
-          stream: true,
-          temperature: message.data.temperature || 1.0,
-          max_tokens: message.data.max_tokens || 256
-        });
-
-        if (message.data.stream) {
-          let fullResponse = '';
-          const stream = await completion;
-          for await (const chunk of stream) {
-            const delta = chunk.choices[0]?.delta?.content;
-            if (delta) {
-              fullResponse += delta;
-              sendResponse({ 
-                type: MessageType.STREAM_CHUNK, 
-                data: { content: delta }
-              });
-            }
-          }
-          sendResponse({ 
-            type: MessageType.COMPLETE, 
-            data: { content: fullResponse }
-          });
-        } else {
-          let fullResponse = '';
-          for await (const chunk of completion) {
-            fullResponse += chunk.choices[0]?.delta?.content || '';
-          }
-          sendResponse({ 
-            type: MessageType.COMPLETE, 
-            data: { content: fullResponse }
-          });
-        }
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-        sendResponse({ 
-          type: MessageType.ERROR, 
-          data: { error: errorMessage }
-        });
-      }
-    })();
     return true;
   }
 

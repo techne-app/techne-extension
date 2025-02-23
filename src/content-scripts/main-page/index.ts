@@ -1,8 +1,6 @@
 import { CONFIG } from '../../config';
 import { fetchTags, addStoryTags } from '../../utils/tag-utils';
 import { StoryData } from '../../types';
-import { getChatCompletion } from '../../utils/llm-utils';
-import { Tag } from '../../background/db';
 import { isFeatureEnabled } from '../../utils/featureFlags';
 import { ExtensionResponse, MessageType } from '../../types/messages';
 
