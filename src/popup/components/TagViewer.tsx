@@ -49,8 +49,8 @@ export const TagViewer: React.FC = () => {
   }, []);
 
   // Format timestamp to locale string
-  const formatDate = (timestamp: number): string => {
-    return new Date(timestamp).toLocaleString();
+  const formatDate = (timestamp: number | undefined): string => {
+    return timestamp ? new Date(timestamp).toLocaleString() : 'Unknown date';
   };
 
   // Loading state

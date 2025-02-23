@@ -54,7 +54,7 @@ async function init(): Promise<void> {
                 const element = document.getElementById(String(thread.id));
                 if (element && thread.tags) {
                     const tagObjects: Tag[] = thread.tags.slice(0, 2).map(tag => ({
-                        text: tag,
+                        tag: tag,
                         type: 'topic'
                     }));
                     addCommentTag(element, tagObjects, true);
@@ -68,7 +68,7 @@ async function init(): Promise<void> {
                 const element = document.getElementById(String(comment.id));
                 if (element && comment.tags) {
                     const tagObjects: Tag[] = comment.tags.slice(0, 1).map(tag => ({
-                        text: tag,
+                        tag: tag,
                         type: 'topic'
                     }));
                     addCommentTag(element, tagObjects, false);

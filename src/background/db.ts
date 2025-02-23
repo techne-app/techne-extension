@@ -1,10 +1,4 @@
-interface Tag {
-  id: number;
-  tag: string;
-  type: string;
-  timestamp: number;
-  anchor: string;
-}
+import { Tag } from '../types/tag';
 
 class TagDB {
   private dbName = 'TagDB';

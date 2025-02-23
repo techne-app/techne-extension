@@ -37,7 +37,7 @@ async function init(): Promise<void> {
                     const expertiseIndex = comment.tag_types.findIndex(type => type === 'expertise');
                     if (expertiseIndex !== -1) {
                         tagObjects.push({
-                            text: comment.tags[expertiseIndex],
+                            tag: comment.tags[expertiseIndex],
                             type: 'expertise'
                         });
                     }
@@ -46,7 +46,7 @@ async function init(): Promise<void> {
                     const topicIndex = comment.tag_types.findIndex(type => type === 'topic');
                     if (topicIndex !== -1) {
                         tagObjects.push({
-                            text: comment.tags[topicIndex],
+                            tag: comment.tags[topicIndex],
                             type: 'topic'
                         });
                     }

@@ -72,7 +72,7 @@ export function addCommentTag(element: HTMLElement | null, tags: Tag[], isThread
         const tagElement = document.createElement('span');
         tagElement.className = `techne-tag ${tag.type}`;
         Object.assign(tagElement.style, CONFIG.STYLES.COMMENT_TAG);
-        tagElement.textContent = tag.text || tag.tag || '';
+        tagElement.textContent = tag.tag || '';
         comheadElement.appendChild(tagElement);
     });
 }
