@@ -2,6 +2,7 @@ import { tagDb } from './db';
 import { CONFIG } from '../config';
 import { isFeatureEnabled } from '../utils/featureFlags';
 import { ExtensionServiceWorkerMLCEngineHandler } from "@mlc-ai/web-llm";
+
 import { 
   MessageType, 
   ExtensionRequest, 
@@ -11,7 +12,9 @@ import {
 import { personalize_with_webllm } from './personalization';  
 import { personalize_with_tjs_embeddings } from './personalization';
 
+
 let mlcHandler: ExtensionServiceWorkerMLCEngineHandler | undefined;
+
 
 if (isFeatureEnabled('use_webllm')) {
   // Handle MLCBot connections

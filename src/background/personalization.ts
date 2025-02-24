@@ -2,6 +2,30 @@ import { ExtensionServiceWorkerMLCEngineHandler } from "@mlc-ai/web-llm";
 import { Tag } from '../types/tag';
 import { pipeline } from "@huggingface/transformers";
 
+
+class EmbedderSingleton {
+    private static fn: any;
+    private static instance: any;
+    private static promise_chain: Promise<any>;
+    static async getInstance(progress_callback) {
+        return (this.fn ??= async (...args) => {
+            this.instance ??= pipeline(
+                "feature-extraction",
+                "Xenova/all-MiniLM-L6-v2",
+                {
+                    progress_callback,
+                    device: "webgpu",
+                },
+            );
+
+            return (this.promise_chain = (
+                this.promise_chain ?? Promise.resolve()
+            ).then(async () => (await this.instance)(...args)));
+        });
+    }
+}
+
+  
 export async function personalize_with_webllm(
     mlcHandler: ExtensionServiceWorkerMLCEngineHandler,
     historicalTags: Tag[],
@@ -63,55 +87,65 @@ export async function personalize_with_tjs_embeddings(
     tagTypes: string[],
     tagAnchors: string[]
 ) {
-    const historicalTagStrings = historicalTags.map(t => t.tag);
+    console.log('Techne: Starting personalization with TJS embeddings');
+    console.log('Historical tags:', historicalTags.length, 'Story tags:', storyTags.length);
 
-    /**
-     * Singleton class to manage the embedding model
-     */
-    class EmbedderSingleton {
-        private static fn: any;
-        private static instance: any;
-        private static promise_chain: Promise<any>;
-        static async getInstance(progress_callback) {
-        return (this.fn ??= async (...args) => {
-            this.instance ??= pipeline(
-            "feature-extraction",
-            "Xenova/all-MiniLM-L6-v2",
-            {
-                progress_callback,
-                device: "webgpu",
-            },
-            );
-    
-            return (this.promise_chain = (
-            this.promise_chain ?? Promise.resolve()
-            ).then(async () => (await this.instance)(...args)));
+    try {
+        const embedder = await EmbedderSingleton.getInstance((data) => {
+            console.log('Embedder progress:', data);
         });
-        }
-    }
 
-    const embedder = await EmbedderSingleton.getInstance((data) => {
-        // Progress tracking for embedder
-      });
-    
-    // Get embeddings for all test words
-    const historicalTagEmbeddings = await Promise.all(
-    historicalTagStrings.map(word => 
-        embedder(word, { pooling: 'mean', normalize: true })
-    )
-    );
+        console.log('Techne: Embedder initialized successfully');
 
-    // Get embeddings for all test words
-    const storyTagEmbeddings = await Promise.all(
-        storyTags.map(word => 
-            embedder(word, { pooling: 'mean', normalize: true })
-        )
+        const historicalTagStrings = historicalTags.map(t => t.tag);
+
+        // Process historical tags
+        console.log('Processing historical tags:', historicalTagStrings);
+        const historicalTagEmbeddings = await Promise.all(
+            historicalTagStrings.map(async (word) => {
+                console.log('Getting embedding for historical tag:', word);
+                return embedder(word, { pooling: 'mean', normalize: true });
+            })
         );
 
-    console.log(historicalTagEmbeddings);
-    console.log(storyTagEmbeddings);
+        // Process story tags
+        console.log('Processing story tags:', storyTags);
+        const storyTagEmbeddings = await Promise.all(
+            storyTags.map(async (word) => {
+                console.log('Getting embedding for story tag:', word);
+                return embedder(word, { pooling: 'mean', normalize: true });
+            })
+        );
 
-    const result = { tags: storyTags, types: tagTypes, anchors: tagAnchors };
+        console.log('Historical embeddings count:', historicalTagEmbeddings.length);
+        console.log('Story embeddings count:', storyTagEmbeddings.length);
 
-    return result;
+        // Calculate similarities
+        const similarities = storyTagEmbeddings.map((storyEmbed, storyIndex) => {
+            const maxSimilarity = Math.max(...historicalTagEmbeddings.map(histEmbed => 
+                cosineSimilarity(
+                    Array.from(storyEmbed.data),
+                    Array.from(histEmbed.data)
+                )
+            ));
+            return {
+                index: storyIndex,
+                similarity: maxSimilarity
+            };
+        });
+
+        // Sort by similarity and take top 3
+        similarities.sort((a, b) => b.similarity - a.similarity);
+        const topIndices = similarities.slice(0, 3).map(s => s.index);
+
+        return {
+            tags: topIndices.map(i => storyTags[i]),
+            types: topIndices.map(i => tagTypes[i]),
+            anchors: topIndices.map(i => tagAnchors[i])
+        };
+    } catch (error) {
+        console.error('Error in personalize_with_tjs_embeddings:', error);
+        // Return all tags if there's an error
+        return { tags: storyTags, types: tagTypes, anchors: tagAnchors };
+    }
 }

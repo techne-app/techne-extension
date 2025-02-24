@@ -16,7 +16,7 @@ function modifyManifest() {
 
   if (featureFlags.use_tjs) {
     manifest.content_security_policy = {
-      extension_pages: "script-src 'self' 'wasm-unsafe-eval'"
+      extension_pages: "script-src 'self' 'wasm-unsafe-eval'; connect-src 'self' https://huggingface.co https://cdn-lfs.huggingface.co https://cdn-lfs-us-1.huggingface.co https://cdn-lfs.hf.co; object-src 'self';"
     };
   }
 
