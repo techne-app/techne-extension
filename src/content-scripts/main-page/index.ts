@@ -20,6 +20,8 @@ async function init(): Promise<void> {
 
         if (isFeatureEnabled('use_webllm')) {
             tagSelector = selectRelevantTags;
+        } else if (isFeatureEnabled('use_tjs')) {
+            tagSelector = selectRelevantTags;
         }
 
         console.log('Techne: Starting tag processing for stories:', data.length);

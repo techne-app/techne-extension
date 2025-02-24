@@ -8,7 +8,8 @@ import {
   ExtensionResponse
 } from '../types/messages';
 
-import { personalize_with_webllm } from './personalization';
+import { personalize_with_webllm } from './personalization';  
+import { personalize_with_tjs_embeddings } from './personalization';
 
 let mlcHandler: ExtensionServiceWorkerMLCEngineHandler | undefined;
 
@@ -87,7 +88,18 @@ chrome.runtime.onMessage.addListener((
             data: { result }
           });
 
-        } else {
+        } else if (isFeatureEnabled('use_tjs')) {
+          const { storyTags, tagTypes, tagAnchors } = message.data;
+          const historicalTags = await tagDb.getAllTags();
+
+          const result = await personalize_with_tjs_embeddings(historicalTags, storyTags, tagTypes, tagAnchors);
+          sendResponse({ 
+            type: MessageType.RANK_TAGS_COMPLETE, 
+            data: { result }
+          });
+
+        } 
+        else {
           const { storyTags, tagTypes, tagAnchors } = message.data;
           const result = { tags: storyTags, types: tagTypes, anchors: tagAnchors };
           sendResponse({ 

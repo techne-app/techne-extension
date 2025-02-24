@@ -16,7 +16,7 @@ function modifyManifest() {
 
   if (featureFlags.use_tjs) {
     manifest.content_security_policy = {
-      extension_pages: ""
+      extension_pages: "script-src 'self' 'wasm-unsafe-eval'"
     };
   }
 
