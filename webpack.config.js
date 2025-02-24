@@ -35,6 +35,10 @@ module.exports = {
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: '[name].js',
+    chunkLoading: false,
+  },
+  optimization: {
+    splitChunks: false,
   },
   module: {
     rules: [
