@@ -13,17 +13,19 @@ import { personalize_with_tjs_embeddings } from './personalization';
 
 let mlcHandler: ExtensionServiceWorkerMLCEngineHandler | undefined;
 
-// Handle MLCBot connections
-chrome.runtime.onConnect.addListener(function (port) {
-  if (port.name === "web_llm_service_worker") {
-    if (mlcHandler === undefined) {
-      mlcHandler = new ExtensionServiceWorkerMLCEngineHandler(port);
-    } else {
-      mlcHandler.setPort(port);
+if (isFeatureEnabled('use_webllm')) {
+  // Handle MLCBot connections
+  chrome.runtime.onConnect.addListener(function (port) {
+    if (port.name === "web_llm_service_worker") {
+      if (mlcHandler === undefined) {
+        mlcHandler = new ExtensionServiceWorkerMLCEngineHandler(port);
+      } else {
+        mlcHandler.setPort(port);
+      }
+      port.onMessage.addListener(mlcHandler.onmessage.bind(mlcHandler));
     }
-    port.onMessage.addListener(mlcHandler.onmessage.bind(mlcHandler));
-  }
-});
+  });
+}
 
 // Handle extension icon clicks
 chrome.action.onClicked.addListener(async () => {
@@ -74,19 +76,28 @@ chrome.runtime.onMessage.addListener((
     return true;
   }
 
-  if (message.type === MessageType.RANK_TAGS && mlcHandler) {
+  if (message.type === MessageType.RANK_TAGS) {
     (async () => {
       try {
 
         if (isFeatureEnabled('use_webllm')) {
-          const { storyTags, tagTypes, tagAnchors } = message.data;
-          const historicalTags = await tagDb.getAllTags();
 
-          const result = await personalize_with_webllm(mlcHandler, historicalTags, storyTags, tagTypes, tagAnchors);
-          sendResponse({ 
-            type: MessageType.RANK_TAGS_COMPLETE, 
-            data: { result }
-          });
+          if (mlcHandler) {
+            const { storyTags, tagTypes, tagAnchors } = message.data;
+            const historicalTags = await tagDb.getAllTags();
+  
+            const result = await personalize_with_webllm(mlcHandler, historicalTags, storyTags, tagTypes, tagAnchors);
+            sendResponse({ 
+              type: MessageType.RANK_TAGS_COMPLETE, 
+              data: { result }
+            });
+          } else {
+            sendResponse({
+              type: MessageType.ERROR,
+              data: { error: 'MLC handler is not connected yet.' }
+            });
+            return;
+          }
 
         } else if (isFeatureEnabled('use_tjs')) {
           const { storyTags, tagTypes, tagAnchors } = message.data;
