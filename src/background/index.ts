@@ -1,11 +1,14 @@
 import { tagDb } from './db';
 import { CONFIG } from '../config';
+import { isFeatureEnabled } from '../utils/featureFlags';
 import { ExtensionServiceWorkerMLCEngineHandler } from "@mlc-ai/web-llm";
 import { 
   MessageType, 
   ExtensionRequest, 
   ExtensionResponse
 } from '../types/messages';
+
+import { personalize_with_webllm } from './personalization';
 
 let mlcHandler: ExtensionServiceWorkerMLCEngineHandler | undefined;
 
@@ -73,49 +76,26 @@ chrome.runtime.onMessage.addListener((
   if (message.type === MessageType.RANK_TAGS && mlcHandler) {
     (async () => {
       try {
-        // Get historical tags directly from DB
-        const historicalTags = await tagDb.getAllTags();
-        const historicalTagStrings = historicalTags.map(t => t.tag);
-        
-        const { storyTags, tagTypes, tagAnchors } = message.data;
-        
-        const prompt = `Given:
-                      Historical tags: [${historicalTagStrings.join(', ')}]
-                      Story tags: [${storyTags.join(', ')}]
 
-                      Select exactly 3 story tags most similar to historical tags.
-                      Reply only with tags separated by commas.`;
+        if (isFeatureEnabled('use_webllm')) {
+          const { storyTags, tagTypes, tagAnchors } = message.data;
+          const historicalTags = await tagDb.getAllTags();
 
-        const completion = await mlcHandler.engine.chat.completions.create({
-          messages: [{ role: 'user', content: prompt }],
-          stream: true,
-          temperature: 0.7,
-          max_tokens: 128
-        });
+          const result = await personalize_with_webllm(mlcHandler, historicalTags, storyTags, tagTypes, tagAnchors);
+          sendResponse({ 
+            type: MessageType.RANK_TAGS_COMPLETE, 
+            data: { result }
+          });
 
-        let response = '';
-        const stream = await completion;
-        for await (const chunk of stream) {
-          response += chunk.choices[0]?.delta?.content || '';
+        } else {
+          const { storyTags, tagTypes, tagAnchors } = message.data;
+          const result = { tags: storyTags, types: tagTypes, anchors: tagAnchors };
+          sendResponse({ 
+            type: MessageType.RANK_TAGS_COMPLETE, 
+            data: { result }
+          });
         }
 
-        const selectedTags = response.split(',').map(t => t.trim());
-        
-        // Map back to full tag data
-        const result = { tags: [] as string[], types: [] as string[], anchors: [] as string[] };
-        selectedTags.forEach(tag => {
-            const index = storyTags.findIndex(t => t === tag);
-            if (index !== -1) {
-                result.tags.push(storyTags[index]);
-                result.types.push(tagTypes[index]);
-                result.anchors.push(tagAnchors[index]);
-            }
-        });
-
-        sendResponse({ 
-          type: MessageType.RANK_TAGS_COMPLETE, 
-          data: { result }
-        });
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
         sendResponse({ 
