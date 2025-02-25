@@ -25,6 +25,15 @@ function modifyManifest() {
 }
 
 module.exports = {
+  resolve: {
+    alias: {
+      "@huggingface/transformers": path.resolve(
+        __dirname,
+        "node_modules/@huggingface/transformers",
+      ),
+    },
+    extensions: ['.tsx', '.ts', '.js'],
+  },
   entry: {
     'popup/index': './src/popup/index.tsx',
     'background/index': './src/background/index.ts',
@@ -48,9 +57,6 @@ module.exports = {
         exclude: /node_modules/,
       },
     ],
-  },
-  resolve: {
-    extensions: ['.tsx', '.ts', '.js'],
   },
   plugins: [
     new CopyPlugin({
