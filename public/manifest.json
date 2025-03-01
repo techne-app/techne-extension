@@ -1,24 +1,14 @@
 {
   "manifest_version": 3,
   "name": "Techne",
-  "version": "1.6.4",
+  "version": "1.7.0",
   "description": "An extension that helps navigate Hacker News with AI-generated tags using Techne.",
-  "icons": {
-    "48": "images/icon-48.png"
-  },
-  "action": {
-    "default_icon": {
-      "48": "images/icon-48.png"
-    }
-  },
-  "background": {
-    "service_worker": "background/index.js",
-    "type": "module"
-  },
   "permissions": [
     "tabs"
   ],
-  "content_security_policy": {
+  "background": {
+    "service_worker": "background/index.js",
+    "type": "module"
   },
   "content_scripts": [
     {
@@ -38,6 +28,18 @@
       "js": ["content-scripts/profile-page/index.js"]
     }
   ],
+  "minimum_chrome_version": "92",
+  "action": {
+    "default_icon": {
+      "48": "images/icon-48.png"
+    }
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'"
+  },
+  "icons": {
+    "48": "images/icon-48.png"
+  },
   "web_accessible_resources": [{
     "resources": [
       "index.html",

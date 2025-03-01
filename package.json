@@ -1,7 +1,7 @@
 {
-  "name": "browser-extension",
-  "version": "0.0.1",
-  "description": "Transformers.js | Sample browser extension",
+  "name": "techne-extension",
+  "version": "1.7.0",
+  "description": "An extension that helps navigate Hacker News with AI-generated tags using Techne.",
   "scripts": {
     "build": "webpack",
     "dev": "webpack --watch"
