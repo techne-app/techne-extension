@@ -1,4 +1,5 @@
 {
-    "use_webllm": false,
-    "use_tjs": false
+    "tag_personalization": true,
+    "chat_interface": false,
+    "tag_search": true
 }
