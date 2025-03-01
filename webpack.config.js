@@ -5,7 +5,7 @@ const featureFlags = require('./feature-flags.json');
 
 // Dynamically modify manifest.json based on feature flags
 function modifyManifest() {
-  const manifestPath = path.resolve(__dirname, 'manifest.json');
+  const manifestPath = path.resolve(__dirname, 'public/manifest.json');
   const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
 
   if (featureFlags.use_webllm) {
