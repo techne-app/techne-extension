@@ -62,7 +62,7 @@ function mapStorySubtextElements(): Map<number, HTMLElement> {
 async function processStory(
     story: StoryData,
     storySubtextMap: Map<number, HTMLElement>,
-    tagSelector: (story: StoryData) => Promise<{ tags: string[]; types: string[]; anchors: string[] }>
+    tagSelector: (story: StoryData) => Promise<{ tags: string[]; tag_types: string[]; tag_anchors: string[] }>
 ) {
     const subtextElement = storySubtextMap.get(story.id);
     if (!subtextElement || !story.tags?.length) {
@@ -78,13 +78,13 @@ async function processStory(
 async function getDefaultTags(story: StoryData) {
     return {
         tags: story.tags.slice(0, 3),
-        types: story.tag_types.slice(0, 3),
-        anchors: story.tag_anchors.slice(0, 3)
+        tag_types: story.tag_types.slice(0, 3),
+        tag_anchors: story.tag_anchors.slice(0, 3)
     };
 }
 
 
-async function selectRelevantTags(story: StoryData): Promise<{ tags: string[]; types: string[]; anchors: string[] }> {
+async function selectRelevantTags(story: StoryData): Promise<{ tags: string[]; tag_types: string[]; tag_anchors: string[] }> {
     
     try {
         const response = await new Promise<ExtensionResponse>((resolve, reject) => {
@@ -107,8 +107,8 @@ async function selectRelevantTags(story: StoryData): Promise<{ tags: string[]; t
         if (response.type === MessageType.RANK_TAGS_COMPLETE) {
             return {
                 tags: response.data.result.tags.slice(0, 3),
-                types: response.data.result.types.slice(0, 3),
-                anchors: response.data.result.anchors.slice(0, 3)
+                tag_types: response.data.result.types.slice(0, 3),
+                tag_anchors: response.data.result.anchors.slice(0, 3)
             };
         }
         throw new Error('Unexpected response type');
