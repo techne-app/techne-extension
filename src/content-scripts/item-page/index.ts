@@ -1,6 +1,8 @@
 import { CONFIG } from '../../config';
 import { fetchTags, addStoryTags, addCommentTag } from '../../utils/tag-utils';
 import { StoryData, ThreadData, CommentData, CommentCategories, Tag } from '../../types';
+import { isFeatureEnabled } from '../../utils/featureFlags';
+import { selectRelevantTags, getDefaultTags } from '../../utils/personalization-utils';
 
 function categorizeComments(comments: NodeListOf<Element>): CommentCategories {
     return Array.from(comments).reduce((acc: CommentCategories, comment: Element) => {
@@ -39,7 +41,18 @@ async function init(): Promise<void> {
             if (titleRow?.nextElementSibling) {
                 const subtext = titleRow.nextElementSibling.querySelector('.subline');
                 if (subtext) {
-                    addStoryTags(subtext, storyData[0]);
+                    // Apply personalization if enabled
+                    if (isFeatureEnabled('tag_personalization')) {
+                        const selectedTags = await selectRelevantTags(storyData[0]);
+                        addStoryTags(subtext, { 
+                            ...storyData[0], 
+                            tags: selectedTags.tags,
+                            tag_types: selectedTags.tag_types,
+                            tag_anchors: selectedTags.tag_anchors 
+                        });
+                    } else {
+                        addStoryTags(subtext, storyData[0]);
+                    }
                 }
             }
         }

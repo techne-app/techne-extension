@@ -2,7 +2,7 @@ import { CONFIG } from '../../config';
 import { fetchTags, addStoryTags } from '../../utils/tag-utils';
 import { StoryData } from '../../types';
 import { isFeatureEnabled } from '../../utils/featureFlags';
-import { ExtensionResponse, MessageType } from '../../types/messages';
+import { selectRelevantTags, getDefaultTags } from '../../utils/personalization-utils';
 
 async function init(): Promise<void> {
     try {
@@ -73,49 +73,6 @@ async function processStory(
     const selectedTags = await tagSelector(story);
     console.log(`Techne: Adding tags to DOM for story ${story.id}:`, selectedTags.tags);
     addStoryTags(subtextElement, { ...story, ...selectedTags });
-}
-
-async function getDefaultTags(story: StoryData) {
-    return {
-        tags: story.tags.slice(0, 3),
-        tag_types: story.tag_types.slice(0, 3),
-        tag_anchors: story.tag_anchors.slice(0, 3)
-    };
-}
-
-
-async function selectRelevantTags(story: StoryData): Promise<{ tags: string[]; tag_types: string[]; tag_anchors: string[] }> {
-    
-    try {
-        const response = await new Promise<ExtensionResponse>((resolve, reject) => {
-            chrome.runtime.sendMessage({
-                type: MessageType.RANK_TAGS,
-                data: {
-                    storyTags: story.tags,
-                    tagTypes: story.tag_types,
-                    tagAnchors: story.tag_anchors
-                }
-            }, (response) => {
-                if (chrome.runtime.lastError) {
-                    reject(chrome.runtime.lastError);
-                } else {
-                    resolve(response);
-                }
-            });
-        });
-
-        if (response.type === MessageType.RANK_TAGS_COMPLETE) {
-            return {
-                tags: response.data.result.tags.slice(0, 3),
-                tag_types: response.data.result.types.slice(0, 3),
-                tag_anchors: response.data.result.anchors.slice(0, 3)
-            };
-        }
-        throw new Error('Unexpected response type');
-    } catch (error) {
-        console.error('Error getting tag recommendations:', error);
-        return getDefaultTags(story);
-    }
 }
 
 init();
