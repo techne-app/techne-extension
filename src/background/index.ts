@@ -3,6 +3,7 @@ import { rankTagsBySimilarity, computeTensorSimilarity } from "./personalize";
 import { contextDb } from "./contextDb";
 import * as ort from 'onnxruntime-web';
 import './webllm';
+import { isFeatureEnabled } from '../utils/featureFlags';
 
 import { 
   MessageType, 
@@ -41,7 +42,24 @@ export function registerPersonalizeMessageListener() {
       (async function () {
           try {
               if (message.type === MessageType.RANK_TAGS) {
-                  // Validate input
+                  // Check if personalization is enabled
+                  if (!isFeatureEnabled('tag_personalization')) {
+                      // If personalization is disabled, return the original tags without ranking
+                      const { storyTags, tagTypes, tagAnchors } = message.data;
+                      sendResponse({ 
+                          type: MessageType.RANK_TAGS_COMPLETE, 
+                          data: { 
+                              result: {
+                                  tags: storyTags,
+                                  types: tagTypes,
+                                  anchors: tagAnchors
+                              }
+                          }
+                      });
+                      return;
+                  }
+                  
+                  // Personalization is enabled, continue with existing logic
                   const { storyTags, tagTypes, tagAnchors } = message.data;
                   if (storyTags.length !== tagTypes.length || storyTags.length !== tagAnchors.length) {
                       throw new Error("Input arrays must all have the same length");
@@ -96,7 +114,7 @@ export function registerPersonalizeMessageListener() {
               } else {
                   sendResponse({ success: false, error: `Unknown type: ${message.type}` });
               }
-          } catch (error: unknown) {
+          } catch (error) {
               console.error('Error in background script:', error);
               sendResponse({ 
                   success: false, 

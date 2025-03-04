@@ -1,8 +1,7 @@
 import { CONFIG } from '../../config';
 import { fetchTags, addStoryTags } from '../../utils/tag-utils';
 import { StoryData } from '../../types';
-import { isFeatureEnabled } from '../../utils/featureFlags';
-import { selectRelevantTags, getDefaultTags } from '../../utils/personalization-utils';
+import { selectRelevantTags } from '../../utils/personalization-utils';
 
 async function init(): Promise<void> {
     try {
@@ -21,13 +20,8 @@ async function init(): Promise<void> {
         );
         console.log('Techne: Fetched story tags:', data);
 
-        let tagSelector;
-
-        if (isFeatureEnabled('tag_personalization')) {
-            tagSelector = selectRelevantTags;
-        } else{
-            tagSelector = getDefaultTags;
-        }
+        // Always use selectRelevantTags - the background script will handle the feature flag check
+        const tagSelector = selectRelevantTags;
 
         console.log('Techne: Starting tag processing for stories:', data.length);
 
