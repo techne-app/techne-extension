@@ -6,6 +6,7 @@ import { Search } from '../types/search';
 class ContextDB extends Dexie {
   tags: Dexie.Table<Tag, number>;
   searches: Dexie.Table<Search, number>;
+  settings: Dexie.Table<UserSetting, string>;
 
   constructor() {
     super('ContextDB');
@@ -13,12 +14,14 @@ class ContextDB extends Dexie {
     // Define tables and their primary keys and indexes
     this.version(1).stores({
       tags: '++id, tag, timestamp, type',
-      searches: '++id, query, timestamp'
+      searches: '++id, query, timestamp',
+      settings: 'key, timestamp'
     });
     
     // TypeScript type binding
     this.tags = this.table('tags');
     this.searches = this.table('searches');
+    this.settings = this.table('settings');
   }
 
   // Tag-related methods
@@ -70,7 +73,49 @@ class ContextDB extends Dexie {
       .limit(k)
       .toArray();
   }
+
+  // Settings-related methods
+  async getSetting(key: string): Promise<UserSetting | undefined> {
+    return await this.settings.get(key);
+  }
+
+  async getSettingValue<T>(key: string, defaultValue: T): Promise<T> {
+    const setting = await this.getSetting(key);
+    return setting ? setting.value : defaultValue;
+  }
+
+  async saveSetting(key: string, value: any): Promise<void> {
+    await this.settings.put({
+      key,
+      value,
+      timestamp: Date.now()
+    });
+  }
+
+  async getAllSettings(): Promise<UserSetting[]> {
+    return await this.settings.toArray();
+  }
+
+  async getRecentSettings(k: number): Promise<UserSetting[]> {
+    return await this.settings
+      .orderBy('timestamp')
+      .reverse()
+      .limit(k)
+      .toArray();
+  }
 }
+
+// Define the UserSetting interface
+export interface UserSetting {
+  key: string;
+  value: any;
+  timestamp: number;
+}
+
+// Define setting keys as constants
+export const SettingKeys = {
+  PERSONALIZATION_ENABLED: 'personalization_enabled'
+};
 
 export const contextDb = new ContextDB();
 export type { Tag, Search }; 

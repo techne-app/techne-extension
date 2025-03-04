@@ -3,7 +3,7 @@ import { rankTagsBySimilarity, computeTensorSimilarity } from "./personalize";
 import { contextDb } from "./contextDb";
 import * as ort from 'onnxruntime-web';
 import './webllm';
-import { isFeatureEnabled } from '../utils/featureFlags';
+import { isPersonalizationEnabled } from '../utils/featureFlags';
 
 import { 
   MessageType, 
@@ -42,8 +42,10 @@ export function registerPersonalizeMessageListener() {
       (async function () {
           try {
               if (message.type === MessageType.RANK_TAGS) {
-                  // Check if personalization is enabled
-                  if (!isFeatureEnabled('tag_personalization')) {
+                  // Check if personalization is enabled (both feature flag and user setting)
+                  const personalizationEnabled = await isPersonalizationEnabled();
+                  
+                  if (!personalizationEnabled) {
                       // If personalization is disabled, return the original tags without ranking
                       const { storyTags, tagTypes, tagAnchors } = message.data;
                       sendResponse({ 
