@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { tagDb, type Tag } from '../../background/db';
+import { contextDb, type Tag } from '../../background/contextDb';
 import { MessageType, ExtensionResponse } from '../../types/messages';
 
 export const TagViewer: React.FC = () => {
@@ -10,7 +10,7 @@ export const TagViewer: React.FC = () => {
   // Load tags function
   const loadTags = async () => {
     try {
-      const records = await tagDb.getAllTags();
+      const records = await contextDb.getAllTags();
       setTags(records);
     } catch (err) {
       console.error('Failed to load tags:', err);
@@ -23,7 +23,7 @@ export const TagViewer: React.FC = () => {
   // Handle clear all tags
   const handleClearAll = async () => {
     try {
-      await tagDb.clearTags();
+      await contextDb.clearTags();
       setTags([]);
     } catch (err) {
       console.error('Failed to clear tags:', err);

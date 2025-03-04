@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { searchDb, type Search } from '../../background/searchDb';
+import { contextDb, type Search } from '../../background/contextDb';
 import { MessageType } from '../../types/messages';
 
 export const SearchHistory: React.FC = () => {
@@ -10,7 +10,7 @@ export const SearchHistory: React.FC = () => {
   // Load searches function
   const loadSearches = async () => {
     try {
-      const records = await searchDb.getRecentSearches(10); // Get the 10 most recent searches
+      const records = await contextDb.getRecentSearches(10); // Get the 10 most recent searches
       setSearches(records);
     } catch (err) {
       console.error('Failed to load searches:', err);
@@ -23,7 +23,7 @@ export const SearchHistory: React.FC = () => {
   // Handle clear all searches
   const handleClearAll = async () => {
     try {
-      await searchDb.clearSearches();
+      await contextDb.clearSearches();
       setSearches([]);
     } catch (err) {
       console.error('Failed to clear searches:', err);

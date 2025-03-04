@@ -1,7 +1,6 @@
 import { embed_tags } from "./embed.js";
 import { rankTagsBySimilarity, computeTensorSimilarity } from "./personalize";
-import { tagDb } from "./db";
-import { searchDb } from "./searchDb";
+import { contextDb } from "./contextDb";
 import * as ort from 'onnxruntime-web';
 import './webllm';
 
@@ -49,11 +48,11 @@ export function registerPersonalizeMessageListener() {
                   }
               
                   // Get recent tags from the database
-                  const recentTags = await tagDb.getRecentTags(10);
+                  const recentTags = await contextDb.getRecentTags(10);
                   const recentTagTexts = recentTags.map(tag => tag.tag || '').filter(tag => tag !== '');
                   
                   // Get recent searches from the database
-                  const recentSearches = await searchDb.getRecentSearches(10);
+                  const recentSearches = await contextDb.getRecentSearches(10);
                   const recentSearchTexts = recentSearches.map(search => search.query).filter(query => query !== '');
                   
                   // Combine both lists into a single list of historical texts
@@ -122,7 +121,7 @@ export function registerTagMessageListener() {
     if (message.type === MessageType.NEW_TAG) {
       try {
         console.log('NEW_TAG received:', message.data);
-        tagDb.storeTag(
+        contextDb.storeTag(
           message.data.tag, 
           message.data.type,
           message.data.anchor
@@ -231,7 +230,7 @@ export function registerSearchMessageListener() {
     if (message.type === MessageType.NEW_SEARCH) {
       try {
         console.log('NEW_SEARCH received:', message.data);
-        searchDb.storeSearch(message.data.query)
+        contextDb.storeSearch(message.data.query)
           .then(() => {
             console.log('Search stored successfully, notifying popup');
             // Send message to all extension pages
