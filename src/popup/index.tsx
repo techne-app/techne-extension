@@ -4,6 +4,7 @@ import { TagViewer } from './components/TagViewer';
 import { TagMatcher } from './components/TagMatcher';
 import { ChatInterface } from './components/ChatInterface';
 import { SearchHistory } from './components/SearchHistory';
+import { Settings } from './components/Settings';
 import { isFeatureEnabled } from '../utils/featureFlags';
 
 console.log("Popup script starting...");
@@ -16,6 +17,11 @@ if (container) {
   console.log("Root created, rendering components...");
   root.render(
     <div className="min-h-screen flex flex-col h-full text-base">
+      {/* Header with Settings */}
+      <div className="flex justify-end p-2 border-b">
+        <Settings />
+      </div>
+      
       <div className="flex flex-row flex-grow">
         <div className="w-1/2 border-r flex flex-col flex-grow">
           <div className="flex-1 border-b overflow-auto p-4">
