@@ -1,10 +1,13 @@
 {
   "name": "techne-extension",
-  "version": "1.7.1",
+  "version": "1.7.2",
   "description": "An extension that helps navigate Hacker News with AI-generated tags using Techne.",
   "scripts": {
     "build": "webpack",
-    "dev": "webpack --watch"
+    "dev": "webpack --watch",
+    "version:patch": "node scripts/bump-version.js patch",
+    "version:minor": "node scripts/bump-version.js minor",
+    "version:major": "node scripts/bump-version.js major"
   },
   "type": "module",
   "author": "Hugging Face",
