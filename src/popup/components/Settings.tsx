@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { contextDb, SettingKeys } from '../../background/contextDb';
 
 export const Settings: React.FC = () => {
   const [isPersonalizationEnabled, setIsPersonalizationEnabled] = useState<boolean>(false);
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
+  const settingsRef = useRef<HTMLDivElement>(null);
 
   // Load current settings when component mounts
   useEffect(() => {
@@ -22,6 +23,27 @@ export const Settings: React.FC = () => {
 
     loadSettings();
   }, []);
+
+  // Add click outside listener
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (isOpen && 
+          settingsRef.current && 
+          !settingsRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    // Add event listener when panel is open
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    // Clean up event listener
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen]);
 
   // Toggle settings panel
   const togglePanel = () => {
@@ -47,7 +69,7 @@ export const Settings: React.FC = () => {
   };
 
   return (
-    <div className="relative">
+    <div className="relative" ref={settingsRef}>
       {/* Settings icon button */}
       <button 
         onClick={togglePanel}
