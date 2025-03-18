@@ -71,7 +71,16 @@ export function addCommentTag(element: HTMLElement | null, tags: Tag[], isThread
     tags.forEach(tag => {
         const tagElement = document.createElement('span');
         tagElement.className = `techne-tag ${tag.type}`;
-        Object.assign(tagElement.style, CONFIG.STYLES.COMMENT_TAG);
+        // Use appropriate style based on tag type
+        const style = tag.type === 'expertise' 
+            ? CONFIG.STYLES.EXPERTISE_TAG 
+            : CONFIG.STYLES.TOPIC_TAG;
+        Object.assign(tagElement.style, {
+            ...style,
+            padding: '1px 3px',
+            borderRadius: '2px',
+            marginLeft: '4px'
+        });
         tagElement.textContent = tag.tag || '';
         comheadElement.appendChild(tagElement);
     });

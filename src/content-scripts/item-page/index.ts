@@ -69,22 +69,8 @@ async function init(): Promise<void> {
                 }
             });
         }
-
-        if (commentIds.length) {
-            const commentData = await fetchTags<CommentData>(CONFIG.ENDPOINTS.COMMENT_TAGS, commentIds, 'comment_ids');
-            commentData.forEach(comment => {
-                const element = document.getElementById(String(comment.id));
-                if (element && comment.tags) {
-                    const tagObjects: Tag[] = comment.tags.slice(0, 1).map(tag => ({
-                        tag: tag,
-                        type: 'topic'
-                    }));
-                    addCommentTag(element, tagObjects, false);
-                }
-            });
-        }
     } catch (error) {
-        console.error('Techne: Error in item page initialization:', error);
+        console.error("Techne: Error fetching tags:", error);
     }
 }
 
