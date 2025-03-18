@@ -10,6 +10,7 @@ export interface StoryData {
 export interface ThreadData {
     id: number;
     tags: string[];
+    tag_types: string[];
 }
 
 export interface CommentData {

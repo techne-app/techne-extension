@@ -60,12 +60,32 @@ async function init(): Promise<void> {
             const threadData = await fetchTags<ThreadData>(CONFIG.ENDPOINTS.THREAD_TAGS, threadIds, 'thread_ids');
             threadData.forEach(thread => {
                 const element = document.getElementById(String(thread.id));
-                if (element && thread.tags) {
-                    const tagObjects: Tag[] = thread.tags.slice(0, 2).map(tag => ({
-                        tag: tag,
-                        type: 'topic'
-                    }));
-                    addCommentTag(element, tagObjects, true);
+                if (element && thread.tags && thread.tag_types) {
+                    // Find thread category and theme tags
+                    const categoryIndex = thread.tag_types.findIndex(type => type === 'thread_category');
+                    const themeIndex = thread.tag_types.findIndex(type => type === 'thread_theme');
+                    
+                    const tagObjects: Tag[] = [];
+                    
+                    // Add thread category tag first if found
+                    if (categoryIndex !== -1) {
+                        tagObjects.push({
+                            tag: thread.tags[categoryIndex],
+                            type: 'topic'
+                        });
+                    }
+                    
+                    // Add thread theme tag second if found
+                    if (themeIndex !== -1) {
+                        tagObjects.push({
+                            tag: thread.tags[themeIndex],
+                            type: 'topic'
+                        });
+                    }
+                    
+                    if (tagObjects.length > 0) {
+                        addCommentTag(element, tagObjects, true);
+                    }
                 }
             });
         }
