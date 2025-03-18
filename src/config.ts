@@ -11,12 +11,8 @@ export const CONFIG = {
             color: 'blue', 
             textDecoration: 'none' 
         },
-        EXPERTISE_TAG: {
-            backgroundColor: '#4A90E2',
-            color: 'white'
-        },
         TOPIC_TAG: {
-            backgroundColor: '#50B83C',
+            backgroundColor: '#4A90E2',
             color: 'white'
         }
     },
