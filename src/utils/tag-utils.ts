@@ -71,12 +71,9 @@ export function addCommentTag(element: HTMLElement | null, tags: Tag[], isThread
     tags.forEach(tag => {
         const tagElement = document.createElement('span');
         tagElement.className = `techne-tag ${tag.type}`;
-        // Use appropriate style based on tag type
-        const style = tag.type === 'expertise' 
-            ? CONFIG.STYLES.EXPERTISE_TAG 
-            : CONFIG.STYLES.TOPIC_TAG;
         Object.assign(tagElement.style, {
-            ...style,
+            backgroundColor: '#FF6600',
+            color: 'black',
             padding: '1px 3px',
             borderRadius: '2px',
             marginLeft: '4px'
