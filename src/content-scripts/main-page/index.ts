@@ -1,5 +1,5 @@
 import { CONFIG } from '../../config';
-import { fetchTags, addStoryTags } from '../../utils/tag-utils';
+import { fetchStoryTags, addStoryTags } from '../../utils/tag-utils';
 import { StoryData } from '../../types';
 import { selectRelevantTags } from '../../utils/personalization-utils';
 
@@ -12,9 +12,9 @@ async function init(): Promise<void> {
         }
 
         const storySubtextMap = mapStorySubtextElements();
-        const data = await fetchTags<StoryData>(CONFIG.ENDPOINTS.STORY_TAGS, 
-            storyIds, 
-            'story_ids', 
+        const data = await fetchStoryTags(
+            storyIds,
+            undefined,
             false,
             ['thread_theme']
         );

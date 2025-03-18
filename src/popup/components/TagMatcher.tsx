@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { MessageType, TagMatchResponse, NewSearchRequest, NewTagRequest } from '../../types/messages';
 import { CONFIG } from '../../config';
 import { StoryData } from '../../types';
-import { fetchTags } from '../../utils/tag-utils';
+import { fetchStoryTags } from '../../utils/tag-utils';
 
 interface TagMatch {
   tag: string;
@@ -75,12 +75,11 @@ export const TagMatcher: React.FC = () => {
       console.log('Fetched story IDs:', storyIds);
       
       // Now fetch tags for these stories using your existing utility
-      const data = await fetchTags<StoryData>(
-        CONFIG.ENDPOINTS.STORY_TAGS, 
-        storyIds, 
-        'story_ids',
+      const data = await fetchStoryTags(
+        storyIds,
+        undefined,
         false,
-        ['thread_theme']
+        undefined
       );
       
       console.log('API response:', data);

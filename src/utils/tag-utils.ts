@@ -1,30 +1,45 @@
 import { CONFIG } from '../config';
-import { StoryData, Tag } from '../types';
+import { StoryData, ThreadData, Tag } from '../types';
 import { MessageType, NewTagRequest } from '../types/messages';
 
-export async function fetchTags<T>(
-    endpoint: string, 
-    ids: number[], 
-    idField = 'ids',
-    limitTagsPerStory = false,
+export async function fetchStoryTags(
+    storyIds: number[],
+    maxTagsPerStory?: number,
+    limitTagsPerStory?: boolean,
     tagTypes?: string[]
-): Promise<T[]> {
+): Promise<StoryData[]> {
     try {
-        const response = await fetch(`${CONFIG.BASE_URL}${endpoint}`, {
+        const response = await fetch(`${CONFIG.BASE_URL}${CONFIG.ENDPOINTS.STORY_TAGS}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
-                [idField]: ids,
+                story_ids: storyIds,
+                max_tags_per_story: maxTagsPerStory,
                 limit_tags_per_story: limitTagsPerStory,
                 tag_types: tagTypes
             })
         });
         return await response.json();
     } catch (error) {
-        console.error(`Error fetching tags from ${endpoint}:`, error);
+        console.error('Error fetching story tags:', error);
         return [];
     }
-} 
+}
+
+export async function fetchThreadTags(threadIds: number[]): Promise<ThreadData[]> {
+    try {
+        const response = await fetch(`${CONFIG.BASE_URL}${CONFIG.ENDPOINTS.THREAD_TAGS}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ thread_ids: threadIds })
+        });
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching thread tags:', error);
+        return [];
+    }
+}
+
 export function addStoryTags(subtextElement: Element, storyData: StoryData): void {
     if (!subtextElement || !storyData?.tags?.length || !storyData?.tag_anchors?.length) return;
 
@@ -58,7 +73,7 @@ export function addStoryTags(subtextElement: Element, storyData: StoryData): voi
     subtextElement.appendChild(tagsContainer);
 }
 
-export function addCommentTag(element: HTMLElement | null, tags: Tag[], isThread: boolean): void {
+export function addThreadTag(element: HTMLElement | null, tags: Tag[], isThread: boolean): void {
     if (!element || !tags?.length) return;
     
     const comheadElement = element.querySelector('.comhead');

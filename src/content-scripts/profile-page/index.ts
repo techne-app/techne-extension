@@ -1,5 +1,5 @@
 import { CONFIG } from '../../config';
-import { fetchTags, addCommentTag } from '../../utils/tag-utils';
+import { fetchThreadTags, addThreadTag } from '../../utils/tag-utils';
 import { ThreadData, Tag } from '../../types';
 
 async function init(): Promise<void> {
@@ -17,14 +17,7 @@ async function init(): Promise<void> {
 
     if (threadIds.length) {
         try {
-            const threadData = await fetchTags<ThreadData>(
-                CONFIG.ENDPOINTS.THREAD_TAGS, 
-                threadIds, 
-                'thread_ids',
-                false,
-                ['expertise', 'topic']
-            );
-            
+            const threadData = await fetchThreadTags(threadIds);
             console.log("Techne: Received tag data:", threadData);
 
             threadData.forEach(thread => {
@@ -53,7 +46,7 @@ async function init(): Promise<void> {
                     }
                     
                     if (tagObjects.length > 0) {
-                        addCommentTag(element, tagObjects, true);
+                        addThreadTag(element, tagObjects, true);
                     }
                 }
             });
