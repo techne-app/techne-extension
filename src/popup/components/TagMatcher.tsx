@@ -3,6 +3,7 @@ import { MessageType, TagMatchResponse, NewSearchRequest, NewTagRequest } from '
 import { CONFIG } from '../../config';
 import { StoryData } from '../../types';
 import { fetchStoryTags } from '../../utils/tag-utils';
+import { ThreadCard } from './ThreadCard';
 
 interface TagMatch {
   tag: string;
@@ -130,14 +131,8 @@ export const TagMatcher: React.FC = () => {
     }
   };
 
-  // Format score as percentage
-  const formatScore = (score: number): string => {
-    return `${Math.round(score * 100)}%`;
-  };
-
   // Handle thread link click
   const handleThreadClick = (match: TagMatch) => {
-    // Store the tag in TagDB when a user clicks on "Go to thread"
     chrome.runtime.sendMessage({
       type: MessageType.NEW_TAG,
       data: {
@@ -178,28 +173,14 @@ export const TagMatcher: React.FC = () => {
           <h3 className="font-medium mb-2">Results:</h3>
           <div className="space-y-2">
             {matches.map((match, index) => (
-              <div key={index} className="border p-3 rounded">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <span className="font-medium">{match.tag}</span>
-                    <div className="text-sm text-gray-500">
-                      Type: {match.type}
-                    </div>
-                  </div>
-                  <div className="flex flex-col items-end">
-                    <span className="text-green-600 font-medium">{formatScore(match.score)} match</span>
-                    <a 
-                      href={match.anchor} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="text-blue-500 hover:underline text-sm"
-                      onClick={() => handleThreadClick(match)}
-                    >
-                      Go to thread
-                    </a>
-                  </div>
-                </div>
-              </div>
+              <ThreadCard
+                key={index}
+                tag={match.tag}
+                type={match.type}
+                anchor={match.anchor}
+                score={match.score}
+                onThreadClick={() => handleThreadClick(match)}
+              />
             ))}
           </div>
         </div>

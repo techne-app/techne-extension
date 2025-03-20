@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { contextDb, type Tag } from '../../background/contextDb';
-import { MessageType, ExtensionResponse } from '../../types/messages';
+import { MessageType } from '../../types/messages';
+import { ThreadCard } from './ThreadCard';
 
 export const TagViewer: React.FC = () => {
   const [tags, setTags] = useState<Tag[]>([]);
@@ -11,7 +12,11 @@ export const TagViewer: React.FC = () => {
   const loadTags = async () => {
     try {
       const records = await contextDb.getAllTags();
-      setTags(records);
+      // Filter out any records with undefined required fields
+      const validRecords = records.filter(
+        record => record.tag && record.type && record.anchor
+      );
+      setTags(validRecords);
     } catch (err) {
       console.error('Failed to load tags:', err);
       setError(err instanceof Error ? err.message : 'Unknown error');
@@ -53,11 +58,6 @@ export const TagViewer: React.FC = () => {
     };
   }, []);
 
-  // Format timestamp to locale string
-  const formatDate = (timestamp: number | undefined): string => {
-    return timestamp ? new Date(timestamp).toLocaleString() : 'Unknown date';
-  };
-
   // Loading state
   if (loading) {
     return (
@@ -92,21 +92,13 @@ export const TagViewer: React.FC = () => {
       </div>
       <div className="space-y-2">
         {tags.map((tag) => (
-          <div key={tag.id} className="border p-3 rounded">
-            <div className="font-medium">{tag.tag}</div>
-            <div className="text-sm text-gray-500">
-              Visited: {formatDate(tag.timestamp)}
-              <br />
-              <a 
-                href={tag.anchor} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-blue-500 hover:underline"
-              >
-                Go to thread
-              </a>
-            </div>
-          </div>
+          <ThreadCard
+            key={tag.id}
+            tag={tag.tag || ''}
+            type={tag.type || ''}
+            anchor={tag.anchor || ''}
+            timestamp={tag.timestamp}
+          />
         ))}
       </div>
     </div>
