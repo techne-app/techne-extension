@@ -33,7 +33,7 @@ async function init(): Promise<void> {
                     if (categoryIndex !== -1) {
                         tagObjects.push({
                             tag: thread.tags[categoryIndex],
-                            type: 'topic'
+                            type: thread.tag_types[categoryIndex]
                         });
                     }
                     
@@ -41,7 +41,7 @@ async function init(): Promise<void> {
                     if (themeIndex !== -1) {
                         tagObjects.push({
                             tag: thread.tags[themeIndex],
-                            type: 'topic'
+                            type: thread.tag_types[themeIndex]
                         });
                     }
                     
