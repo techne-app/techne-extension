@@ -3,7 +3,7 @@ import { contextDb, type Tag } from '../../background/contextDb';
 import { MessageType } from '../../types/messages';
 import { ThreadCard } from './ThreadCard';
 
-export const TagViewer: React.FC = () => {
+export const ThreadHistory: React.FC = () => {
   const [tags, setTags] = useState<Tag[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -42,7 +42,7 @@ export const TagViewer: React.FC = () => {
 
     // Define the message listener function
     const handleMessage = (message: any) => {
-      console.log('TagViewer received message:', message);
+      console.log('ThreadHistory received message:', message);
       if (message.type === MessageType.TAGS_UPDATED) {
         console.log('Reloading tags due to TAGS_UPDATED message');
         loadTags();

@@ -1,6 +1,6 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import { TagViewer } from './components/TagViewer';
+import { ThreadHistory } from './components/ThreadHistory';
 import { ThreadSearch } from './components/ThreadSearch';
 import { ChatInterface } from './components/ChatInterface';
 import { SearchHistory } from './components/SearchHistory';
@@ -25,7 +25,7 @@ if (container) {
       <div className="flex flex-row flex-grow">
         <div className="w-1/2 border-r flex flex-col flex-grow">
           <div className="flex-1 border-b overflow-auto p-4">
-            <TagViewer />
+            <ThreadHistory />
           </div>
           {isFeatureEnabled('tag_search') && (
             <div className="flex-1 overflow-auto p-4">
