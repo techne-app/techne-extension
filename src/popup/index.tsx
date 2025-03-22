@@ -1,7 +1,7 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { TagViewer } from './components/TagViewer';
-import { TagMatcher } from './components/TagMatcher';
+import { ThreadSearch } from './components/ThreadSearch';
 import { ChatInterface } from './components/ChatInterface';
 import { SearchHistory } from './components/SearchHistory';
 import { Settings } from './components/Settings';
@@ -36,7 +36,7 @@ if (container) {
         <div className="w-1/2 flex flex-col flex-grow">
           {isFeatureEnabled('tag_search') && (
             <div className="flex-1 border-b p-4">
-              <TagMatcher />
+              <ThreadSearch />
             </div>
           )}
           {isFeatureEnabled('chat_interface') && (

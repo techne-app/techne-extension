@@ -60,7 +60,7 @@ export const SearchHistory: React.FC = () => {
 
   // Handle search click - populate the search box
   const handleSearchClick = (query: string) => {
-    // Send a message to TagMatcher to update its input
+    // Send a message to ThreadSearch to update its input
     chrome.runtime.sendMessage({
       type: 'UPDATE_SEARCH_INPUT',
       data: { query }
