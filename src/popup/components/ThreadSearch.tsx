@@ -180,8 +180,6 @@ export const ThreadSearch: React.FC = () => {
     } catch (error) {
       console.error('Error during search:', error);
       setError(error instanceof Error ? error.message : 'Search failed');
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -225,7 +223,7 @@ export const ThreadSearch: React.FC = () => {
       <h2 className="text-xl font-bold mb-4">Search Threads</h2>
       
       <div className="relative">
-        <div className="flex mb-2">
+        <div className="flex mb-2 gap-3">
           <input
             ref={inputRef}
             type="text"
@@ -238,12 +236,12 @@ export const ThreadSearch: React.FC = () => {
             aria-autocomplete="list"
             aria-controls="search-suggestions"
             role="combobox"
-            className="flex-grow p-2 border rounded-l focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="flex-1 p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           <button
             onClick={() => executeSearch(inputValue)}
             disabled={loading}
-            className="px-4 py-2 bg-blue-500 text-white rounded-r hover:bg-blue-600 disabled:bg-blue-300"
+            className="min-w-[100px] px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-blue-300"
           >
             {loading ? 'Searching...' : 'Search'}
           </button>
