@@ -2,8 +2,8 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { ThreadHistory } from './components/ThreadHistory';
 import { ThreadSearch } from './components/ThreadSearch';
+import { SearchArchive } from './components/SearchHistory';
 import { ChatInterface } from './components/ChatInterface';
-import { SearchHistory } from './components/SearchHistory';
 import { Settings } from './components/Settings';
 import { isFeatureEnabled } from '../utils/featureFlags';
 
@@ -29,13 +29,13 @@ if (container) {
           </div>
           {isFeatureEnabled('tag_search') && (
             <div className="flex-1 overflow-auto p-4">
-              <SearchHistory />
+              <SearchArchive />
             </div>
           )}
         </div>
         <div className="w-1/2 flex flex-col flex-grow">
           {isFeatureEnabled('tag_search') && (
-            <div className="flex-1 border-b p-4">
+            <div className="flex-1 p-4">
               <ThreadSearch />
             </div>
           )}
