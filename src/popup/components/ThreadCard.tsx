@@ -29,12 +29,9 @@ export const ThreadCard: React.FC<ThreadCardProps> = ({
 
   return (
     <div className="border p-3 rounded">
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-start">
         <div>
           <span className="font-medium">{tag}</span>
-          <div className="text-sm text-gray-500">
-            Type: {type}
-          </div>
           {timestamp && (
             <div className="text-sm text-gray-500">
               Visited: {formatDate(timestamp)}
