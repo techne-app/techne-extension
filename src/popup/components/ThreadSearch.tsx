@@ -80,7 +80,7 @@ export const ThreadSearch: React.FC = () => {
         storyIds,
         undefined,
         false,
-        undefined
+        ['thread_theme']
       );
       
       console.log('API response:', data);
