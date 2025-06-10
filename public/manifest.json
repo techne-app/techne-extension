@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Techne",
-  "version": "1.7.6",
+  "version": "1.7.7",
   "description": "An extension that helps navigate Hacker News with AI-generated tags using Techne.",
   "permissions": [
     "tabs"
@@ -15,6 +15,11 @@
       "matches": [
         "https://news.ycombinator.com/",
         "https://news.ycombinator.com/news",
+        "https://news.ycombinator.com/newest",
+        "https://news.ycombinator.com/front",
+        "https://news.ycombinator.com/ask",
+        "https://news.ycombinator.com/show",
+        "https://news.ycombinator.com/news?p=*",
         "https://news.ycombinator.com/?p=*"
       ],
       "js": ["content-scripts/main-page/index.js"]
