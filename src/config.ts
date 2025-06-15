@@ -1,7 +1,7 @@
 export const CONFIG = {
     BASE_URL: process.env.NODE_ENV === 'development' 
-        ? "https://techne.app"
-        : "https://techne.app",
+        ? "https://techne-pipeline-func-prod.azurewebsites.net/api"
+        : "https://techne-pipeline-func-prod.azurewebsites.net/api",
     ENDPOINTS: {
         STORY_TAGS: "/story-tags/",
         THREAD_TAGS: "/thread-tags/"
