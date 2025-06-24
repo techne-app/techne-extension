@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Techne",
-  "version": "1.7.9",
+  "version": "1.8.0",
   "description": "An extension that helps navigate Hacker News with AI-generated tags using Techne.",
   "permissions": [
     "tabs"
