@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Techne",
+  "name": "Techne – Personalized insights from Hacker News",
   "version": "1.8.0",
-  "description": "An extension that helps navigate Hacker News with AI-generated tags using Techne.",
+  "description": "Understand nuanced tech discussions. Discover relevant conversations based on context, not just keywords.",
   "permissions": [
     "tabs"
   ],
