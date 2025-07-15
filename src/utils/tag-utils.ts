@@ -43,15 +43,43 @@ export async function fetchThreadTags(threadIds: number[]): Promise<ThreadData[]
 export function addStoryTags(subtextElement: Element, storyData: StoryData): void {
     if (!subtextElement || !storyData?.tags?.length || !storyData?.tag_anchors?.length) return;
 
+    // Add line break
+    const lineBreak = document.createElement('br');
+    subtextElement.appendChild(lineBreak);
+
+    // Add "Threads:" prefix with muted styling
+    const threadsPrefix = document.createElement('span');
+    threadsPrefix.textContent = 'Threads: ';
+    threadsPrefix.style.color = '#828282'; // HN's grey color
+    subtextElement.appendChild(threadsPrefix);
+
     const tagsContainer = document.createElement('span');
     tagsContainer.style.color = CONFIG.STYLES.STORY_TAG.color;
     
     const tagCount = Math.min(storyData.tags.length, CONFIG.MAX_STORY_TAGS);
     for (let i = 0; i < tagCount; i++) {
+        // Add pipe separator before tag (except for first tag)
+        if (i > 0) {
+            const pipeElement = document.createElement('span');
+            pipeElement.textContent = ' | ';
+            pipeElement.style.color = '#828282'; // Match HN's grey metadata style
+            tagsContainer.appendChild(pipeElement);
+        }
+
         const anchorElement = document.createElement('a');
-        Object.assign(anchorElement.style, CONFIG.STYLES.STORY_TAG);
+        // Style like HN links - grey with underline on hover
+        anchorElement.style.color = '#828282';
+        anchorElement.style.textDecoration = 'none';
         anchorElement.href = storyData.tag_anchors[i];
-        anchorElement.textContent = ' | ' + storyData.tags[i];
+        anchorElement.textContent = storyData.tags[i];
+        
+        // Add hover effect
+        anchorElement.addEventListener('mouseenter', () => {
+            anchorElement.style.textDecoration = 'underline';
+        });
+        anchorElement.addEventListener('mouseleave', () => {
+            anchorElement.style.textDecoration = 'none';
+        });
         
         // Add click handler
         anchorElement.addEventListener('click', (e) => {
