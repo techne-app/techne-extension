@@ -114,7 +114,8 @@ export interface UserSetting {
 
 // Define setting keys as constants
 export const SettingKeys = {
-  PERSONALIZATION_ENABLED: 'personalization_enabled'
+  PERSONALIZATION_ENABLED: 'personalization_enabled',
+  CHAT_INTERFACE_ENABLED: 'chat_interface_enabled'
 };
 
 export const contextDb = new ContextDB();

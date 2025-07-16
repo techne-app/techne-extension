@@ -1,5 +1,5 @@
 {
     "tag_personalization": true,
-    "chat_interface": false,
+    "chat_interface": true,
     "tag_search": true
 }

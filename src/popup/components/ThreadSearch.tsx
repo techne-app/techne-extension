@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef, KeyboardEvent } from 'react';
-import { MessageType, TagMatchResponse, NewSearchRequest, NewTagRequest } from '../../types/messages';
+import { MessageType, TagMatchResponse, NewSearchRequest } from '../../types/messages';
 import { contextDb, type Search } from '../../background/contextDb';
-import { ThreadCard } from './ThreadCard';
 import { fetchStoryTags } from '../../utils/tag-utils';
 
 interface TagMatch {
@@ -11,8 +10,18 @@ interface TagMatch {
   score: number;
 }
 
-export const ThreadSearch: React.FC = () => {
-  const [inputValue, setInputValue] = useState('');
+interface ThreadSearchProps {
+  onSearch?: (query: string, results: TagMatch[]) => void;
+  onClear?: () => void;
+  initialQuery?: string;
+}
+
+export const ThreadSearch: React.FC<ThreadSearchProps> = ({ 
+  onSearch, 
+  onClear, 
+  initialQuery = '' 
+}) => {
+  const [inputValue, setInputValue] = useState(initialQuery);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [matches, setMatches] = useState<TagMatch[]>([]);
@@ -183,17 +192,6 @@ export const ThreadSearch: React.FC = () => {
     }
   };
 
-  // Handle thread click
-  const handleThreadClick = (match: TagMatch) => {
-    chrome.runtime.sendMessage({
-      type: MessageType.NEW_TAG,
-      data: {
-        tag: match.tag,
-        type: match.type,
-        anchor: match.anchor
-      }
-    } as NewTagRequest);
-  };
 
   // Load searches on mount and set up listeners
   useEffect(() => {
@@ -206,6 +204,10 @@ export const ThreadSearch: React.FC = () => {
           setError(message.data.error);
         } else {
           setMatches(message.data.matches);
+          // Call onSearch callback if provided
+          if (onSearch) {
+            onSearch(inputValue, message.data.matches);
+          }
         }
       } else if (message.type === MessageType.SEARCHES_UPDATED) {
         loadRecentSearches();
@@ -219,11 +221,9 @@ export const ThreadSearch: React.FC = () => {
   }, []);
 
   return (
-    <div className="p-4">
-      <h2 className="text-xl font-bold mb-4">Search Threads</h2>
-      
+    <div>
       <div className="relative">
-        <div className="flex mb-2 gap-3">
+        <div className="flex mb-2 gap-2">
           <input
             ref={inputRef}
             type="text"
@@ -241,10 +241,28 @@ export const ThreadSearch: React.FC = () => {
           <button
             onClick={() => executeSearch(inputValue)}
             disabled={loading}
-            className="min-w-[100px] px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-blue-300"
+            className="px-4 py-2 text-white rounded disabled:bg-blue-300"
+            style={{ backgroundColor: '#0000ED' }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#0000CC'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#0000ED'}
           >
             {loading ? 'Searching...' : 'Search'}
           </button>
+          {(inputValue || matches.length > 0) && (
+            <button
+              onClick={() => {
+                setInputValue('');
+                setMatches([]);
+                setError(null);
+                if (onClear) {
+                  onClear();
+                }
+              }}
+              className="px-4 py-2 text-gray-500 hover:text-gray-700 border rounded"
+            >
+              Clear
+            </button>
+          )}
         </div>
 
         {/* Autocomplete dropdown */}
@@ -274,24 +292,6 @@ export const ThreadSearch: React.FC = () => {
       
       {error && (
         <div className="text-red-500 mt-2 mb-4">{error}</div>
-      )}
-      
-      {matches.length > 0 && (
-        <div className="mt-4">
-          <h3 className="font-medium mb-2">Results:</h3>
-          <div className="space-y-2">
-            {matches.map((match, index) => (
-              <ThreadCard
-                key={index}
-                tag={match.tag}
-                type={match.type}
-                anchor={match.anchor}
-                score={match.score}
-                onThreadClick={() => handleThreadClick(match)}
-              />
-            ))}
-          </div>
-        </div>
       )}
     </div>
   );

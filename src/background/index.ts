@@ -2,6 +2,7 @@ import { embed_tags } from "./embed.js";
 import { rankTagsBySimilarity, computeTensorSimilarity } from "./personalize";
 import { contextDb } from "./contextDb";
 import * as ort from 'onnxruntime-web';
+import './webllm';
 import { isPersonalizationEnabled } from '../utils/featureFlags';
 
 import { 

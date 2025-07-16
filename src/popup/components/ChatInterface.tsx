@@ -138,11 +138,8 @@ export const ChatInterface: React.FC = () => {
   };
 
   return (
-    <div className="chat-interface mb-8 w-full">
-      <div className="flex justify-center items-center mb-4">
-        <h1 className="text-xl font-bold">Chat with Techne</h1>
-      </div>
-      <div id="loadingContainer" className="h-2 mb-4" />
+    <div className="chat-interface w-full">
+      <div id="loadingContainer" className="h-2 mb-4 w-full" />
       
       {!engine ? (
         <div className="model-selector flex flex-col gap-4 p-4 border rounded mb-4">
@@ -187,7 +184,10 @@ export const ChatInterface: React.FC = () => {
             <button 
               onClick={handleSubmit}
               disabled={isLoading || !message.trim()}
-              className="px-4 py-2 bg-blue-500 text-white rounded disabled:bg-gray-300"
+              className="px-4 py-2 text-white rounded disabled:bg-gray-300"
+              style={{ backgroundColor: '#0000ED' }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#0000CC'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#0000ED'}
             >
               Send
             </button>

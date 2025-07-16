@@ -17,3 +17,22 @@ export async function isPersonalizationEnabled(): Promise<boolean> {
   const userEnabled = await contextDb.getSettingValue(SettingKeys.PERSONALIZATION_ENABLED, false);
   return userEnabled;
 }
+
+export async function isChatInterfaceEnabled(): Promise<boolean> {
+  try {
+    // First check if the feature is globally enabled via feature flags
+    const featureEnabled = isFeatureEnabled('chat_interface');
+    
+    if (!featureEnabled) {
+      return false; // If feature is globally disabled, return false
+    }
+    
+    // If feature is globally enabled, check user preference (default to false)
+    const userEnabled = await contextDb.getSettingValue(SettingKeys.CHAT_INTERFACE_ENABLED, false);
+    return userEnabled;
+  } catch (error) {
+    console.error('Error checking chat interface setting:', error);
+    // Fall back to feature flag on error
+    return isFeatureEnabled('chat_interface');
+  }
+}

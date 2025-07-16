@@ -88,8 +88,8 @@ export const Settings: React.FC = () => {
           <div className="p-4">
             <h3 className="text-lg font-medium text-gray-900 mb-4">Settings</h3>
             
-            <div className="flex items-center justify-between mb-2">
-              <label htmlFor="personalization" className="text-sm text-gray-700">
+            <div className="flex items-center mb-2">
+              <label htmlFor="personalization" className="text-sm text-gray-700 mr-3">
                 Enable Personalization
               </label>
               
