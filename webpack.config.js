@@ -43,6 +43,11 @@ const config = {
     }),
   ],
   module: {
+    parser: {
+      javascript: {
+        importMeta: false,
+      },
+    },
     rules: [
       {
         test: /\.tsx?$/,
