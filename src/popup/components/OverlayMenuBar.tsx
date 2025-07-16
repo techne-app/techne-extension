@@ -114,7 +114,7 @@ export const OverlayMenuBar: React.FC<OverlayMenuBarProps> = ({
       <div 
         className={`
           bg-black bg-opacity-90 text-white px-2 py-1 rounded-full shadow-lg
-          transition-opacity duration-300 ease-in-out
+          transition-opacity duration-1000 ease-in-out
           ${isVisible ? 'opacity-100' : 'opacity-0'}
           ${isVisible ? 'pointer-events-auto' : 'pointer-events-none'}
         `}
