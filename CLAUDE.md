@@ -108,10 +108,8 @@ Build configuration with multiple entry points:
 
 ## Tag System
 The extension supports multiple tag types:
-- `thread_theme`: Discussion themes
-- `thread_category`: Topic categories
-- `story_tag`: Story-level tags
-- `topic_tag`: General topic tags
+- `thread_theme`: Discussion themes (used on main page and search)
+- `thread_category`: Topic categories (used on item and profile pages)
 
 Tags are visually integrated into the HN UI with a maximum of 3 tags per story.
 
