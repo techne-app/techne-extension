@@ -14,7 +14,7 @@ Techne is a sophisticated browser extension that enhances the Hacker News experi
 - **Frontend**: React 19 + TypeScript
 - **Styling**: Tailwind CSS
 - **Build**: Webpack 5 + ts-loader
-- **AI/ML**: Hugging Face Transformers.js, ONNX Runtime Web, WebLLM
+- **AI/ML**: Hugging Face Transformers.js, ONNX Runtime Web
 - **Database**: Dexie.js (IndexedDB wrapper)
 - **Extension**: Chrome Manifest V3
 
@@ -101,7 +101,6 @@ Build configuration with multiple entry points:
 
 ## Key Dependencies
 - `@huggingface/transformers`: AI text embeddings
-- `@mlc-ai/web-llm`: WebLLM for in-browser ML
 - `dexie`: IndexedDB operations
 - `react`: UI framework
 - `downshift`: Autocomplete components
