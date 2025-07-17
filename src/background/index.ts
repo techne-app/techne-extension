@@ -149,10 +149,15 @@ export function registerTagMessageListener() {
           .then(() => {
             console.log('Tag stored successfully, notifying popup');
             // Send message to all extension pages
-            chrome.runtime.sendMessage({
-              type: MessageType.TAGS_UPDATED,
-              data: {}
-            });
+            try {
+              chrome.runtime.sendMessage({
+                type: MessageType.TAGS_UPDATED,
+                data: {}
+              });
+            } catch (error) {
+              // Ignore "Receiving end does not exist" errors - this is expected when popup is closed
+              console.debug('No listeners for TAGS_UPDATED message, this is expected');
+            }
           })
           .catch((error) => {
             console.error('Error storing tag:', error);
@@ -176,13 +181,17 @@ export function registerTagMatchingListener() {
           const { inputText, tags } = message.data;
           
           if (!inputText || !tags || tags.length === 0) {
-            chrome.runtime.sendMessage({
-              type: MessageType.TAG_MATCH_RESPONSE,
-              data: { 
-                matches: [],
-                error: 'Invalid input or no tags available'
-              }
-            });
+            try {
+              chrome.runtime.sendMessage({
+                type: MessageType.TAG_MATCH_RESPONSE,
+                data: { 
+                  matches: [],
+                  error: 'Invalid input or no tags available'
+                }
+              });
+            } catch (error) {
+              console.debug('No listeners for TAG_MATCH_RESPONSE message, this is expected');
+            }
             return;
           }
           
@@ -217,19 +226,27 @@ export function registerTagMatchingListener() {
             .slice(0, 3);
           
           // Send response back to UI
-          chrome.runtime.sendMessage({
-            type: MessageType.TAG_MATCH_RESPONSE,
-            data: { matches: topMatches }
-          });
+          try {
+            chrome.runtime.sendMessage({
+              type: MessageType.TAG_MATCH_RESPONSE,
+              data: { matches: topMatches }
+            });
+          } catch (error) {
+            console.debug('No listeners for TAG_MATCH_RESPONSE message, this is expected');
+          }
         } catch (error) {
           console.error('Error in tag matching:', error);
-          chrome.runtime.sendMessage({
-            type: MessageType.TAG_MATCH_RESPONSE,
-            data: { 
-              matches: [],
-              error: error instanceof Error ? error.message : String(error)
-            }
-          });
+          try {
+            chrome.runtime.sendMessage({
+              type: MessageType.TAG_MATCH_RESPONSE,
+              data: { 
+                matches: [],
+                error: error instanceof Error ? error.message : String(error)
+              }
+            });
+          } catch (msgError) {
+            console.debug('No listeners for TAG_MATCH_RESPONSE message, this is expected');
+          }
         }
       })();
       return true; // Indicates async response
@@ -254,10 +271,15 @@ export function registerSearchMessageListener() {
           .then(() => {
             console.log('Search stored successfully, notifying popup');
             // Send message to all extension pages
-            chrome.runtime.sendMessage({
-              type: MessageType.SEARCHES_UPDATED,
-              data: {}
-            });
+            try {
+              chrome.runtime.sendMessage({
+                type: MessageType.SEARCHES_UPDATED,
+                data: {}
+              });
+            } catch (error) {
+              // Ignore "Receiving end does not exist" errors - this is expected when popup is closed
+              console.debug('No listeners for SEARCHES_UPDATED message, this is expected');
+            }
           })
           .catch((error) => {
             console.error('Error storing search:', error);

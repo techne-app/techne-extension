@@ -132,7 +132,9 @@ export const ThreadSearch: React.FC<ThreadSearchProps> = ({
       chrome.runtime.sendMessage({
         type: MessageType.NEW_SEARCH,
         data: { query }
-      } as NewSearchRequest);
+      } as NewSearchRequest).catch(() => {
+        console.debug('No listeners for NEW_SEARCH message, this is expected');
+      });
 
       // Fetch top story IDs
       const hnApiUrl = "https://hacker-news.firebaseio.com/v0/topstories.json";
@@ -185,6 +187,8 @@ export const ThreadSearch: React.FC<ThreadSearchProps> = ({
           inputText: query,
           tags: formattedTags
         }
+      }).catch(() => {
+        console.debug('No listeners for TAG_MATCH_REQUEST message, this is expected');
       });
     } catch (error) {
       console.error('Error during search:', error);

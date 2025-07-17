@@ -94,7 +94,10 @@ export function addStoryTags(subtextElement: Element, storyData: StoryData): voi
                     anchor: storyData.tag_anchors[i]
                 }
             };
-            chrome.runtime.sendMessage(msg);
+            chrome.runtime.sendMessage(msg).catch((error) => {
+                // Ignore "Receiving end does not exist" errors - this is expected when popup is closed
+                console.debug('No listeners for NEW_TAG message, this is expected');
+            });
             window.open(storyData.tag_anchors[i], '_blank');
         });
         

@@ -6,7 +6,6 @@ import { ActivityPage } from './components/ActivityPage';
 import { ChatPage } from './components/ChatPage';
 import { SettingsPage } from './components/SettingsPage';
 import { isChatInterfaceEnabled } from '../utils/featureFlags';
-import { restoreSearchState } from '../utils/searchStateManager';
 
 console.log("Popup script starting...");
 
@@ -14,20 +13,15 @@ const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>('search');
   const [chatEnabled, setChatEnabled] = useState<boolean>(false);
 
-  // Restore last active tab on startup and check chat interface
+  // Check chat interface on startup
   useEffect(() => {
-    const restoreState = async () => {
-      const searchState = await restoreSearchState();
-      if (searchState && searchState.tab) {
-        setActiveTab(searchState.tab);
-      }
-      
+    const checkChatInterface = async () => {
       // Check if chat interface is enabled
       const chatInterfaceEnabled = await isChatInterfaceEnabled();
       setChatEnabled(chatInterfaceEnabled);
     };
 
-    restoreState();
+    checkChatInterface();
   }, []);
 
   // Render active page component

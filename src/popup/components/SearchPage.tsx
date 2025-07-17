@@ -1,62 +1,27 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { ThreadSearch } from './ThreadSearch';
 import { SearchArchive } from './SearchHistory';
-import { 
-  storeSearchState, 
-  restoreSearchState, 
-  clearSearchState, 
-  formatSearchStateAge,
-  SearchState 
-} from '../../utils/searchStateManager';
 
 export const SearchPage: React.FC = () => {
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [restoredState, setRestoredState] = useState<SearchState | null>(null);
   const [showArchive, setShowArchive] = useState(true);
 
-  // Restore search state on component mount
-  useEffect(() => {
-    const restoreState = async () => {
-      const state = await restoreSearchState();
-      if (state) {
-        setRestoredState(state);
-        setSearchResults(state.results);
-        setSearchQuery(state.query);
-        // Keep archive visible even with restored results
-      }
-    };
-
-    restoreState();
-  }, []);
 
   // Handle new search
   const handleSearch = async (query: string, results: any[]) => {
     setSearchQuery(query);
     setSearchResults(results);
-    setRestoredState(null);
     // Keep archive visible alongside results
-    
-    // Store the new search state
-    await storeSearchState(query, results);
   };
 
   // Handle clearing search
   const handleClearSearch = async () => {
     setSearchQuery('');
     setSearchResults([]);
-    setRestoredState(null);
     setShowArchive(true);
-    await clearSearchState();
   };
 
-  // Handle refresh of restored results
-  const handleRefresh = () => {
-    setRestoredState(null);
-    setSearchResults([]);
-    setSearchQuery('');
-    setShowArchive(true);
-  };
 
   return (
     <div className="h-full flex flex-col">
@@ -75,19 +40,6 @@ export const SearchPage: React.FC = () => {
           onClear={handleClearSearch}
           initialQuery={searchQuery}
         />
-        
-        {/* Restored state indicator */}
-        {restoredState && (
-          <div className="mt-2 flex items-center justify-between text-xs text-gray-500">
-            <span>Results from {formatSearchStateAge(restoredState)}</span>
-            <button
-              onClick={handleRefresh}
-              className="text-blue-500 hover:text-blue-700 ml-2"
-            >
-              Refresh
-            </button>
-          </div>
-        )}
       </div>
 
       {/* Content Area */}
@@ -108,18 +60,16 @@ export const SearchPage: React.FC = () => {
                       // Handle result click - navigate to thread and store tag
                       if (result.anchor) {
                         // Store tag click
-                        try {
-                          chrome.runtime.sendMessage({
-                            type: 'NEW_TAG',
-                            data: {
-                              tag: result.tag,
-                              type: result.type,
-                              anchor: result.anchor
-                            }
-                          });
-                        } catch (error) {
-                          console.warn('Failed to send tag message:', error);
-                        }
+                        chrome.runtime.sendMessage({
+                          type: 'NEW_TAG',
+                          data: {
+                            tag: result.tag,
+                            type: result.type,
+                            anchor: result.anchor
+                          }
+                        }).catch(() => {
+                          console.debug('No listeners for NEW_TAG message, this is expected');
+                        });
                         
                         // Open thread
                         window.open(result.anchor, '_blank');
