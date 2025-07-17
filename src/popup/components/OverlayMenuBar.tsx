@@ -113,14 +113,16 @@ export const OverlayMenuBar: React.FC<OverlayMenuBarProps> = ({
     <div ref={containerRef} className="absolute top-1 left-1/2 transform -translate-x-1/2 z-50">
       <div 
         className={`
-          bg-black bg-opacity-90 text-white px-2 py-1 rounded-full shadow-lg
+          text-white px-4 py-2 rounded-full shadow-2xl
           transition-opacity duration-1000 ease-in-out
           ${isVisible ? 'opacity-100' : 'opacity-0'}
           ${isVisible ? 'pointer-events-auto' : 'pointer-events-none'}
         `}
         style={{
-          backdropFilter: 'blur(4px)',
-          WebkitBackdropFilter: 'blur(4px)'
+          background: 'linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #0f172a 100%)',
+          backdropFilter: 'blur(6px)',
+          WebkitBackdropFilter: 'blur(6px)',
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(59, 130, 246, 0.1)'
         }}
       >
         <div className="flex items-center space-x-1">
@@ -129,18 +131,21 @@ export const OverlayMenuBar: React.FC<OverlayMenuBarProps> = ({
               key={tab.id}
               onClick={() => handleTabClick(tab.id)}
               className={`
-                flex items-center space-x-1 px-3 py-1 rounded-full text-sm font-medium
-                transition-colors duration-200
+                flex items-center space-x-2 px-4 py-2 rounded-full text-base font-medium
+                transition-all duration-200
                 ${activeTab === tab.id 
-                  ? 'text-white' 
-                  : 'text-gray-300 hover:text-white hover:bg-gray-700'
+                  ? 'text-white shadow-lg' 
+                  : 'text-gray-300 hover:text-white hover:bg-blue-600/30'
                 }
               `}
-              style={activeTab === tab.id ? { backgroundColor: '#0000ED' } : {}}
+              style={activeTab === tab.id ? { 
+                background: 'linear-gradient(135deg, #3b82f6 0%, #1e40af 100%)',
+                boxShadow: '0 4px 15px rgba(59, 130, 246, 0.4)'
+              } : {}}
               title={tab.label}
             >
-              <span className="text-sm">{tab.icon}</span>
-              <span className="hidden sm:inline">{tab.label}</span>
+              <span className="text-base">{tab.icon}</span>
+              <span className="hidden sm:inline text-base">{tab.label}</span>
             </button>
           ))}
         </div>
