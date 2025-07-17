@@ -1,19 +1,103 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { ChatInterface } from './ChatInterface';
+import { ConversationSidebar } from './ConversationSidebar';
+import { Conversation } from '../../types/chat';
+import { ConversationManager } from '../../utils/conversationUtils';
+import { configStore } from '../../utils/configStore';
 
 export const ChatPage: React.FC = () => {
-  return (
-    <div className="h-full flex flex-col">
-      <div className="flex-shrink-0 p-4 border-b">
-        <h2 className="text-lg font-semibold text-gray-800">Chat</h2>
-        <p className="text-sm text-gray-600 mt-1">
-          Ask questions about Hacker News content
-        </p>
-      </div>
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Load conversations on component mount
+  useEffect(() => {
+    loadConversations();
+  }, []);
+
+  const loadConversations = async () => {
+    try {
+      const convs = await ConversationManager.getConversations();
+      setConversations(convs);
       
-      <div className="flex-1 overflow-auto p-4">
-        <ChatInterface />
+      // Select the first conversation if available
+      if (convs.length > 0 && !activeConversationId) {
+        setActiveConversationId(convs[0].id);
+      }
+    } catch (error) {
+      console.error('Error loading conversations:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleNewConversation = async () => {
+    try {
+      const config = await configStore.getConfig();
+      const newConv = await ConversationManager.createNewConversation(
+        'New Conversation',
+        config.model
+      );
+      setConversations(prev => [newConv, ...prev]);
+      setActiveConversationId(newConv.id);
+    } catch (error) {
+      console.error('Error creating new conversation:', error);
+    }
+  };
+
+  const handleSelectConversation = (id: string) => {
+    setActiveConversationId(id);
+  };
+
+  const handleDeleteConversation = async (id: string) => {
+    try {
+      await ConversationManager.deleteConversation(id);
+      setConversations(prev => prev.filter(conv => conv.id !== id));
+      
+      // If deleted conversation was active, select another one
+      if (activeConversationId === id) {
+        const remaining = conversations.filter(conv => conv.id !== id);
+        setActiveConversationId(remaining.length > 0 ? remaining[0].id : null);
+      }
+    } catch (error) {
+      console.error('Error deleting conversation:', error);
+    }
+  };
+
+  const handleConversationUpdated = (updatedConversation: Conversation) => {
+    setConversations(prev => 
+      prev.map(conv => 
+        conv.id === updatedConversation.id ? updatedConversation : conv
+      )
+    );
+  };
+
+  const activeConversation = conversations.find(conv => conv.id === activeConversationId) || null;
+
+  if (isLoading) {
+    return (
+      <div className="h-full flex items-center justify-center bg-gray-900">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-4"></div>
+          <p className="text-gray-400">Loading conversations...</p>
+        </div>
       </div>
+    );
+  }
+
+  return (
+    <div className="h-full flex bg-gray-900">
+      <ConversationSidebar
+        conversations={conversations}
+        activeConversationId={activeConversationId}
+        onSelectConversation={handleSelectConversation}
+        onNewConversation={handleNewConversation}
+        onDeleteConversation={handleDeleteConversation}
+      />
+      <ChatInterface
+        activeConversation={activeConversation}
+        onConversationUpdated={handleConversationUpdated}
+      />
     </div>
   );
 };

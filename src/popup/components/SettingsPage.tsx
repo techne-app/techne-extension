@@ -1,25 +1,40 @@
 import React, { useState, useEffect } from 'react';
 import { contextDb, SettingKeys } from '../../background/contextDb';
+import { CacheType, MODEL_OPTIONS } from '../../types/chat';
 
 export const SettingsPage: React.FC = () => {
   const [isPersonalizationEnabled, setIsPersonalizationEnabled] = useState<boolean>(false);
   const [isChatInterfaceEnabled, setIsChatInterfaceEnabled] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
+  
+  // Chat-specific settings
+  const [selectedModel, setSelectedModel] = useState<string>(MODEL_OPTIONS[0].value);
+  const [cacheType, setCacheType] = useState<CacheType>(CacheType.Cache);
+  const [temperature, setTemperature] = useState<number>(0.7);
+  const [topP, setTopP] = useState<number>(0.95);
+  const [maxTokens, setMaxTokens] = useState<number>(4096);
 
   // Load current settings when component mounts
   useEffect(() => {
     const loadSettings = async () => {
       try {
-        const personalizationEnabled = await contextDb.getSettingValue(
-          SettingKeys.PERSONALIZATION_ENABLED, 
-          false
-        );
-        const chatInterfaceEnabled = await contextDb.getSettingValue(
-          SettingKeys.CHAT_INTERFACE_ENABLED, 
-          false
-        );
+        const [personalizationEnabled, chatInterfaceEnabled, chatModel, chatCacheType, chatTemperature, chatTopP, chatMaxTokens] = await Promise.all([
+          contextDb.getSettingValue(SettingKeys.PERSONALIZATION_ENABLED, false),
+          contextDb.getSettingValue(SettingKeys.CHAT_INTERFACE_ENABLED, false),
+          contextDb.getSettingValue(SettingKeys.CHAT_MODEL, MODEL_OPTIONS[0].value),
+          contextDb.getSettingValue(SettingKeys.CHAT_CACHE_TYPE, CacheType.Cache),
+          contextDb.getSettingValue(SettingKeys.CHAT_TEMPERATURE, 0.7),
+          contextDb.getSettingValue(SettingKeys.CHAT_TOP_P, 0.95),
+          contextDb.getSettingValue(SettingKeys.CHAT_MAX_TOKENS, 4096)
+        ]);
+        
         setIsPersonalizationEnabled(personalizationEnabled);
         setIsChatInterfaceEnabled(chatInterfaceEnabled);
+        setSelectedModel(chatModel);
+        setCacheType(chatCacheType);
+        setTemperature(chatTemperature);
+        setTopP(chatTopP);
+        setMaxTokens(chatMaxTokens);
       } catch (error) {
         console.error('Failed to load settings:', error);
       }
@@ -59,6 +74,72 @@ export const SettingsPage: React.FC = () => {
       console.error('Failed to save setting:', error);
       // Revert UI state on error
       setIsChatInterfaceEnabled(!newValue);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Handle chat settings changes
+  const handleModelChange = async (newModel: string) => {
+    setIsSaving(true);
+    try {
+      setSelectedModel(newModel);
+      await contextDb.saveSetting(SettingKeys.CHAT_MODEL, newModel);
+      console.log(`Model updated to: ${newModel}`);
+    } catch (error) {
+      console.error('Failed to save model:', error);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleCacheTypeChange = async (newCacheType: CacheType) => {
+    setIsSaving(true);
+    try {
+      setCacheType(newCacheType);
+      await contextDb.saveSetting(SettingKeys.CHAT_CACHE_TYPE, newCacheType);
+      console.log(`Cache type updated to: ${newCacheType}`);
+    } catch (error) {
+      console.error('Failed to save cache type:', error);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleTemperatureChange = async (newTemperature: number) => {
+    setIsSaving(true);
+    try {
+      setTemperature(newTemperature);
+      await contextDb.saveSetting(SettingKeys.CHAT_TEMPERATURE, newTemperature);
+      console.log(`Temperature updated to: ${newTemperature}`);
+    } catch (error) {
+      console.error('Failed to save temperature:', error);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleTopPChange = async (newTopP: number) => {
+    setIsSaving(true);
+    try {
+      setTopP(newTopP);
+      await contextDb.saveSetting(SettingKeys.CHAT_TOP_P, newTopP);
+      console.log(`Top P updated to: ${newTopP}`);
+    } catch (error) {
+      console.error('Failed to save top P:', error);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleMaxTokensChange = async (newMaxTokens: number) => {
+    setIsSaving(true);
+    try {
+      setMaxTokens(newMaxTokens);
+      await contextDb.saveSetting(SettingKeys.CHAT_MAX_TOKENS, newMaxTokens);
+      console.log(`Max tokens updated to: ${newMaxTokens}`);
+    } catch (error) {
+      console.error('Failed to save max tokens:', error);
     } finally {
       setIsSaving(false);
     }
@@ -140,6 +221,117 @@ export const SettingsPage: React.FC = () => {
               When enabled, the chat interface will be available in the navigation.
             </p>
           </div>
+
+          {/* Chat Settings - only show when chat interface is enabled */}
+          {isChatInterfaceEnabled && (
+            <div className="ml-4 pl-4 border-l-2 border-gray-200 space-y-6">
+              <h3 className="text-md font-medium text-gray-700">Chat Settings</h3>
+              
+              {/* Model Selection */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  AI Model
+                </label>
+                <select
+                  value={selectedModel}
+                  onChange={(e) => handleModelChange(e.target.value)}
+                  disabled={isSaving}
+                  className="w-full p-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  {MODEL_OPTIONS.map(model => (
+                    <option key={model.id} value={model.value}>
+                      {model.name}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-xs text-gray-500 mt-1">
+                  Select the AI model to use for chat conversations.
+                </p>
+              </div>
+              
+              {/* Cache Type Setting */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Cache Type
+                </label>
+                <select
+                  value={cacheType}
+                  onChange={(e) => handleCacheTypeChange(e.target.value as CacheType)}
+                  disabled={isSaving}
+                  className="w-full p-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value={CacheType.Cache}>Cache API (Faster, Default)</option>
+                  <option value={CacheType.IndexDB}>IndexedDB (More Persistent)</option>
+                </select>
+                <p className="text-xs text-gray-500 mt-1">
+                  {cacheType === CacheType.Cache 
+                    ? 'Uses browser Cache API for faster access but may have storage limits'
+                    : 'Uses IndexedDB for more persistent storage with larger capacity but slightly slower access'
+                  }
+                </p>
+              </div>
+
+              {/* Temperature Setting */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Temperature: {temperature}
+                </label>
+                <input
+                  type="range"
+                  min="0"
+                  max="2"
+                  step="0.1"
+                  value={temperature}
+                  onChange={(e) => handleTemperatureChange(parseFloat(e.target.value))}
+                  disabled={isSaving}
+                  className="w-full"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Controls randomness. Lower values make responses more focused and deterministic.
+                </p>
+              </div>
+
+              {/* Top P Setting */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Top P: {topP}
+                </label>
+                <input
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.05"
+                  value={topP}
+                  onChange={(e) => handleTopPChange(parseFloat(e.target.value))}
+                  disabled={isSaving}
+                  className="w-full"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Controls diversity via nucleus sampling. Lower values make responses more focused.
+                </p>
+              </div>
+
+              {/* Max Tokens Setting */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Max Tokens: {maxTokens}
+                </label>
+                <input
+                  type="range"
+                  min="256"
+                  max="8192"
+                  step="256"
+                  value={maxTokens}
+                  onChange={(e) => handleMaxTokensChange(parseInt(e.target.value))}
+                  disabled={isSaving}
+                  className="w-full"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Maximum number of tokens to generate in the response.
+                </p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

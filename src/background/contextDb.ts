@@ -1,12 +1,14 @@
 import Dexie from 'dexie';
 import { Tag } from '../types/tag';
 import { Search } from '../types/search';
+import { Conversation, ChatMessage } from '../types/chat';
 
 // Define the database schema
 class ContextDB extends Dexie {
   tags: Dexie.Table<Tag, number>;
   searches: Dexie.Table<Search, number>;
   settings: Dexie.Table<UserSetting, string>;
+  conversations: Dexie.Table<Conversation, string>;
 
   constructor() {
     super('ContextDB');
@@ -18,10 +20,18 @@ class ContextDB extends Dexie {
       settings: 'key, timestamp'
     });
     
+    this.version(2).stores({
+      tags: '++id, tag, timestamp, type',
+      searches: '++id, query, timestamp',
+      settings: 'key, timestamp',
+      conversations: 'id, title, model, createdAt, updatedAt'
+    });
+    
     // TypeScript type binding
     this.tags = this.table('tags');
     this.searches = this.table('searches');
     this.settings = this.table('settings');
+    this.conversations = this.table('conversations');
   }
 
   // Tag-related methods
@@ -103,6 +113,79 @@ class ContextDB extends Dexie {
       .limit(k)
       .toArray();
   }
+
+  // Conversation-related methods
+  async getAllConversations(): Promise<Conversation[]> {
+    return await this.conversations
+      .orderBy('updatedAt')
+      .reverse()
+      .toArray();
+  }
+
+  async getConversation(id: string): Promise<Conversation | undefined> {
+    return await this.conversations.get(id);
+  }
+
+  async saveConversation(conversation: Conversation): Promise<void> {
+    await this.conversations.put(conversation);
+  }
+
+  async createConversation(title: string, model: string, modelDisplayName: string): Promise<Conversation> {
+    const conversation: Conversation = {
+      id: `conv_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      title,
+      messages: [],
+      model,
+      modelDisplayName,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    
+    await this.conversations.put(conversation);
+    return conversation;
+  }
+
+  async updateConversation(id: string, updates: Partial<Conversation>): Promise<void> {
+    const conversation = await this.conversations.get(id);
+    if (conversation) {
+      const updatedConversation = {
+        ...conversation,
+        ...updates,
+        updatedAt: new Date()
+      };
+      await this.conversations.put(updatedConversation);
+    }
+  }
+
+  async deleteConversation(id: string): Promise<void> {
+    await this.conversations.delete(id);
+  }
+
+  async addMessageToConversation(conversationId: string, message: ChatMessage): Promise<void> {
+    const conversation = await this.conversations.get(conversationId);
+    if (conversation) {
+      conversation.messages.push(message);
+      conversation.updatedAt = new Date();
+      await this.conversations.put(conversation);
+    }
+  }
+
+  async updateMessageInConversation(conversationId: string, messageId: string, content: string): Promise<void> {
+    const conversation = await this.conversations.get(conversationId);
+    if (conversation) {
+      const messageIndex = conversation.messages.findIndex(m => m.id === messageId);
+      if (messageIndex !== -1) {
+        conversation.messages[messageIndex].content = content;
+        conversation.messages[messageIndex].isStreaming = false;
+        conversation.updatedAt = new Date();
+        await this.conversations.put(conversation);
+      }
+    }
+  }
+
+  async clearConversations(): Promise<void> {
+    await this.conversations.clear();
+  }
 }
 
 // Define the UserSetting interface
@@ -115,7 +198,12 @@ export interface UserSetting {
 // Define setting keys as constants
 export const SettingKeys = {
   PERSONALIZATION_ENABLED: 'personalization_enabled',
-  CHAT_INTERFACE_ENABLED: 'chat_interface_enabled'
+  CHAT_INTERFACE_ENABLED: 'chat_interface_enabled',
+  CHAT_MODEL: 'chat_model',
+  CHAT_CACHE_TYPE: 'chat_cache_type',
+  CHAT_TEMPERATURE: 'chat_temperature',
+  CHAT_TOP_P: 'chat_top_p',
+  CHAT_MAX_TOKENS: 'chat_max_tokens'
 };
 
 export const contextDb = new ContextDB();

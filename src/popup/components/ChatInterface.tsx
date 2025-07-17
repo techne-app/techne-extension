@@ -1,211 +1,270 @@
-import React, { useState, useRef } from 'react';
-import { CreateExtensionServiceWorkerMLCEngine, type ChatCompletionMessageParam } from "@mlc-ai/web-llm";
+import React, { useState, useRef, useEffect } from 'react';
+import { type ChatCompletionMessageParam } from "@mlc-ai/web-llm";
+import { Conversation, ChatMessage, MODEL_OPTIONS, CacheType } from '../../types/chat';
+import { ConversationManager } from '../../utils/conversationUtils';
+import { webLLMClient } from '../../utils/webLLMClient';
+import { configStore } from '../../utils/configStore';
+import MessageBubble from './MessageBubble';
 
-// @ts-ignore
-import Line from 'progressbar.js/src/line';
 
-const MODEL_OPTIONS = [
-  {
-    id: "qwen",
-    name: "Qwen2-0.5B (Balanced)", 
-    value: "Qwen2-0.5B-Instruct-q4f16_1-MLC"
-  },
-  {
-    id: "llama",
-    name: "Llama-3.2-3B (Powerful)",
-    value: "Llama-3.2-3B-Instruct-q4f16_1-MLC"
-  },
-  {
-    id: "gemma",
-    name:"gemma-2-2B", 
-    value: "gemma-2-2b-it-q4f16_1-MLC"  
-  },
-  {
-    id: "phi",
-    name: "Phi-3.5-mini",
-    value: "Phi-3.5-mini-instruct-q4f16_1-MLC"
-  },
-  {
-    id: "r1-qwen",
-    name: "DeepSeek-R1-Distill-Qwen", 
-    value: "DeepSeek-R1-Distill-Qwen-7B-q4f16_1-MLC"
-  }
-];
+interface ChatInterfaceProps {
+  activeConversation: Conversation | null;
+  onConversationUpdated: (conversation: Conversation) => void;
+}
 
-export const ChatInterface: React.FC = () => {
+export const ChatInterface: React.FC<ChatInterfaceProps> = ({ 
+  activeConversation, 
+  onConversationUpdated 
+}) => {
   const [message, setMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [answer, setAnswer] = useState('');
-  const [engine, setEngine] = useState<any>(null);
-  const [chatHistory, setChatHistory] = useState<ChatCompletionMessageParam[]>([]);
-  const [selectedModel, setSelectedModel] = useState(MODEL_OPTIONS[0].value);
+  const [streamingMessage, setStreamingMessage] = useState<ChatMessage | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const progressBarRef = useRef<Line | null>(null);
   const [loadedModelName, setLoadedModelName] = useState<string>('');
+  const [isModelLoading, setIsModelLoading] = useState(false);
+  const [modelLoadingProgress, setModelLoadingProgress] = useState(0);
+  const [modelLoadingText, setModelLoadingText] = useState('');
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const initEngine = async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
+  // Auto-scroll to bottom when new messages arrive
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [activeConversation?.messages, streamingMessage]);
 
-      const container = document.getElementById('loadingContainer');
-      if (!container) {
-        throw new Error('Loading container not found');
-      }
-
-      if (!progressBarRef.current) {
-        progressBarRef.current = new Line(container, {
-          strokeWidth: 4,
-          easing: "easeInOut",
-          duration: 1400,
-          color: "#ffd166",
-          trailColor: "#eee",
-          trailWidth: 1,
-          svgStyle: { width: "100%", height: "100%" }
-        });
-      }
-
-      const progressBar = progressBarRef.current;
-      progressBar.set(0);
-
-      console.log('Starting model initialization:', selectedModel);
-      const mlcEngine = await CreateExtensionServiceWorkerMLCEngine(
-        selectedModel,
-        { 
-          initProgressCallback: (report) => {
-            console.log('Progress:', report);
-            progressBar.animate(report.progress, { duration: 50 });
-            if (report.progress === 1.0) {
-              setIsLoading(false);
-            }
-          }
-        }
-      );
-      
-      console.log('Model initialized successfully:', mlcEngine);
-      setEngine(mlcEngine);
-      setLoadedModelName(MODEL_OPTIONS.find(m => m.value === selectedModel)?.name || selectedModel);
-    } catch (err) {
-      console.error('Detailed error initializing engine:', {
-        error: err,
-        errorMessage: err instanceof Error ? err.message : 'Unknown error',
-        errorStack: err instanceof Error ? err.stack : undefined,
-        selectedModel,
-      });
-      setError(err instanceof Error ? err.message : 'Failed to initialize model');
-      setIsLoading(false);
+  // Update model display name when conversation changes
+  useEffect(() => {
+    if (activeConversation) {
+      setLoadedModelName(activeConversation.modelDisplayName);
     }
-  };
+  }, [activeConversation]);
+
+  // No need for separate progress callback setup
 
   const handleSubmit = async () => {
-    if (!message.trim() || !engine) return;
+    if (!message.trim() || !activeConversation || isModelLoading) return;
 
-    const newHistory: ChatCompletionMessageParam[] = [
-      ...chatHistory, 
-      { role: "user" as const, content: message }
-    ];
-    setChatHistory(newHistory);
-    setAnswer('');
+    const userMessage = message.trim();
+    setMessage('');
     setIsLoading(true);
+    setError(null);
 
     try {
-      let curMessage = '';
-      const completion = await engine.chat.completions.create({
-        stream: true,
-        messages: newHistory,
-      });
-
-      for await (const chunk of completion) {
-        const curDelta = chunk.choices[0].delta.content;
-        if (curDelta) {
-          curMessage += curDelta;
-          setAnswer(curMessage);
-        }
+      // Add user message to conversation
+      await ConversationManager.addMessage(activeConversation.id, 'user', userMessage);
+      
+      // Update conversation title if this is the first message
+      if (activeConversation.messages.length === 0) {
+        const newTitle = ConversationManager.generateConversationTitle(userMessage);
+        await ConversationManager.updateConversationTitle(activeConversation.id, newTitle);
       }
 
-      const finalMessage = await engine.getMessage();
-      setChatHistory([
-        ...newHistory, 
-        { role: "assistant" as const, content: finalMessage }
-      ]);
+      // Get updated conversation
+      const updatedConversation = await ConversationManager.getConversation(activeConversation.id);
+      if (updatedConversation) {
+        onConversationUpdated(updatedConversation);
+      }
+
+      // Create streaming assistant message
+      const assistantMessage = await ConversationManager.addMessage(
+        activeConversation.id, 
+        'assistant', 
+        '', 
+        true
+      );
+      setStreamingMessage(assistantMessage);
+
+      // Prepare chat history for the engine
+      const chatHistory: ChatCompletionMessageParam[] = updatedConversation?.messages.map(msg => ({
+        role: msg.role as 'user' | 'assistant',
+        content: msg.content
+      })) || [];
+
+      // Set model loading state
+      setIsModelLoading(true);
+      
+      // Get current config
+      const config = await configStore.getConfig();
+      setLoadedModelName(MODEL_OPTIONS.find(m => m.value === config.model)?.name || config.model);
+
+      // Use WebLLM client with web-llm-chat patterns
+      await webLLMClient.chat({
+        messages: chatHistory,
+        config: {
+          model: config.model,
+          temperature: config.temperature,
+          topP: config.topP,
+          maxTokens: config.maxTokens,
+          cache: config.cacheType,
+          stream: true,
+        },
+        onUpdate: (message, chunk) => {
+          // Handle model loading progress
+          if (chunk.includes('Loading') || chunk.includes('Initializing') || chunk.includes('%')) {
+            setModelLoadingText(chunk);
+            // Try to extract progress percentage
+            const progressMatch = chunk.match(/(\d+)%/);
+            if (progressMatch) {
+              setModelLoadingProgress(parseInt(progressMatch[1]) / 100);
+            }
+          } else {
+            // Model loading is complete when we start receiving actual content
+            if (isModelLoading) {
+              setIsModelLoading(false);
+            }
+            setStreamingMessage(prev => prev ? {
+              ...prev,
+              content: message
+            } : null);
+          }
+        },
+        onFinish: async (message) => {
+          // Ensure model loading is marked as complete
+          setIsModelLoading(false);
+          // Update the message in the database
+          await ConversationManager.updateMessage(activeConversation.id, assistantMessage.id, message);
+          
+          // Get final updated conversation
+          const finalConversation = await ConversationManager.getConversation(activeConversation.id);
+          if (finalConversation) {
+            onConversationUpdated(finalConversation);
+          }
+
+          setStreamingMessage(null);
+        },
+        onError: (errorMessage) => {
+          setIsModelLoading(false);
+          setError(errorMessage);
+          setStreamingMessage(null);
+        }
+      });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to get response');
       console.error('Error during chat:', err);
+      setStreamingMessage(null);
+      setIsModelLoading(false);
     } finally {
       setIsLoading(false);
-      setMessage('');
     }
   };
 
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSubmit();
+    }
+  };
+
+  if (!activeConversation) {
+    return (
+      <div className="flex-1 flex items-center justify-center text-gray-400">
+        <div className="text-center">
+          <svg className="w-16 h-16 mx-auto mb-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+          </svg>
+          <p className="text-lg font-medium">Select a conversation to start chatting</p>
+          <p className="text-sm mt-2">Choose a conversation from the sidebar or create a new one</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="chat-interface w-full">
-      <div id="loadingContainer" className="h-2 mb-4 w-full" />
-      
-      {!engine ? (
-        <div className="model-selector flex flex-col gap-4 p-4 border rounded mb-4">
-          <select 
-            value={selectedModel}
-            onChange={(e) => setSelectedModel(e.target.value)}
-            className="p-2 border rounded"
-          >
-            {MODEL_OPTIONS.map(model => (
-              <option key={model.id} value={model.value}>
-                {model.name}
-              </option>
-            ))}
-          </select>
-          <button
-            onClick={initEngine}
-            disabled={isLoading}
-            className="px-4 py-2 bg-green-500 text-white rounded disabled:bg-gray-300"
-          >
-            {isLoading ? 'Loading...' : 'Load Model'}
-          </button>
+    <div className="flex-1 flex flex-col h-full bg-gray-900">
+      {/* Header */}
+      <div className="flex-shrink-0 p-4 border-b border-gray-700">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-lg font-semibold text-white truncate">
+              {activeConversation.title}
+            </h2>
+            <p className="text-sm text-gray-400">
+              {activeConversation.messages.length} messages
+            </p>
+          </div>
+          <div></div>
+        </div>
+      </div>
+
+      {/* Chat Messages */}
+      <div className="flex-1 overflow-auto p-4">
+        <div className="max-w-4xl mx-auto">
+          {/* Model loading progress message */}
+          {isModelLoading && (
+            <div className="flex justify-center mb-4">
+              <div className="bg-gray-700 text-gray-300 px-4 py-3 rounded-lg text-sm max-w-2xl">
+                <div className="flex items-center gap-3">
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                  <div>
+                    <div className="font-semibold mb-1">Loading AI Model...</div>
+                    <div className="text-xs text-gray-400">
+                      {modelLoadingText || `Loading ${loadedModelName || 'AI Model'}`}
+                    </div>
+                    <div className="w-48 h-2 bg-gray-600 rounded-full mt-2">
+                      <div 
+                        className="h-2 bg-blue-500 rounded-full transition-all duration-300"
+                        style={{ width: `${Math.round(modelLoadingProgress * 100)}%` }}
+                      />
+                    </div>
+                    <div className="text-xs text-gray-400 mt-1">
+                      {Math.round(modelLoadingProgress * 100)}% complete
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          {activeConversation.messages.map((msg) => (
+            <MessageBubble key={msg.id} message={msg} />
+          ))}
+          {streamingMessage && (
+            <MessageBubble message={streamingMessage} />
+          )}
+          <div ref={messagesEndRef} />
+        </div>
+      </div>
+
+      {/* Input Area */}
+      <div className="flex-shrink-0 p-4 border-t border-gray-700">
+        <div className="max-w-4xl mx-auto">
           {error && (
-            <div className="error-message text-red-500 mt-2">
+            <div className="error-message text-red-400 mb-4 text-sm">
               {error}
             </div>
           )}
-        </div>
-      ) : (
-        <>
-          <div className="text-center mb-4 text-gray-600">
-            Loaded model: {loadedModelName}
-          </div>
-          <div className="input-container flex gap-2 mb-4">
-            <input
-              type="text"
+          <div className="flex gap-2">
+            <textarea
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              placeholder="Ask me anything..."
-              disabled={isLoading}
-              className="flex-1 p-2 border rounded"
+              onKeyDown={handleKeyPress}
+              placeholder={isModelLoading ? "Loading model, please wait..." : "Enter to send, Shift + Enter to wrap, / to search prompts, : to use commands"}
+              disabled={isLoading || isModelLoading}
+              className="flex-1 p-3 bg-gray-800 text-white rounded border border-gray-600 resize-none focus:outline-none focus:border-blue-500"
+              rows={1}
+              style={{ minHeight: '44px', maxHeight: '120px' }}
             />
             <button 
               onClick={handleSubmit}
-              disabled={isLoading || !message.trim()}
-              className="px-4 py-2 text-white rounded disabled:bg-gray-300"
-              style={{ backgroundColor: '#0000ED' }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#0000CC'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#0000ED'}
+              disabled={isLoading || isModelLoading || !message.trim()}
+              className="px-6 py-3 bg-blue-600 text-white rounded disabled:bg-gray-500 hover:bg-blue-700 transition-colors font-medium"
             >
-              Send
+              {isModelLoading ? 'Loading...' : 'Send'}
             </button>
           </div>
-
-          {error && (
-            <div className="error-message text-red-500 mb-4">
-              {error}
+          {loadedModelName && (
+            <div className="flex items-center gap-2 mt-2 text-xs text-gray-400">
+              <span className="flex items-center gap-1">
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                {loadedModelName}
+              </span>
+              <span>•</span>
+              <span>Prefill: 388.2 tok/s, Decode: 29.6 tok/s</span>
             </div>
           )}
-
-          {answer && (
-            <div className="answer-container p-3 rounded border">
-              <p>{answer}</p>
-            </div>
-          )}
-        </>
-      )}
+        </div>
+      </div>
     </div>
   );
 };
