@@ -14,7 +14,7 @@
   "license": "Apache-2.0",
   "dependencies": {
     "@huggingface/transformers": "^3.0.2",
-    "@mlc-ai/web-llm": "^0.2.78",
+    "@mlc-ai/web-llm": "^0.2.79",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
     "dexie": "^4.0.11",
