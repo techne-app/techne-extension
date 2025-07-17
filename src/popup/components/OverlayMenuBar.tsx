@@ -23,7 +23,7 @@ export const OverlayMenuBar: React.FC<OverlayMenuBarProps> = ({
   const hideTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Load tabs with async chat interface check
+  // Load tabs with async chat interface check and listen for changes
   useEffect(() => {
     const loadTabs = async () => {
       const chatEnabled = await isChatInterfaceEnabled();
@@ -75,7 +75,20 @@ export const OverlayMenuBar: React.FC<OverlayMenuBarProps> = ({
       setTabs(menuTabs);
     };
 
+    // Listen for chat interface toggle events
+    const handleChatInterfaceToggled = () => {
+      loadTabs(); // Reload tabs when chat interface is toggled
+    };
+
     loadTabs();
+    
+    // Add event listener
+    window.addEventListener('chatInterfaceToggled', handleChatInterfaceToggled);
+    
+    // Cleanup
+    return () => {
+      window.removeEventListener('chatInterfaceToggled', handleChatInterfaceToggled);
+    };
   }, []);
 
   // Auto-hide functionality

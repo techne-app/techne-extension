@@ -10,27 +10,6 @@ export const ChatPage: React.FC = () => {
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Load conversations on component mount
-  useEffect(() => {
-    loadConversations();
-  }, []);
-
-  const loadConversations = async () => {
-    try {
-      const convs = await ConversationManager.getConversations();
-      setConversations(convs);
-      
-      // Select the first conversation if available
-      if (convs.length > 0 && !activeConversationId) {
-        setActiveConversationId(convs[0].id);
-      }
-    } catch (error) {
-      console.error('Error loading conversations:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const handleNewConversation = async () => {
     try {
       const config = await configStore.getConfig();
@@ -44,6 +23,30 @@ export const ChatPage: React.FC = () => {
       console.error('Error creating new conversation:', error);
     }
   };
+
+  const loadConversations = async () => {
+    try {
+      const convs = await ConversationManager.getConversations();
+      setConversations(convs);
+      
+      // Select the first conversation if available, or create new one if none exist
+      if (convs.length > 0 && !activeConversationId) {
+        setActiveConversationId(convs[0].id);
+      } else if (convs.length === 0) {
+        // Auto-create new conversation if none exist
+        await handleNewConversation();
+      }
+    } catch (error) {
+      console.error('Error loading conversations:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Load conversations on component mount
+  useEffect(() => {
+    loadConversations();
+  }, []);
 
   const handleSelectConversation = (id: string) => {
     setActiveConversationId(id);

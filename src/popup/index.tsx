@@ -13,7 +13,7 @@ const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>('search');
   const [chatEnabled, setChatEnabled] = useState<boolean>(false);
 
-  // Check chat interface on startup
+  // Check chat interface on startup and listen for changes
   useEffect(() => {
     const checkChatInterface = async () => {
       // Check if chat interface is enabled
@@ -21,7 +21,20 @@ const App: React.FC = () => {
       setChatEnabled(chatInterfaceEnabled);
     };
 
+    // Listen for chat interface toggle events
+    const handleChatInterfaceToggled = (event: CustomEvent) => {
+      setChatEnabled(event.detail.enabled);
+    };
+
     checkChatInterface();
+    
+    // Add event listener
+    window.addEventListener('chatInterfaceToggled', handleChatInterfaceToggled as EventListener);
+    
+    // Cleanup
+    return () => {
+      window.removeEventListener('chatInterfaceToggled', handleChatInterfaceToggled as EventListener);
+    };
   }, []);
 
   // Render active page component

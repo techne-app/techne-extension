@@ -70,6 +70,11 @@ export const SettingsPage: React.FC = () => {
       setIsChatInterfaceEnabled(newValue); // Update UI immediately
       await contextDb.saveSetting(SettingKeys.CHAT_INTERFACE_ENABLED, newValue);
       console.log(`Chat interface setting updated to: ${newValue}`);
+      
+      // Notify other components about the change
+      window.dispatchEvent(new CustomEvent('chatInterfaceToggled', { 
+        detail: { enabled: newValue } 
+      }));
     } catch (error) {
       console.error('Failed to save setting:', error);
       // Revert UI state on error

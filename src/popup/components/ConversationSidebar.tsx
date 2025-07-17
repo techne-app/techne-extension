@@ -22,45 +22,10 @@ export const ConversationSidebar: React.FC<ConversationSidebarProps> = ({
     <div className="w-80 bg-gray-800 flex flex-col h-full">
       {/* Header */}
       <div className="p-4 border-b border-gray-700">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-8 h-8 bg-blue-600 rounded flex items-center justify-center">
-            <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M2 5a2 2 0 012-2h7a2 2 0 012 2v4a2 2 0 01-2 2H9l-3 3v-3H4a2 2 0 01-2-2V5z" clipRule="evenodd" />
-            </svg>
-          </div>
-          <div>
-            <h1 className="text-xl font-semibold text-white">WebLLM Chat</h1>
-            <p className="text-sm text-gray-400">AI Models Running in Browser</p>
-          </div>
+        <div className="mb-4">
+          <h1 className="text-xl font-semibold text-white">Techne Chat</h1>
+          <p className="text-sm text-gray-400">AI Models Running in Browser</p>
         </div>
-        
-        {/* Action buttons */}
-        <div className="flex items-center gap-2 mb-4">
-          <button 
-            onClick={onNewConversation}
-            className="p-2 bg-gray-700 rounded hover:bg-gray-600 transition-colors"
-            title="New Conversation"
-          >
-            <svg className="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-            </svg>
-          </button>
-          <button className="p-2 bg-gray-700 rounded hover:bg-gray-600 transition-colors" title="Settings">
-            <svg className="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-          </button>
-          <button 
-            className="p-2 bg-gray-700 rounded hover:bg-gray-600 transition-colors flex-1"
-            title="More Options"
-          >
-            <svg className="w-4 h-4 text-gray-300 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-            </svg>
-          </button>
-        </div>
-
       </div>
 
       {/* Conversation List */}
