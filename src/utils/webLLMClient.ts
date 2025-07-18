@@ -145,6 +145,24 @@ export class WebLLMClient {
       if (errorMessage === "[object Object]") {
         errorMessage = JSON.stringify(err);
       }
+      
+      // Handle port disconnection errors with automatic reconnection
+      if (errorMessage.includes('disconnected port') || 
+          errorMessage.includes('port is null') ||
+          errorMessage.includes('Attempting to use a disconnected port object')) {
+        console.log('Port disconnected, attempting to reinitialize and retry');
+        try {
+          await this.reset();
+          await this.initModel(options.onUpdate);
+          // Retry the chat once after reconnection
+          return this.chat(options);
+        } catch (retryErr: any) {
+          console.error("Failed to reconnect and retry:", retryErr);
+          options.onError?.("Connection lost. Please try again.");
+          return;
+        }
+      }
+      
       console.error("Error in chatCompletion", errorMessage);
       options.onError?.(errorMessage);
     }
