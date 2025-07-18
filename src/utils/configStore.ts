@@ -1,11 +1,12 @@
-import { ChatConfig, MODEL_OPTIONS } from '../types/chat';
+import { ChatConfig } from '../types/chat';
 import { contextDb, SettingKeys } from '../background/contextDb';
+import { CONFIG } from '../config';
 
 class ConfigStore {
   private async loadConfig(): Promise<ChatConfig> {
     try {
       const [model, temperature, topP, maxTokens] = await Promise.all([
-        contextDb.getSettingValue(SettingKeys.CHAT_MODEL, MODEL_OPTIONS[0].value),
+        contextDb.getSettingValue(SettingKeys.CHAT_MODEL, CONFIG.DEFAULT_MODEL),
         contextDb.getSettingValue(SettingKeys.CHAT_TEMPERATURE, 0.7),
         contextDb.getSettingValue(SettingKeys.CHAT_TOP_P, 0.95),
         contextDb.getSettingValue(SettingKeys.CHAT_MAX_TOKENS, 4096)
@@ -20,7 +21,7 @@ class ConfigStore {
     } catch (error) {
       console.error('Failed to load chat config:', error);
       return {
-        model: MODEL_OPTIONS[0].value,
+        model: CONFIG.DEFAULT_MODEL,
         temperature: 0.7,
         topP: 0.95,
         maxTokens: 4096,
@@ -29,7 +30,7 @@ class ConfigStore {
   }
 
   async getModel(): Promise<string> {
-    return await contextDb.getSettingValue(SettingKeys.CHAT_MODEL, MODEL_OPTIONS[0].value);
+    return await contextDb.getSettingValue(SettingKeys.CHAT_MODEL, CONFIG.DEFAULT_MODEL);
   }
 
   async setModel(model: string): Promise<void> {

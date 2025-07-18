@@ -1,14 +1,9 @@
 import React, { useState, useEffect, useRef, KeyboardEvent } from 'react';
 import { MessageType, TagMatchResponse, NewSearchRequest } from '../../types/messages';
 import { contextDb, type Search } from '../../background/contextDb';
-import { fetchStoryTags } from '../../utils/tag-utils';
+import { SearchService, TagMatch } from '../../utils/searchService';
 
-interface TagMatch {
-  tag: string;
-  type: string;
-  anchor: string;
-  score: number;
-}
+// TagMatch interface now imported from SearchService
 
 interface ThreadSearchProps {
   onSearch?: (query: string, results: TagMatch[]) => void;
@@ -128,71 +123,23 @@ export const ThreadSearch: React.FC<ThreadSearchProps> = ({
     setIsOpen(false);
 
     try {
-      // Store the search query
-      chrome.runtime.sendMessage({
-        type: MessageType.NEW_SEARCH,
-        data: { query }
-      } as NewSearchRequest).catch(() => {
-        console.debug('No listeners for NEW_SEARCH message, this is expected');
-      });
-
-      // Fetch top story IDs
-      const hnApiUrl = "https://hacker-news.firebaseio.com/v0/topstories.json";
-      const storyIdsResponse = await fetch(hnApiUrl);
+      // Use the new SearchService
+      const searchResult = await SearchService.executeSearch(query);
       
-      if (!storyIdsResponse.ok) {
-        throw new Error(`Failed to fetch story IDs: ${storyIdsResponse.status}`);
-      }
-      
-      const allStoryIds = await storyIdsResponse.json();
-      const storyIds = allStoryIds.slice(0, 30);
-      
-      if (storyIds.length === 0) {
-        throw new Error('No story IDs found');
-      }
-      
-      // Fetch tags for stories
-      const data = await fetchStoryTags(storyIds, undefined, false, ['thread_theme']);
-      
-      if (!Array.isArray(data) || data.length === 0) {
-        setError('No tags returned from API');
-        return;
-      }
-      
-      // Format tags
-      const formattedTags = [];
-      for (const story of data) {
-        if (story.tags && Array.isArray(story.tags)) {
-          for (let i = 0; i < story.tags.length; i++) {
-            if (story.tags[i] && story.tag_types?.[i] && story.tag_anchors?.[i]) {
-              formattedTags.push({
-                tag: story.tags[i],
-                type: story.tag_types[i],
-                anchor: story.tag_anchors[i]
-              });
-            }
-          }
+      if (searchResult.error) {
+        setError(searchResult.error);
+      } else {
+        setMatches(searchResult.matches);
+        // Call onSearch callback if provided
+        if (onSearch) {
+          onSearch(query, searchResult.matches);
         }
       }
-      
-      if (formattedTags.length === 0) {
-        setError('No valid tags found');
-        return;
-      }
-      
-      // Send match request
-      chrome.runtime.sendMessage({
-        type: MessageType.TAG_MATCH_REQUEST,
-        data: {
-          inputText: query,
-          tags: formattedTags
-        }
-      }).catch(() => {
-        console.debug('No listeners for TAG_MATCH_REQUEST message, this is expected');
-      });
     } catch (error) {
       console.error('Error during search:', error);
       setError(error instanceof Error ? error.message : 'Search failed');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -202,18 +149,7 @@ export const ThreadSearch: React.FC<ThreadSearchProps> = ({
     loadRecentSearches();
 
     const handleMessage = (message: any) => {
-      if (message.type === MessageType.TAG_MATCH_RESPONSE) {
-        setLoading(false);
-        if (message.data.error) {
-          setError(message.data.error);
-        } else {
-          setMatches(message.data.matches);
-          // Call onSearch callback if provided
-          if (onSearch) {
-            onSearch(inputValue, message.data.matches);
-          }
-        }
-      } else if (message.type === MessageType.SEARCHES_UPDATED) {
+      if (message.type === MessageType.SEARCHES_UPDATED) {
         loadRecentSearches();
       }
     };

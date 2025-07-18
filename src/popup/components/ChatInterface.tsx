@@ -5,6 +5,9 @@ import { ConversationManager } from '../../utils/conversationUtils';
 import { webLLMClient } from '../../utils/webLLMClient';
 import { configStore } from '../../utils/configStore';
 import MessageBubble from './MessageBubble';
+import { IntentDetector } from '../../utils/intentDetector';
+import { SearchService } from '../../utils/searchService';
+import { SearchResultMessage } from './SearchResultMessage';
 
 
 interface ChatInterfaceProps {
@@ -38,7 +41,59 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     }
   }, [activeConversation]);
 
-  // No need for separate progress callback setup
+  // Handle search request
+  const handleSearchRequest = async (searchQuery: string) => {
+    try {
+      // Execute search
+      const searchResult = await SearchService.executeSearch(searchQuery);
+      
+      // Format search results as HTML content
+      const searchResultContent = formatSearchResultsAsMessage(searchQuery, searchResult);
+      
+      // Add search result as assistant message
+      await ConversationManager.addMessage(
+        activeConversation!.id, 
+        'assistant', 
+        searchResultContent
+      );
+      
+      // Get updated conversation
+      const updatedConversation = await ConversationManager.getConversation(activeConversation!.id);
+      if (updatedConversation) {
+        onConversationUpdated(updatedConversation);
+      }
+    } catch (error) {
+      console.error('Search error:', error);
+      setError('Search failed. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Format search results as message content
+  const formatSearchResultsAsMessage = (query: string, searchResult: any) => {
+    if (searchResult.error) {
+      return `I encountered an error while searching for "${query}": ${searchResult.error}`;
+    }
+    
+    if (searchResult.matches.length === 0) {
+      return `I couldn't find any discussions about "${query}" in the recent top stories. Try a different search term or check back later.`;
+    }
+    
+    const matchesText = searchResult.matches.slice(0, 5).map((match: any, index: number) => 
+      `${index + 1}. **${match.tag}** (${match.type}, Score: ${match.score.toFixed(2)}) - [View Discussion](${match.anchor})`
+    ).join('\n');
+    
+    let response = `I found ${searchResult.matches.length} discussion${searchResult.matches.length !== 1 ? 's' : ''} about "${query}":\n\n${matchesText}`;
+    
+    if (searchResult.matches.length > 5) {
+      response += `\n\n... and ${searchResult.matches.length - 5} more result${searchResult.matches.length - 5 !== 1 ? 's' : ''}`;
+    }
+    
+    response += '\n\nClick any discussion link to open it in a new tab.';
+    
+    return response;
+  };
 
   const handleSubmit = async () => {
     if (!message.trim() || !activeConversation || isModelLoading) return;
@@ -64,7 +119,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         onConversationUpdated(updatedConversation);
       }
 
-      // Create streaming assistant message
+      // Create streaming assistant message for regular chat
       const assistantMessage = await ConversationManager.addMessage(
         activeConversation.id, 
         'assistant', 
@@ -79,15 +134,42 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         content: msg.content
       })) || [];
 
-      // Set model loading state
-      setIsModelLoading(true);
-      
       // Get current config
       const config = await configStore.getConfig();
       setLoadedModelName(MODEL_OPTIONS.find(m => m.value === config.model)?.name || config.model);
 
+
+      // Check if model is already loaded by checking webLLMClient state
+      const isModelLoaded = webLLMClient.isModelLoaded();
+      console.log('🔍 Model loaded check:', isModelLoaded);
+      
+      if (isModelLoaded) {
+        console.log('🔍 Model already loaded, checking for search intent...');
+        try {
+          const intentResult = await IntentDetector.detectSearchIntent(userMessage);
+          console.log('🎯 Intent detection result:', intentResult);
+          
+          if (intentResult.isSearch && intentResult.searchQuery && intentResult.confidence > 0.5) {
+            console.log('✅ Search intent detected with high confidence, executing search for:', intentResult.searchQuery);
+            setStreamingMessage(null);
+            await handleSearchRequest(intentResult.searchQuery);
+            return;
+          } else {
+            console.log('💬 No search intent detected or low confidence, continuing with chat. Confidence:', intentResult.confidence);
+          }
+        } catch (error) {
+          console.error('Intent detection failed:', error);
+        }
+      } else {
+        console.log('⏳ Model not loaded, will load during chat and check intent then');
+      }
+
+      // Only proceed with chat if we didn't intercept for search
+      console.log('🗨️ Starting chat conversation...');
+
       // Use WebLLM client with web-llm-chat patterns
-      await webLLMClient.chat({
+      try {
+        await webLLMClient.chat({
         messages: chatHistory,
         config: {
           model: config.model,
@@ -96,29 +178,28 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
           maxTokens: config.maxTokens,
           stream: true,
         },
-        onUpdate: (message, chunk) => {
-          // Handle model loading progress
-          if (chunk.includes('Loading') || chunk.includes('Initializing') || chunk.includes('%')) {
-            setModelLoadingText(chunk);
-            // Try to extract progress percentage
-            const progressMatch = chunk.match(/(\d+)%/);
-            if (progressMatch) {
-              setModelLoadingProgress(parseInt(progressMatch[1]) / 100);
-            }
-          } else {
-            // Model loading is complete when we start receiving actual content
-            if (isModelLoading) {
-              setIsModelLoading(false);
-            }
-            setStreamingMessage(prev => prev ? {
-              ...prev,
-              content: message
-            } : null);
-          }
+        onModelLoadingStart: () => {
+          setIsModelLoading(true);
+          setModelLoadingProgress(0);
+          setModelLoadingText(`Loading ${loadedModelName || 'AI Model'}`);
+        },
+        onModelLoadingProgress: (progress, text) => {
+          setModelLoadingProgress(progress);
+          setModelLoadingText(text);
+        },
+        onModelLoadingComplete: () => {
+          setIsModelLoading(false);
+          setModelLoadingProgress(1);
+          setModelLoadingText('');
+        },
+        onUpdate: (message) => {
+          // Update streaming message
+          setStreamingMessage(prev => prev ? {
+            ...prev,
+            content: message
+          } : null);
         },
         onFinish: async (message) => {
-          // Ensure model loading is marked as complete
-          setIsModelLoading(false);
           // Update the message in the database
           await ConversationManager.updateMessage(activeConversation.id, assistantMessage.id, message);
           
@@ -131,11 +212,17 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
           setStreamingMessage(null);
         },
         onError: (errorMessage) => {
-          setIsModelLoading(false);
+          console.error('WebLLM chat error:', errorMessage);
           setError(errorMessage);
           setStreamingMessage(null);
+          setIsModelLoading(false);
         }
-      });
+        });
+      } catch (error) {
+        console.error('WebLLM chat failed:', error);
+        setIsModelLoading(false);
+        setError('Chat failed to start');
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to get response');
       console.error('Error during chat:', err);

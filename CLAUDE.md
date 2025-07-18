@@ -70,6 +70,19 @@ src/
 
 ## Configuration Files
 
+### `src/config.ts`
+Static application configuration:
+- **API URLs**: Backend endpoints and base URLs
+- **UI Styling**: Default colors and styling constants  
+- **Business Rules**: MAX_STORY_TAGS, etc.
+- **DEFAULT_MODEL**: Default AI model (`Llama-3.2-3B-Instruct-q4f16_1-MLC`)
+
+### `src/utils/configStore.ts`
+User preferences and runtime settings:
+- **Chat Configuration**: Model selection, temperature, topP, maxTokens
+- **Database Integration**: Saves/loads user preferences to IndexedDB
+- **Dynamic Settings**: User-changeable settings that persist across sessions
+
 ### `public/manifest.json`
 Extension configuration and permissions. Key settings:
 - **manifest_version**: 3 (Chrome MV3)
@@ -153,6 +166,27 @@ The interface uses an overlay menu bar for tab navigation and defaults to the ch
 - Chat interface runs entirely locally with WebLLM models
 - Feature flags control interface availability and default tabs
 
+## Recent Changes
+
+### v1.8.5 - Agentic Search Implementation
+- **Intent Detection**: Added `IntentDetector` utility to detect search intent using local LLM
+- **Search Service**: Created `SearchService` to encapsulate search functionality
+- **Unified Chat Interface**: Chat now handles both conversational AI and search requests
+- **Debug Cleanup**: Removed verbose console.log statements while preserving event state tracking
+- **Configuration Centralization**: Moved default model configuration to `src/config.ts`
+  - Default model is now `Llama-3.2-3B-Instruct-q4f16_1-MLC`
+  - Easy to change by updating `CONFIG.DEFAULT_MODEL` in `config.ts`
+
+### Key Components Added:
+- `src/utils/intentDetector.ts`: LLM-based intent detection with fallback keyword matching
+- `src/utils/searchService.ts`: Centralized search execution and tag matching
+- `src/popup/components/SearchResultMessage.tsx`: Search result display component
+
+### Architecture Notes:
+- Chat interface now intercepts search intents and routes to search functionality
+- Maintains backward compatibility with existing search and chat features
+- Prepares foundation for future MCP (Model Context Protocol) integration
+
 ## Agentic Search Evolution
 
 The following phases outline the roadmap for evolving from current basic search to powerful agentic search capabilities, while maintaining backward compatibility and preparing for MCP (Model Context Protocol) integration.
@@ -164,7 +198,8 @@ The following phases outline the roadmap for evolving from current basic search 
 
 ### Phase 1: Current Search as "Tool"
 - **Search Tool Integration**: Wrap existing search functionality as a chat "tool"
-- **Intent Detection**: Chat interface detects search intent and routes to current search logic
+- **LLM-Based Intent Detection**: Use local LLM (Llama 3.2) to detect search intent and extract queries
+- **Function Calling Patterns**: Implement modern agentic search patterns using LLM routing
 - **Proof of Concept**: Use as testing ground for future MCP tool integration patterns
 - **Seamless UX**: Maintain all existing search capabilities within conversational interface
 - **Bridge Architecture**: Create patterns that will extend to MCP tools
@@ -198,11 +233,19 @@ The following phases outline the roadmap for evolving from current basic search 
 - **Black Box Backend**: Design assumes backend is extensible black box that will expose MCP servers
 
 ### Technical Implementation Strategy
+- **LLM-Based Intent Routing**: Use Llama 3.2's function calling capabilities for intent detection
 - **Extensible Architecture**: Chat interface designed to handle any number of MCP tools
 - **Function Calling**: Conversation handling that can orchestrate multiple backend calls
 - **Context Preservation**: Multi-step reasoning with conversation memory and context building
 - **Graceful Degradation**: Fallback to current search capabilities when backend tools unavailable
 - **Feature Flags**: Control rollout of agentic capabilities as backend evolves
+
+### Modern Agentic Search Patterns (2024)
+- **Hybrid Routing Systems**: Combine LLMs with traditional methods for optimal performance
+- **Intent Detection Evolution**: LLMs excel at understanding user intent from natural language
+- **Manual Function Calling**: WebLLM supports manual function calling with JSON parsing
+- **Uncertainty-Based Routing**: Route between different approaches based on confidence scores
+- **Structured Output Parsing**: Manual JSON parsing for tool calling until OpenAI API compatibility arrives
 
 ### Benefits of Agentic Approach
 - **Powerful Search**: Access to historical data and sophisticated vector indexing

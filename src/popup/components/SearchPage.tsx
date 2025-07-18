@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ThreadSearch } from './ThreadSearch';
 import { SearchArchive } from './SearchHistory';
+import { SearchService } from '../../utils/searchService';
 
 export const SearchPage: React.FC = () => {
   const [searchResults, setSearchResults] = useState<any[]>([]);
@@ -57,22 +58,10 @@ export const SearchPage: React.FC = () => {
                     key={index}
                     className="p-3 border rounded-lg hover:bg-gray-50 cursor-pointer"
                     onClick={() => {
-                      // Handle result click - navigate to thread and store tag
+                      // Handle result click using SearchService
                       if (result.anchor) {
-                        // Store tag click
-                        chrome.runtime.sendMessage({
-                          type: 'NEW_TAG',
-                          data: {
-                            tag: result.tag,
-                            type: result.type,
-                            anchor: result.anchor
-                          }
-                        }).catch(() => {
-                          console.debug('No listeners for NEW_TAG message, this is expected');
-                        });
-                        
-                        // Open thread
-                        window.open(result.anchor, '_blank');
+                        SearchService.handleTagClick(result.tag, result.type, result.anchor);
+                        SearchService.openThread(result.anchor);
                       }
                     }}
                   >

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { contextDb, SettingKeys } from '../../background/contextDb';
 import { MODEL_OPTIONS } from '../../types/chat';
+import { CONFIG } from '../../config';
 
 export const SettingsPage: React.FC = () => {
   const [isPersonalizationEnabled, setIsPersonalizationEnabled] = useState<boolean>(false);
@@ -8,7 +9,7 @@ export const SettingsPage: React.FC = () => {
   const [isSaving, setIsSaving] = useState<boolean>(false);
   
   // Chat-specific settings
-  const [selectedModel, setSelectedModel] = useState<string>(MODEL_OPTIONS[0].value);
+  const [selectedModel, setSelectedModel] = useState<string>(CONFIG.DEFAULT_MODEL);
   const [temperature, setTemperature] = useState<number>(0.7);
   const [topP, setTopP] = useState<number>(0.95);
   const [maxTokens, setMaxTokens] = useState<number>(4096);
@@ -20,7 +21,7 @@ export const SettingsPage: React.FC = () => {
         const [personalizationEnabled, chatInterfaceEnabled, chatModel, chatTemperature, chatTopP, chatMaxTokens] = await Promise.all([
           contextDb.getSettingValue(SettingKeys.PERSONALIZATION_ENABLED, false),
           contextDb.getSettingValue(SettingKeys.CHAT_INTERFACE_ENABLED, false),
-          contextDb.getSettingValue(SettingKeys.CHAT_MODEL, MODEL_OPTIONS[0].value),
+          contextDb.getSettingValue(SettingKeys.CHAT_MODEL, CONFIG.DEFAULT_MODEL),
           contextDb.getSettingValue(SettingKeys.CHAT_TEMPERATURE, 0.7),
           contextDb.getSettingValue(SettingKeys.CHAT_TOP_P, 0.95),
           contextDb.getSettingValue(SettingKeys.CHAT_MAX_TOKENS, 4096)

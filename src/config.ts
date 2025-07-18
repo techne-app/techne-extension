@@ -16,5 +16,7 @@ export const CONFIG = {
             color: 'white'
         }
     },
-    MAX_STORY_TAGS: 3
+    MAX_STORY_TAGS: 3,
+    // Default model configuration - change this to update the default model
+    DEFAULT_MODEL: "Llama-3.2-3B-Instruct-q4f16_1-MLC"
 }; 

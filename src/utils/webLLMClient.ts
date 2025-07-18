@@ -17,6 +17,9 @@ export interface ChatOptions {
   onUpdate?: (message: string, chunk: string) => void;
   onFinish?: (message: string) => void;
   onError?: (error: string) => void;
+  onModelLoadingStart?: () => void;
+  onModelLoadingProgress?: (progress: number, text: string) => void;
+  onModelLoadingComplete?: () => void;
 }
 
 interface LLMConfig {
@@ -36,10 +39,17 @@ export class WebLLMClient {
     // Initialize with default config
   }
 
-  private async initModel(onUpdate?: (message: string, chunk: string) => void): Promise<void> {
+  private async initModel(options?: {
+    onUpdate?: (message: string, chunk: string) => void;
+    onModelLoadingStart?: () => void;
+    onModelLoadingProgress?: (progress: number, text: string) => void;
+    onModelLoadingComplete?: () => void;
+  }): Promise<void> {
     if (!this.llmConfig) {
       throw Error("llmConfig is undefined");
     }
+
+    options?.onModelLoadingStart?.();
 
     // Create engine config with Cache API (Chrome recommended for AI models)
     const engineConfig = {
@@ -48,7 +58,8 @@ export class WebLLMClient {
         useIndexedDBCache: false, // Use Cache API as recommended by Chrome
       },
       initProgressCallback: (report: InitProgressReport) => {
-        onUpdate?.(report.text, report.text);
+        options?.onUpdate?.(report.text, report.text);
+        options?.onModelLoadingProgress?.(report.progress || 0, report.text);
       }
     };
 
@@ -58,6 +69,7 @@ export class WebLLMClient {
     );
 
     this.initialized = true;
+    options?.onModelLoadingComplete?.();
   }
 
   private isDifferentConfig(config: LLMConfig): boolean {
@@ -94,7 +106,12 @@ export class WebLLMClient {
       this.llmConfig = { ...(this.llmConfig || {}), ...config };
       
       try {
-        await this.initModel(options.onUpdate);
+        await this.initModel({
+          onUpdate: options.onUpdate,
+          onModelLoadingStart: options.onModelLoadingStart,
+          onModelLoadingProgress: options.onModelLoadingProgress,
+          onModelLoadingComplete: options.onModelLoadingComplete
+        });
       } catch (err: any) {
         let errorMessage = err.message || err.toString() || "";
         if (errorMessage === "[object Object]") {
@@ -148,7 +165,12 @@ export class WebLLMClient {
         console.log('Port disconnected, attempting to reinitialize and retry');
         try {
           await this.reset();
-          await this.initModel(options.onUpdate);
+          await this.initModel({
+            onUpdate: options.onUpdate,
+            onModelLoadingStart: options.onModelLoadingStart,
+            onModelLoadingProgress: options.onModelLoadingProgress,
+            onModelLoadingComplete: options.onModelLoadingComplete
+          });
           // Retry the chat once after reconnection
           return this.chat(options);
         } catch (retryErr: any) {
@@ -167,6 +189,14 @@ export class WebLLMClient {
     this.initialized = false;
     this.llmConfig = undefined;
     this.engine = null;
+  }
+
+  isModelLoaded(): boolean {
+    return this.initialized && this.engine !== null;
+  }
+
+  getModelName(): string | undefined {
+    return this.llmConfig?.model;
   }
 }
 
