@@ -153,44 +153,60 @@ The interface uses an overlay menu bar for tab navigation and defaults to the ch
 - Chat interface runs entirely locally with WebLLM models
 - Feature flags control interface availability and default tabs
 
-## Merging Search and Chat Tabs
+## Agentic Search Evolution
 
-The following phases outline the plan to consolidate search functionality within the chat interface, ultimately eliminating the separate search tab while maintaining all current capabilities.
+The following phases outline the roadmap for evolving from current basic search to powerful agentic search capabilities, while maintaining backward compatibility and preparing for MCP (Model Context Protocol) integration.
 
-### Phase 1: Extract Search Logic
-- Create shared search service from `ThreadSearch.tsx` functionality
-- Extract semantic matching logic into reusable utility from `ThreadSearch.tsx:118-197`
-- Maintain existing API integration patterns with HN Firebase API
-- Preserve tag matching and scoring algorithms
+### Current State
+- **Existing Search**: Limited to recent top 30 stories with frontend semantic matching
+- **Chat Interface**: Local WebLLM-powered conversations with basic message handling
+- **Backend**: Azure Functions with basic tag APIs, evolving toward MCP server capabilities
 
-### Phase 2: Enhance Chat with Search Intent
-- Add search intent detection in `ChatInterface.tsx` message handling
-- Integrate search service into chat message processing pipeline
-- Create search result formatting for conversational display
-- Maintain same semantic search capabilities via embeddings
+### Phase 1: Current Search as "Tool"
+- **Search Tool Integration**: Wrap existing search functionality as a chat "tool"
+- **Intent Detection**: Chat interface detects search intent and routes to current search logic
+- **Proof of Concept**: Use as testing ground for future MCP tool integration patterns
+- **Seamless UX**: Maintain all existing search capabilities within conversational interface
+- **Bridge Architecture**: Create patterns that will extend to MCP tools
 
-### Phase 3: Unified Results Display
-- Design search results as rich chat messages with embedded links
-- Preserve clickable links and tag information from current search UI
-- Add follow-up question capabilities about search results
-- Format results conversationally: "I found 5 discussions about AI: [clickable thread links]"
+### Phase 2: MCP-Ready Chat Architecture
+- **Tool-Oriented Design**: Redesign chat interface to support tool calling patterns
+- **Message Routing**: Create extensible message handling that can route to different "tools"
+- **Context Management**: Build conversation context management for multi-step reasoning
+- **Function Calling**: Prepare infrastructure for future MCP function calling capabilities
+- **Backward Compatibility**: Maintain all existing chat functionality
 
-### Phase 4: Migration Strategy
-- Keep search tab functional during transition period
-- Add feature flag for consolidated interface testing
-- Gradual user migration from search to chat interface
-- Remove search tab once consolidation is complete
+### Phase 3: MCP Integration Layer
+- **MCP Client**: Implement MCP client capabilities in chat interface
+- **Backend Connection**: Connect to backend MCP servers when they become available
+- **Tool Orchestration**: Create system for managing multiple MCP tools and their interactions
+- **Historical Data**: Access backend's historical HN data and vector indexing capabilities
+- **Agent Behavior**: Enable multi-step reasoning: "find AI discussions from 2023, then show related startups"
 
-### Key Benefits of Consolidation
-- **Preserved Functionality**: All existing search capabilities remain intact
-- **Enhanced UX**: Natural language search queries instead of keyword-based
-- **Unified Interface**: Single interaction paradigm reduces cognitive load
-- **Future-Ready**: Foundation for eliminating separate search tab entirely
-- **Contextual Search**: Search results become part of conversation history
+### Phase 4: Full Agentic Search
+- **Historical Analysis**: Search across years of HN data with powerful backend vector indexing
+- **Multi-Step Reasoning**: Complex queries that require multiple API calls and context building
+- **Topic Evolution**: Track how discussions evolve over time periods
+- **Pattern Recognition**: Identify trends, user patterns, and emerging topics
+- **Contextual Intelligence**: Build understanding across related discussions and time periods
 
-### Technical Implementation Notes
-- Search functionality from `ThreadSearch.tsx` will be extracted into utility services
-- Chat interface will detect search-like queries and route to search service
-- Same HN API integration and tag matching logic will be preserved
-- Search history will merge with conversation history for unified experience
-- Feature flags will control rollout and testing phases
+### Key Design Principles
+- **MCP-First**: Architecture designed for MCP server integration from the start
+- **Tool Orchestration**: Chat interface as intelligent tool coordinator
+- **Backward Compatible**: Current search functionality remains intact throughout evolution
+- **Future-Proof**: Can scale from simple search to full agentic capabilities without breaking changes
+- **Black Box Backend**: Design assumes backend is extensible black box that will expose MCP servers
+
+### Technical Implementation Strategy
+- **Extensible Architecture**: Chat interface designed to handle any number of MCP tools
+- **Function Calling**: Conversation handling that can orchestrate multiple backend calls
+- **Context Preservation**: Multi-step reasoning with conversation memory and context building
+- **Graceful Degradation**: Fallback to current search capabilities when backend tools unavailable
+- **Feature Flags**: Control rollout of agentic capabilities as backend evolves
+
+### Benefits of Agentic Approach
+- **Powerful Search**: Access to historical data and sophisticated vector indexing
+- **Intelligent Reasoning**: Multi-step queries that go beyond simple keyword matching
+- **Natural Interface**: Conversational search that understands intent and context
+- **Scalable Architecture**: Can accommodate any backend MCP tools as they become available
+- **Enhanced Discovery**: Find patterns and connections across time periods and topics
