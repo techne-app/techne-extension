@@ -19,6 +19,11 @@ const App: React.FC = () => {
       // Check if chat interface is enabled
       const chatInterfaceEnabled = await isChatInterfaceEnabled();
       setChatEnabled(chatInterfaceEnabled);
+      
+      // Set chat as default tab if enabled
+      if (chatInterfaceEnabled) {
+        setActiveTab('chat');
+      }
     };
 
     // Listen for chat interface toggle events
