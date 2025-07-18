@@ -1,12 +1,11 @@
-import { CacheType, ChatConfig, MODEL_OPTIONS } from '../types/chat';
+import { ChatConfig, MODEL_OPTIONS } from '../types/chat';
 import { contextDb, SettingKeys } from '../background/contextDb';
 
 class ConfigStore {
   private async loadConfig(): Promise<ChatConfig> {
     try {
-      const [model, cacheType, temperature, topP, maxTokens] = await Promise.all([
+      const [model, temperature, topP, maxTokens] = await Promise.all([
         contextDb.getSettingValue(SettingKeys.CHAT_MODEL, MODEL_OPTIONS[0].value),
-        contextDb.getSettingValue(SettingKeys.CHAT_CACHE_TYPE, CacheType.Cache),
         contextDb.getSettingValue(SettingKeys.CHAT_TEMPERATURE, 0.7),
         contextDb.getSettingValue(SettingKeys.CHAT_TOP_P, 0.95),
         contextDb.getSettingValue(SettingKeys.CHAT_MAX_TOKENS, 4096)
@@ -14,7 +13,6 @@ class ConfigStore {
       
       return {
         model,
-        cacheType,
         temperature,
         topP,
         maxTokens
@@ -23,7 +21,6 @@ class ConfigStore {
       console.error('Failed to load chat config:', error);
       return {
         model: MODEL_OPTIONS[0].value,
-        cacheType: CacheType.Cache,
         temperature: 0.7,
         topP: 0.95,
         maxTokens: 4096,
@@ -39,13 +36,6 @@ class ConfigStore {
     await contextDb.saveSetting(SettingKeys.CHAT_MODEL, model);
   }
 
-  async getCacheType(): Promise<CacheType> {
-    return await contextDb.getSettingValue(SettingKeys.CHAT_CACHE_TYPE, CacheType.Cache);
-  }
-
-  async setCacheType(cacheType: CacheType): Promise<void> {
-    await contextDb.saveSetting(SettingKeys.CHAT_CACHE_TYPE, cacheType);
-  }
 
   async getTemperature(): Promise<number> {
     return await contextDb.getSettingValue(SettingKeys.CHAT_TEMPERATURE, 0.7);
@@ -80,9 +70,6 @@ class ConfigStore {
     
     if (updates.model !== undefined) {
       promises.push(this.setModel(updates.model));
-    }
-    if (updates.cacheType !== undefined) {
-      promises.push(this.setCacheType(updates.cacheType));
     }
     if (updates.temperature !== undefined) {
       promises.push(this.setTemperature(updates.temperature));

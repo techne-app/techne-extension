@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { type ChatCompletionMessageParam } from "@mlc-ai/web-llm";
-import { Conversation, ChatMessage, MODEL_OPTIONS, CacheType } from '../../types/chat';
+import { Conversation, ChatMessage, MODEL_OPTIONS } from '../../types/chat';
 import { ConversationManager } from '../../utils/conversationUtils';
 import { webLLMClient } from '../../utils/webLLMClient';
 import { configStore } from '../../utils/configStore';
@@ -94,7 +94,6 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
           temperature: config.temperature,
           topP: config.topP,
           maxTokens: config.maxTokens,
-          cache: config.cacheType,
           stream: true,
         },
         onUpdate: (message, chunk) => {

@@ -200,7 +200,6 @@ export const SettingKeys = {
   PERSONALIZATION_ENABLED: 'personalization_enabled',
   CHAT_INTERFACE_ENABLED: 'chat_interface_enabled',
   CHAT_MODEL: 'chat_model',
-  CHAT_CACHE_TYPE: 'chat_cache_type',
   CHAT_TEMPERATURE: 'chat_temperature',
   CHAT_TOP_P: 'chat_top_p',
   CHAT_MAX_TOKENS: 'chat_max_tokens'

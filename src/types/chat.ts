@@ -24,14 +24,8 @@ export interface ChatState {
   error: string | null;
 }
 
-export enum CacheType {
-  Cache = "cache",
-  IndexDB = "index_db",
-}
-
 export interface ChatConfig {
   model: string;
-  cacheType: CacheType;
   temperature: number;
   topP: number;
   maxTokens: number;

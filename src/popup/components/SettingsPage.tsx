@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { contextDb, SettingKeys } from '../../background/contextDb';
-import { CacheType, MODEL_OPTIONS } from '../../types/chat';
+import { MODEL_OPTIONS } from '../../types/chat';
 
 export const SettingsPage: React.FC = () => {
   const [isPersonalizationEnabled, setIsPersonalizationEnabled] = useState<boolean>(false);
@@ -9,7 +9,6 @@ export const SettingsPage: React.FC = () => {
   
   // Chat-specific settings
   const [selectedModel, setSelectedModel] = useState<string>(MODEL_OPTIONS[0].value);
-  const [cacheType, setCacheType] = useState<CacheType>(CacheType.Cache);
   const [temperature, setTemperature] = useState<number>(0.7);
   const [topP, setTopP] = useState<number>(0.95);
   const [maxTokens, setMaxTokens] = useState<number>(4096);
@@ -18,11 +17,10 @@ export const SettingsPage: React.FC = () => {
   useEffect(() => {
     const loadSettings = async () => {
       try {
-        const [personalizationEnabled, chatInterfaceEnabled, chatModel, chatCacheType, chatTemperature, chatTopP, chatMaxTokens] = await Promise.all([
+        const [personalizationEnabled, chatInterfaceEnabled, chatModel, chatTemperature, chatTopP, chatMaxTokens] = await Promise.all([
           contextDb.getSettingValue(SettingKeys.PERSONALIZATION_ENABLED, false),
           contextDb.getSettingValue(SettingKeys.CHAT_INTERFACE_ENABLED, false),
           contextDb.getSettingValue(SettingKeys.CHAT_MODEL, MODEL_OPTIONS[0].value),
-          contextDb.getSettingValue(SettingKeys.CHAT_CACHE_TYPE, CacheType.Cache),
           contextDb.getSettingValue(SettingKeys.CHAT_TEMPERATURE, 0.7),
           contextDb.getSettingValue(SettingKeys.CHAT_TOP_P, 0.95),
           contextDb.getSettingValue(SettingKeys.CHAT_MAX_TOKENS, 4096)
@@ -31,7 +29,6 @@ export const SettingsPage: React.FC = () => {
         setIsPersonalizationEnabled(personalizationEnabled);
         setIsChatInterfaceEnabled(chatInterfaceEnabled);
         setSelectedModel(chatModel);
-        setCacheType(chatCacheType);
         setTemperature(chatTemperature);
         setTopP(chatTopP);
         setMaxTokens(chatMaxTokens);
@@ -98,18 +95,6 @@ export const SettingsPage: React.FC = () => {
     }
   };
 
-  const handleCacheTypeChange = async (newCacheType: CacheType) => {
-    setIsSaving(true);
-    try {
-      setCacheType(newCacheType);
-      await contextDb.saveSetting(SettingKeys.CHAT_CACHE_TYPE, newCacheType);
-      console.log(`Cache type updated to: ${newCacheType}`);
-    } catch (error) {
-      console.error('Failed to save cache type:', error);
-    } finally {
-      setIsSaving(false);
-    }
-  };
 
   const handleTemperatureChange = async (newTemperature: number) => {
     setIsSaving(true);
@@ -254,28 +239,6 @@ export const SettingsPage: React.FC = () => {
                 </p>
               </div>
               
-              {/* Cache Type Setting */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Cache Type
-                </label>
-                <select
-                  value={cacheType}
-                  onChange={(e) => handleCacheTypeChange(e.target.value as CacheType)}
-                  disabled={isSaving}
-                  className="w-full p-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value={CacheType.Cache}>Cache API (Faster, Default)</option>
-                  <option value={CacheType.IndexDB}>IndexedDB (More Persistent)</option>
-                </select>
-                <p className="text-xs text-gray-500 mt-1">
-                  {cacheType === CacheType.Cache 
-                    ? 'Uses browser Cache API for faster access but may have storage limits'
-                    : 'Uses IndexedDB for more persistent storage with larger capacity but slightly slower access'
-                  }
-                </p>
-              </div>
-
               {/* Temperature Setting */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">

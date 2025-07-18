@@ -4,7 +4,6 @@ import {
   InitProgressReport,
   prebuiltAppConfig
 } from "@mlc-ai/web-llm";
-import { CacheType } from '../types/chat';
 
 export interface ChatOptions {
   messages: ChatCompletionMessageParam[];
@@ -13,7 +12,6 @@ export interface ChatOptions {
     temperature: number;
     topP: number;
     maxTokens: number;
-    cache: CacheType;
     stream: boolean;
   };
   onUpdate?: (message: string, chunk: string) => void;
@@ -26,7 +24,6 @@ interface LLMConfig {
   temperature: number;
   top_p: number;
   max_tokens: number;
-  cache: CacheType;
   stream: boolean;
 }
 
@@ -44,11 +41,11 @@ export class WebLLMClient {
       throw Error("llmConfig is undefined");
     }
 
-    // Create engine config similar to web-llm-chat
+    // Create engine config with Cache API (Chrome recommended for AI models)
     const engineConfig = {
       appConfig: {
         ...prebuiltAppConfig,
-        useIndexedDBCache: this.llmConfig.cache === CacheType.IndexDB,
+        useIndexedDBCache: false, // Use Cache API as recommended by Chrome
       },
       initProgressCallback: (report: InitProgressReport) => {
         onUpdate?.(report.text, report.text);
@@ -76,8 +73,7 @@ export class WebLLMClient {
     // Compare optional fields
     if (this.llmConfig.temperature !== config.temperature ||
         this.llmConfig.top_p !== config.top_p ||
-        this.llmConfig.max_tokens !== config.max_tokens ||
-        this.llmConfig.cache !== config.cache) {
+        this.llmConfig.max_tokens !== config.max_tokens) {
       return true;
     }
 
@@ -91,7 +87,6 @@ export class WebLLMClient {
       temperature: options.config.temperature,
       top_p: options.config.topP,
       max_tokens: options.config.maxTokens,
-      cache: options.config.cache,
       stream: options.config.stream
     };
 
