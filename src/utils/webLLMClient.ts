@@ -58,7 +58,7 @@ export class WebLLMClient {
         useIndexedDBCache: false, // Use Cache API as recommended by Chrome
       },
       initProgressCallback: (report: InitProgressReport) => {
-        options?.onUpdate?.(report.text, report.text);
+        // Only send progress to model loading callback, not to chat update
         options?.onModelLoadingProgress?.(report.progress || 0, report.text);
       }
     };

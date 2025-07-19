@@ -340,31 +340,6 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       {/* Chat Messages */}
       <div className="flex-1 overflow-auto p-4">
         <div className="max-w-4xl mx-auto">
-          {/* Model loading progress message */}
-          {isModelLoading && (
-            <div className="flex justify-center mb-4">
-              <div className="bg-gray-700 text-gray-300 px-4 py-3 rounded-lg text-sm max-w-2xl">
-                <div className="flex items-center gap-3">
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                  <div>
-                    <div className="font-semibold mb-1">Loading AI Model...</div>
-                    <div className="text-xs text-gray-400">
-                      {modelLoadingText || `Loading ${loadedModelName || 'AI Model'}`}
-                    </div>
-                    <div className="w-48 h-2 bg-gray-600 rounded-full mt-2">
-                      <div 
-                        className="h-2 bg-blue-500 rounded-full transition-all duration-300"
-                        style={{ width: `${Math.round(modelLoadingProgress * 100)}%` }}
-                      />
-                    </div>
-                    <div className="text-xs text-gray-400 mt-1">
-                      {Math.round(modelLoadingProgress * 100)}% complete
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
           
           {activeConversation.messages.map((msg) => (
             <MessageBubble key={msg.id} message={msg} />
@@ -402,6 +377,23 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
             >
               {isModelLoading ? 'Loading...' : 'Send'}
             </button>
+          </div>
+          
+          {/* Status indicator - small reserved space, prominent when active */}
+          <div className="flex items-center justify-center mt-2 h-6">
+            {isModelLoading && (
+              <div className="flex items-center gap-2 text-xs text-gray-400">
+                <div className="animate-spin rounded-full h-3 w-3 border border-gray-400 border-t-blue-500"></div>
+                <span>Loading model...</span>
+                <div className="w-24 h-1 bg-gray-600 rounded-full">
+                  <div 
+                    className="h-1 bg-blue-500 rounded-full transition-all duration-300"
+                    style={{ width: `${Math.round(modelLoadingProgress * 100)}%` }}
+                  />
+                </div>
+                <span>{Math.round(modelLoadingProgress * 100)}%</span>
+              </div>
+            )}
           </div>
         </div>
       </div>
