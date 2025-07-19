@@ -19,7 +19,7 @@ export interface ChatOptions {
   onError?: (error: string) => void;
   onModelLoadingStart?: () => void;
   onModelLoadingProgress?: (progress: number, text: string) => void;
-  onModelLoadingComplete?: () => void;
+  onModelLoadingComplete?: () => Promise<boolean>; // Return false to abort chat
 }
 
 interface LLMConfig {
@@ -43,8 +43,8 @@ export class WebLLMClient {
     onUpdate?: (message: string, chunk: string) => void;
     onModelLoadingStart?: () => void;
     onModelLoadingProgress?: (progress: number, text: string) => void;
-    onModelLoadingComplete?: () => void;
-  }): Promise<void> {
+    onModelLoadingComplete?: () => Promise<boolean>;
+  }): Promise<boolean> {
     if (!this.llmConfig) {
       throw Error("llmConfig is undefined");
     }
@@ -69,7 +69,8 @@ export class WebLLMClient {
     );
 
     this.initialized = true;
-    options?.onModelLoadingComplete?.();
+    const shouldContinue = await options?.onModelLoadingComplete?.();
+    return shouldContinue !== false;
   }
 
   private isDifferentConfig(config: LLMConfig): boolean {
@@ -77,18 +78,13 @@ export class WebLLMClient {
       return true;
     }
 
-    // Compare required fields
+    // Only compare model - other parameters don't require reloading
     if (this.llmConfig.model !== config.model) {
       return true;
     }
 
-    // Compare optional fields
-    if (this.llmConfig.temperature !== config.temperature ||
-        this.llmConfig.top_p !== config.top_p ||
-        this.llmConfig.max_tokens !== config.max_tokens) {
-      return true;
-    }
-
+    // temperature, top_p, max_tokens, and stream are inference parameters
+    // that don't require model reloading
     return false;
   }
 
@@ -103,15 +99,24 @@ export class WebLLMClient {
     };
 
     if (!this.initialized || this.isDifferentConfig(config)) {
+      console.log('🔄 Model needs initialization. Initialized:', this.initialized, 'Config different:', this.isDifferentConfig(config));
+      console.log('🔧 Current config:', this.llmConfig);
+      console.log('🔧 New config:', config);
+      
       this.llmConfig = { ...(this.llmConfig || {}), ...config };
       
       try {
-        await this.initModel({
+        const shouldContinue = await this.initModel({
           onUpdate: options.onUpdate,
           onModelLoadingStart: options.onModelLoadingStart,
           onModelLoadingProgress: options.onModelLoadingProgress,
           onModelLoadingComplete: options.onModelLoadingComplete
         });
+        
+        if (!shouldContinue) {
+          // Model loading completed but chat should be aborted
+          return;
+        }
       } catch (err: any) {
         let errorMessage = err.message || err.toString() || "";
         if (errorMessage === "[object Object]") {
@@ -121,6 +126,8 @@ export class WebLLMClient {
         options?.onError?.(errorMessage);
         return;
       }
+    } else {
+      console.log('✅ Model already initialized and config unchanged, skipping initialization');
     }
 
     let reply: string | null = "";
@@ -165,12 +172,17 @@ export class WebLLMClient {
         console.log('Port disconnected, attempting to reinitialize and retry');
         try {
           await this.reset();
-          await this.initModel({
+          const shouldContinue = await this.initModel({
             onUpdate: options.onUpdate,
             onModelLoadingStart: options.onModelLoadingStart,
             onModelLoadingProgress: options.onModelLoadingProgress,
             onModelLoadingComplete: options.onModelLoadingComplete
           });
+          
+          if (!shouldContinue) {
+            return;
+          }
+          
           // Retry the chat once after reconnection
           return this.chat(options);
         } catch (retryErr: any) {

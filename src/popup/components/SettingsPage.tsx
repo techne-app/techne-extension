@@ -5,7 +5,7 @@ import { CONFIG } from '../../config';
 
 export const SettingsPage: React.FC = () => {
   const [isPersonalizationEnabled, setIsPersonalizationEnabled] = useState<boolean>(false);
-  const [isChatInterfaceEnabled, setIsChatInterfaceEnabled] = useState<boolean>(false);
+  const [isChatInterfaceEnabled, setIsChatInterfaceEnabled] = useState<boolean>(true);
   const [isSaving, setIsSaving] = useState<boolean>(false);
   
   // Chat-specific settings
@@ -20,7 +20,7 @@ export const SettingsPage: React.FC = () => {
       try {
         const [personalizationEnabled, chatInterfaceEnabled, chatModel, chatTemperature, chatTopP, chatMaxTokens] = await Promise.all([
           contextDb.getSettingValue(SettingKeys.PERSONALIZATION_ENABLED, false),
-          contextDb.getSettingValue(SettingKeys.CHAT_INTERFACE_ENABLED, false),
+          contextDb.getSettingValue(SettingKeys.CHAT_INTERFACE_ENABLED, true),
           contextDb.getSettingValue(SettingKeys.CHAT_MODEL, CONFIG.DEFAULT_MODEL),
           contextDb.getSettingValue(SettingKeys.CHAT_TEMPERATURE, 0.7),
           contextDb.getSettingValue(SettingKeys.CHAT_TOP_P, 0.95),

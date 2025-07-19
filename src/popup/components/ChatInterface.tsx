@@ -161,7 +161,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
           console.error('Intent detection failed:', error);
         }
       } else {
-        console.log('⏳ Model not loaded, will load during chat and check intent then');
+        console.log('⏳ Model not loaded, will perform intent detection after loading');
       }
 
       // Only proceed with chat if we didn't intercept for search
@@ -178,20 +178,41 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
           maxTokens: config.maxTokens,
           stream: true,
         },
-        onModelLoadingStart: () => {
+        // Only show loading UI if model actually needs to load
+        onModelLoadingStart: !isModelLoaded ? () => {
           setIsModelLoading(true);
           setModelLoadingProgress(0);
           setModelLoadingText(`Loading ${loadedModelName || 'AI Model'}`);
-        },
-        onModelLoadingProgress: (progress, text) => {
+        } : undefined,
+        onModelLoadingProgress: !isModelLoaded ? (progress, text) => {
           setModelLoadingProgress(progress);
           setModelLoadingText(text);
-        },
-        onModelLoadingComplete: () => {
+        } : undefined,
+        onModelLoadingComplete: !isModelLoaded ? async () => {
           setIsModelLoading(false);
           setModelLoadingProgress(1);
           setModelLoadingText('');
-        },
+          
+          // Perform intent detection after model loads
+          console.log('🔍 Model loading complete, now checking for search intent...');
+          try {
+            const intentResult = await IntentDetector.detectSearchIntent(userMessage);
+            console.log('🎯 Intent detection result:', intentResult);
+            
+            if (intentResult.isSearch && intentResult.searchQuery && intentResult.confidence > 0.5) {
+              console.log('✅ Search intent detected with high confidence, executing search for:', intentResult.searchQuery);
+              setStreamingMessage(null);
+              await handleSearchRequest(intentResult.searchQuery);
+              return false; // Abort chat
+            } else {
+              console.log('💬 No search intent detected or low confidence, continuing with chat. Confidence:', intentResult.confidence);
+            }
+          } catch (error) {
+            console.error('Intent detection failed:', error);
+          }
+          
+          return true; // Continue with chat
+        } : undefined,
         onUpdate: (message) => {
           // Update streaming message
           setStreamingMessage(prev => prev ? {

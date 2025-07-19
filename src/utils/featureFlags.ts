@@ -27,8 +27,8 @@ export async function isChatInterfaceEnabled(): Promise<boolean> {
       return false; // If feature is globally disabled, return false
     }
     
-    // If feature is globally enabled, check user preference (default to false)
-    const userEnabled = await contextDb.getSettingValue(SettingKeys.CHAT_INTERFACE_ENABLED, false);
+    // If feature is globally enabled, check user preference (default to true)
+    const userEnabled = await contextDb.getSettingValue(SettingKeys.CHAT_INTERFACE_ENABLED, true);
     return userEnabled;
   } catch (error) {
     console.error('Error checking chat interface setting:', error);
