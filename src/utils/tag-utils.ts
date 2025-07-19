@@ -67,19 +67,17 @@ export function addStoryTags(subtextElement: Element, storyData: StoryData): voi
         }
 
         const anchorElement = document.createElement('a');
-        // Style like HN links - grey with underline on hover
-        anchorElement.style.color = '#828282';
+        // Style like HN links - blue with underline on hover
+        anchorElement.style.color = '#0000EE'; // HN's blue link color
         anchorElement.style.textDecoration = 'none';
         anchorElement.href = storyData.tag_anchors[i];
         anchorElement.textContent = storyData.tags[i];
         
-        // Add hover effect - blue color and underline like HN links
+        // Add hover effect - underline on hover, stay blue
         anchorElement.addEventListener('mouseenter', () => {
-            anchorElement.style.color = '#0000EE'; // HN's blue link color
             anchorElement.style.textDecoration = 'underline';
         });
         anchorElement.addEventListener('mouseleave', () => {
-            anchorElement.style.color = '#828282'; // Back to grey
             anchorElement.style.textDecoration = 'none';
         });
         
