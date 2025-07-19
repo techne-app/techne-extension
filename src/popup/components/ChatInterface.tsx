@@ -403,18 +403,6 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
               {isModelLoading ? 'Loading...' : 'Send'}
             </button>
           </div>
-          {loadedModelName && (
-            <div className="flex items-center gap-2 mt-2 text-xs text-gray-400">
-              <span className="flex items-center gap-1">
-                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-                {loadedModelName}
-              </span>
-              <span>•</span>
-              <span>Prefill: 388.2 tok/s, Decode: 29.6 tok/s</span>
-            </div>
-          )}
         </div>
       </div>
     </div>

@@ -39,11 +39,6 @@ export interface ModelOption {
 
 export const MODEL_OPTIONS: ModelOption[] = [
   {
-    id: "qwen",
-    name: "Qwen2-0.5B (Balanced)", 
-    value: "Qwen2-0.5B-Instruct-q4f16_1-MLC"
-  },
-  {
     id: "llama",
     name: "Llama-3.2-3B (Powerful)",
     value: "Llama-3.2-3B-Instruct-q4f16_1-MLC"
