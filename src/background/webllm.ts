@@ -1,5 +1,6 @@
 import { ExtensionServiceWorkerMLCEngineHandler } from "@mlc-ai/web-llm";
 import { isChatInterfaceEnabled } from '../utils/featureFlags';
+import { logger } from '../utils/logger';
 
 let mlcHandler: ExtensionServiceWorkerMLCEngineHandler | undefined;
 
@@ -9,7 +10,7 @@ chrome.runtime.onConnect.addListener(async function (port) {
     const chatEnabled = await isChatInterfaceEnabled();
     
     if (!chatEnabled) {
-      console.log('Chat interface is disabled');
+      logger.info('Chat interface is disabled');
       return;
     }
     
@@ -20,13 +21,13 @@ chrome.runtime.onConnect.addListener(async function (port) {
       
       // Handle port disconnection to reset handler
       port.onDisconnect.addListener(() => {
-        console.log('WebLLM port disconnected, awaiting reconnection');
+        logger.debug('WebLLM port disconnected, awaiting reconnection');
         mlcHandler = undefined; // Reset handler to force recreation on next connection
       });
       
-      console.log('WebLLM handler initialized successfully');
+      logger.info('WebLLM handler initialized successfully');
     } catch (error) {
-      console.error('Error initializing WebLLM handler:', error);
+      logger.error('Error initializing WebLLM handler:', error);
     }
   }
 });

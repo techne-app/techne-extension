@@ -1,5 +1,6 @@
 import featureFlags from '../../feature-flags.json';
 import { contextDb, SettingKeys } from '../background/contextDb';
+import { logger } from './logger';
 
 export function isFeatureEnabled(feature: keyof typeof featureFlags): boolean {
   return featureFlags[feature];
@@ -31,7 +32,7 @@ export async function isChatInterfaceEnabled(): Promise<boolean> {
     const userEnabled = await contextDb.getSettingValue(SettingKeys.CHAT_INTERFACE_ENABLED, true);
     return userEnabled;
   } catch (error) {
-    console.error('Error checking chat interface setting:', error);
+    logger.error('Error checking chat interface setting:', error);
     // Fall back to feature flag on error
     return isFeatureEnabled('chat_interface');
   }

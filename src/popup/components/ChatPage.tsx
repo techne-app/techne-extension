@@ -4,6 +4,7 @@ import { ConversationSidebar } from './ConversationSidebar';
 import { Conversation } from '../../types/chat';
 import { ConversationManager } from '../../utils/conversationUtils';
 import { configStore } from '../../utils/configStore';
+import { logger } from '../../utils/logger';
 
 export const ChatPage: React.FC = () => {
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -20,7 +21,7 @@ export const ChatPage: React.FC = () => {
       setConversations(prev => [newConv, ...prev]);
       setActiveConversationId(newConv.id);
     } catch (error) {
-      console.error('Error creating new conversation:', error);
+      logger.error('Error creating new conversation:', error);
     }
   };
 
@@ -37,7 +38,7 @@ export const ChatPage: React.FC = () => {
         await handleNewConversation();
       }
     } catch (error) {
-      console.error('Error loading conversations:', error);
+      logger.error('Error loading conversations:', error);
     } finally {
       setIsLoading(false);
     }
@@ -63,7 +64,7 @@ export const ChatPage: React.FC = () => {
         setActiveConversationId(remaining.length > 0 ? remaining[0].id : null);
       }
     } catch (error) {
-      console.error('Error deleting conversation:', error);
+      logger.error('Error deleting conversation:', error);
     }
   };
 

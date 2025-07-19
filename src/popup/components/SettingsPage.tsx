@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { contextDb, SettingKeys } from '../../background/contextDb';
 import { MODEL_OPTIONS } from '../../types/chat';
 import { CONFIG } from '../../config';
+import { logger } from '../../utils/logger';
 
 export const SettingsPage: React.FC = () => {
   const [isPersonalizationEnabled, setIsPersonalizationEnabled] = useState<boolean>(false);
@@ -34,7 +35,7 @@ export const SettingsPage: React.FC = () => {
         setTopP(chatTopP);
         setMaxTokens(chatMaxTokens);
       } catch (error) {
-        console.error('Failed to load settings:', error);
+        logger.error('Failed to load settings:', error);
       }
     };
 
@@ -49,9 +50,9 @@ export const SettingsPage: React.FC = () => {
     try {
       setIsPersonalizationEnabled(newValue); // Update UI immediately
       await contextDb.saveSetting(SettingKeys.PERSONALIZATION_ENABLED, newValue);
-      console.log(`Personalization setting updated to: ${newValue}`);
+      logger.info(`Personalization setting updated to: ${newValue}`);
     } catch (error) {
-      console.error('Failed to save setting:', error);
+      logger.error('Failed to save setting:', error);
       // Revert UI state on error
       setIsPersonalizationEnabled(!newValue);
     } finally {
@@ -67,14 +68,14 @@ export const SettingsPage: React.FC = () => {
     try {
       setIsChatInterfaceEnabled(newValue); // Update UI immediately
       await contextDb.saveSetting(SettingKeys.CHAT_INTERFACE_ENABLED, newValue);
-      console.log(`Chat interface setting updated to: ${newValue}`);
+      logger.info(`Chat interface setting updated to: ${newValue}`);
       
       // Notify other components about the change
       window.dispatchEvent(new CustomEvent('chatInterfaceToggled', { 
         detail: { enabled: newValue } 
       }));
     } catch (error) {
-      console.error('Failed to save setting:', error);
+      logger.error('Failed to save setting:', error);
       // Revert UI state on error
       setIsChatInterfaceEnabled(!newValue);
     } finally {
@@ -88,9 +89,9 @@ export const SettingsPage: React.FC = () => {
     try {
       setSelectedModel(newModel);
       await contextDb.saveSetting(SettingKeys.CHAT_MODEL, newModel);
-      console.log(`Model updated to: ${newModel}`);
+      logger.info(`Model updated to: ${newModel}`);
     } catch (error) {
-      console.error('Failed to save model:', error);
+      logger.error('Failed to save model:', error);
     } finally {
       setIsSaving(false);
     }
@@ -102,9 +103,9 @@ export const SettingsPage: React.FC = () => {
     try {
       setTemperature(newTemperature);
       await contextDb.saveSetting(SettingKeys.CHAT_TEMPERATURE, newTemperature);
-      console.log(`Temperature updated to: ${newTemperature}`);
+      logger.info(`Temperature updated to: ${newTemperature}`);
     } catch (error) {
-      console.error('Failed to save temperature:', error);
+      logger.error('Failed to save temperature:', error);
     } finally {
       setIsSaving(false);
     }
@@ -115,9 +116,9 @@ export const SettingsPage: React.FC = () => {
     try {
       setTopP(newTopP);
       await contextDb.saveSetting(SettingKeys.CHAT_TOP_P, newTopP);
-      console.log(`Top P updated to: ${newTopP}`);
+      logger.info(`Top P updated to: ${newTopP}`);
     } catch (error) {
-      console.error('Failed to save top P:', error);
+      logger.error('Failed to save top P:', error);
     } finally {
       setIsSaving(false);
     }
@@ -128,9 +129,9 @@ export const SettingsPage: React.FC = () => {
     try {
       setMaxTokens(newMaxTokens);
       await contextDb.saveSetting(SettingKeys.CHAT_MAX_TOKENS, newMaxTokens);
-      console.log(`Max tokens updated to: ${newMaxTokens}`);
+      logger.info(`Max tokens updated to: ${newMaxTokens}`);
     } catch (error) {
-      console.error('Failed to save max tokens:', error);
+      logger.error('Failed to save max tokens:', error);
     } finally {
       setIsSaving(false);
     }

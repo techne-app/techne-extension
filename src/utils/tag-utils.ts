@@ -1,6 +1,7 @@
 import { CONFIG } from '../config';
 import { StoryData, ThreadData, Tag } from '../types';
 import { MessageType, NewTagRequest } from '../types/messages';
+import { logger } from './logger';
 
 export async function fetchStoryTags(
     storyIds: number[],
@@ -21,7 +22,7 @@ export async function fetchStoryTags(
         });
         return await response.json();
     } catch (error) {
-        console.error('Error fetching story tags:', error);
+        logger.api('Error fetching story tags:', error);
         return [];
     }
 }
@@ -35,7 +36,7 @@ export async function fetchThreadTags(threadIds: number[]): Promise<ThreadData[]
         });
         return await response.json();
     } catch (error) {
-        console.error('Error fetching thread tags:', error);
+        logger.api('Error fetching thread tags:', error);
         return [];
     }
 }
@@ -94,7 +95,7 @@ export function addStoryTags(subtextElement: Element, storyData: StoryData): voi
             };
             chrome.runtime.sendMessage(msg).catch((error) => {
                 // Ignore "Receiving end does not exist" errors - this is expected when popup is closed
-                console.debug('No listeners for NEW_TAG message, this is expected');
+                logger.debug('No listeners for NEW_TAG message, this is expected');
             });
             window.open(storyData.tag_anchors[i], '_blank');
         });

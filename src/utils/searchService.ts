@@ -1,5 +1,6 @@
 import { MessageType, NewSearchRequest } from '../types/messages';
 import { fetchStoryTags } from './tag-utils';
+import { logger } from './logger';
 
 export interface TagMatch {
   tag: string;
@@ -39,7 +40,7 @@ export class SearchService {
         type: MessageType.NEW_SEARCH,
         data: { query }
       } as NewSearchRequest).catch(() => {
-        console.debug('No listeners for NEW_SEARCH message, this is expected');
+        logger.debug('No listeners for NEW_SEARCH message, this is expected');
       });
 
       if (onProgress) {
@@ -121,7 +122,7 @@ export class SearchService {
       
       // Perform semantic matching via background script with timeout handling
       try {
-        console.log('🔄 Starting Promise.race for semantic matching...');
+        logger.search('Starting Promise.race for semantic matching...');
         const matches = await Promise.race([
           this.performSemanticMatching(query, formattedTags),
           new Promise<TagMatch[]>((_, reject) => 
@@ -129,35 +130,35 @@ export class SearchService {
           )
         ]);
         
-        console.log('🎯 Promise.race completed, matches received:', matches?.length || 0);
+        logger.search('Promise.race completed, matches received:', matches?.length || 0);
         
         if (onProgress) {
-          console.log('📝 Updating progress to Processing results...');
+          logger.debug('Updating progress to Processing results...');
           onProgress(`I'll search for "${query}" in recent Hacker News discussions...\n\nFetching latest stories from Hacker News...\n\nAnalyzing ${storyIds.length} top stories...\n\nPerforming semantic search...\n\nProcessing results...`);
           await new Promise(resolve => setTimeout(resolve, 200));
         }
         
         // Continue with results processing
-        console.log('🔧 Building final search result...');
+        logger.debug('Building final search result...');
         const searchResult = {
           query,
           matches,
           error: matches.length === 0 ? 'No matching discussions found' : undefined
         };
         
-        console.log('📊 Final search result prepared:', searchResult);
+        logger.debug('Final search result prepared:', searchResult);
         
         if (onProgress) {
-          console.log('🎨 Formatting final content...');
+          logger.debug('Formatting final content...');
           const finalContent = this.formatSearchResultsAsMessage(query, searchResult);
-          console.log('📤 Sending final content via onProgress:', finalContent.substring(0, 100) + '...');
+          logger.debug('Sending final content via onProgress:', finalContent.substring(0, 100) + '...');
           onProgress(finalContent);
         }
         
-        console.log('✅ executeSearchStreaming completed successfully');
+        logger.search('executeSearchStreaming completed successfully');
         return searchResult;
       } catch (matchingError) {
-        console.error('❌ Semantic matching failed:', matchingError);
+        logger.error('Semantic matching failed:', matchingError);
         const errorResult = {
           query,
           matches: [],
@@ -172,7 +173,7 @@ export class SearchService {
         return errorResult;
       }
     } catch (error) {
-      console.error('Error during search:', error);
+      logger.error('Error during search:', error);
       const errorResult = {
         query,
         matches: [],
@@ -208,7 +209,7 @@ export class SearchService {
         type: MessageType.NEW_SEARCH,
         data: { query }
       } as NewSearchRequest).catch(() => {
-        console.debug('No listeners for NEW_SEARCH message, this is expected');
+        logger.debug('No listeners for NEW_SEARCH message, this is expected');
       });
 
       // Fetch top story IDs
@@ -270,7 +271,7 @@ export class SearchService {
         error: matches.length === 0 ? 'No matching discussions found' : undefined
       };
     } catch (error) {
-      console.error('Error during search:', error);
+      logger.error('Error during search:', error);
       return {
         query,
         matches: [],
@@ -290,23 +291,23 @@ export class SearchService {
     tags: Array<{tag: string, type: string, anchor: string}>
   ): Promise<TagMatch[]> {
     return new Promise((resolve, reject) => {
-      console.log('🔍 Starting semantic matching for:', inputText, 'with', tags.length, 'tags');
+      logger.search('Starting semantic matching for:', inputText, 'with', tags.length, 'tags');
       let timeoutId: NodeJS.Timeout;
       let resolved = false;
       
       // Set up message listener for response
       const handleMessage = (message: any) => {
         if (message.type === MessageType.TAG_MATCH_RESPONSE && !resolved) {
-          console.log('✅ Received TAG_MATCH_RESPONSE:', message.data);
+          logger.search('Received TAG_MATCH_RESPONSE:', message.data);
           resolved = true;
           clearTimeout(timeoutId);
           chrome.runtime.onMessage.removeListener(handleMessage);
           
           if (message.data.error) {
-            console.error('❌ Semantic matching error:', message.data.error);
+            logger.error('Semantic matching error:', message.data.error);
             resolve([]);
           } else {
-            console.log('🎯 Semantic matching success, matches:', message.data.matches?.length || 0);
+            logger.search('Semantic matching success, matches:', message.data.matches?.length || 0);
             resolve(message.data.matches || []);
           }
         }
@@ -315,7 +316,7 @@ export class SearchService {
       chrome.runtime.onMessage.addListener(handleMessage);
 
       // Send match request
-      console.log('📤 Sending TAG_MATCH_REQUEST...');
+      logger.search('Sending TAG_MATCH_REQUEST...');
       chrome.runtime.sendMessage({
         type: MessageType.TAG_MATCH_REQUEST,
         data: {
@@ -323,9 +324,9 @@ export class SearchService {
           tags
         }
       }).then(() => {
-        console.log('✅ TAG_MATCH_REQUEST sent successfully');
+        logger.search('TAG_MATCH_REQUEST sent successfully');
       }).catch((error) => {
-        console.error('❌ Failed to send TAG_MATCH_REQUEST:', error);
+        logger.error('Failed to send TAG_MATCH_REQUEST:', error);
         if (!resolved) {
           resolved = true;
           clearTimeout(timeoutId);
@@ -337,7 +338,7 @@ export class SearchService {
       // Timeout fallback
       timeoutId = setTimeout(() => {
         if (!resolved) {
-          console.warn('⏰ Semantic matching timeout reached');
+          logger.warn('Semantic matching timeout reached');
           resolved = true;
           chrome.runtime.onMessage.removeListener(handleMessage);
           resolve([]);
@@ -391,7 +392,7 @@ export class SearchService {
         anchor
       }
     }).catch(() => {
-      console.debug('No listeners for NEW_TAG message, this is expected');
+      logger.debug('No listeners for NEW_TAG message, this is expected');
     });
   }
 

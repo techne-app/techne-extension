@@ -5,8 +5,9 @@ import { ActivityPage } from './components/ActivityPage';
 import { ChatPage } from './components/ChatPage';
 import { SettingsPage } from './components/SettingsPage';
 import { isChatInterfaceEnabled } from '../utils/featureFlags';
+import { logger } from '../utils/logger';
 
-console.log("Popup script starting...");
+logger.info("Popup script starting...");
 
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>('chat');
@@ -74,10 +75,10 @@ const App: React.FC = () => {
 };
 
 const container = document.getElementById('root');
-console.log("Container element:", container);
+logger.debug("Container element:", container);
 
 if (container) {
   const root = createRoot(container);
-  console.log("Root created, rendering components...");
+  logger.debug("Root created, rendering components...");
   root.render(<App />);
 }

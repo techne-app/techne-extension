@@ -1,5 +1,6 @@
 import { StoryData } from '../types';
 import { ExtensionResponse, MessageType } from '../types/messages';
+import { logger } from './logger';
 
 /**
  * Gets personalized tags for a story based on user history
@@ -32,7 +33,7 @@ export async function selectRelevantTags(story: StoryData): Promise<{ tags: stri
         }
         throw new Error('Unexpected response type');
     } catch (error) {
-        console.error('Error getting tag recommendations:', error);
+        logger.error('Error getting tag recommendations:', error);
         return getDefaultTags(story);
     }
 }

@@ -2,12 +2,13 @@ import { CONFIG } from '../../config';
 import { fetchStoryTags, addStoryTags } from '../../utils/tag-utils';
 import { StoryData } from '../../types';
 import { selectRelevantTags } from '../../utils/personalization-utils';
+import { logger } from '../../utils/logger';
 
 async function init(): Promise<void> {
     try {
         const storyIds = getStoryIds();
         if (!storyIds.length) {
-            console.log('Techne: No stories found on page');
+            logger.info('Techne: No stories found on page');
             return;
         }
 
@@ -18,18 +19,18 @@ async function init(): Promise<void> {
             false,
             ['thread_theme']
         );
-        console.log('Techne: Fetched story tags:', data);
+        logger.api('Techne: Fetched story tags:', data);
 
         // Always use selectRelevantTags - the background script will handle the feature flag check
         const tagSelector = selectRelevantTags;
 
-        console.log('Techne: Starting tag processing for stories:', data.length);
+        logger.debug('Techne: Starting tag processing for stories:', data.length);
 
         for (const story of data) {
             await processStory(story, storySubtextMap, tagSelector);
         }
     } catch (error) {
-        console.error('Techne: Error in main page initialization:', error);
+        logger.error('Techne: Error in main page initialization:', error);
     }
 }
 
@@ -60,12 +61,12 @@ async function processStory(
 ) {
     const subtextElement = storySubtextMap.get(story.id);
     if (!subtextElement || !story.tags?.length) {
-        console.log(`Techne: Skipping story ${story.id} - no tags or subtext element`);
+        logger.debug(`Techne: Skipping story ${story.id} - no tags or subtext element`);
         return;
     }
 
     const selectedTags = await tagSelector(story);
-    console.log(`Techne: Adding tags to DOM for story ${story.id}:`, selectedTags.tags);
+    logger.debug(`Techne: Adding tags to DOM for story ${story.id}:`, selectedTags.tags);
     addStoryTags(subtextElement, { ...story, ...selectedTags });
 }
 

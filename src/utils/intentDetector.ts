@@ -1,5 +1,6 @@
 import { webLLMClient } from './webLLMClient';
 import { configStore } from './configStore';
+import { logger } from './logger';
 
 export interface IntentDetectionResult {
   isSearch: boolean;
@@ -24,13 +25,13 @@ export class IntentDetector {
     message: string, 
     callbacks?: IntentDetectionCallbacks
   ): Promise<IntentDetectionResult> {
-    console.log('🤖 Starting intent detection for message:', message);
+    logger.model('Starting intent detection for message:', message);
     const prompt = this.buildIntentDetectionPrompt(message);
-    console.log('📝 Built intent detection prompt');
+    logger.debug('Built intent detection prompt');
     const response = await this.queryLLM(prompt, callbacks);
-    console.log('🔤 Raw LLM response:', response);
+    logger.debug('Raw LLM response:', response);
     const result = this.parseIntentResponse(response);
-    console.log('✨ Parsed intent result:', result);
+    logger.intent('Parsed intent result:', result);
     return result;
   }
 
@@ -147,7 +148,7 @@ JSON Response:`;
         reasoning: parsed.reasoning || undefined
       };
     } catch (error) {
-      console.error('Error parsing intent response:', error);
+      logger.error('Error parsing intent response:', error);
       
       // Return fallback result
       return {

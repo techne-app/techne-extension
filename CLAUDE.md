@@ -167,6 +167,15 @@ The interface uses an overlay menu bar for tab navigation and defaults to the ch
 - Chat interface is the primary interaction mode with integrated search functionality
 - Feature flags control interface availability and default tabs
 
+### Logging
+This codebase uses a custom logger system (`src/utils/logger.ts`) instead of direct console statements:
+```typescript
+import { logger } from '../utils/logger';
+logger.debug('message');  // Instead of console.log()
+logger.error('error');    // Instead of console.error()
+```
+Available methods: `debug()`, `info()`, `warn()`, `error()`, `search()`, `chat()`, `model()`, `database()`, `api()`, `intent()`. Development shows all logs, production only shows errors.
+
 ## Agentic Search Evolution
 
 The following phases outline the roadmap for evolving from current chat-first search to powerful agentic search capabilities, preparing for MCP (Model Context Protocol) integration.

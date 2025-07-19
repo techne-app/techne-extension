@@ -1,24 +1,25 @@
 import { CONFIG } from '../../config';
 import { fetchThreadTags, addThreadTag } from '../../utils/tag-utils';
 import { ThreadData, Tag } from '../../types';
+import { logger } from '../../utils/logger';
 
 async function init(): Promise<void> {
-    console.log("Techne: Profile page script initialized");
+    logger.debug("Techne: Profile page script initialized");
     
     const allComments = document.querySelectorAll('tr.athing.comtr');
-    console.log("Techne: Found comments:", allComments.length);
+    logger.debug("Techne: Found comments:", allComments.length);
     
     const threadIds = Array.from(allComments).map(comment => {
         const id = Number(comment.getAttribute('id'));
         return id;
     }).filter(id => !isNaN(id));
     
-    console.log("Techne: Extracted thread IDs:", threadIds);
+    logger.debug("Techne: Extracted thread IDs:", threadIds);
 
     if (threadIds.length) {
         try {
             const threadData = await fetchThreadTags(threadIds);
-            console.log("Techne: Received tag data:", threadData);
+            logger.api("Techne: Received tag data:", threadData);
 
             threadData.forEach(thread => {
                 const element = document.getElementById(String(thread.id));
@@ -51,7 +52,7 @@ async function init(): Promise<void> {
                 }
             });
         } catch (error) {
-            console.error("Techne: Error fetching tags:", error);
+            logger.error("Techne: Error fetching tags:", error);
         }
     }
 }

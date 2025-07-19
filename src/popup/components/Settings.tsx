@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { contextDb, SettingKeys } from '../../background/contextDb';
+import { logger } from '../../utils/logger';
 
 export const Settings: React.FC = () => {
   const [isPersonalizationEnabled, setIsPersonalizationEnabled] = useState<boolean>(false);
@@ -17,7 +18,7 @@ export const Settings: React.FC = () => {
         );
         setIsPersonalizationEnabled(personalizationEnabled);
       } catch (error) {
-        console.error('Failed to load settings:', error);
+        logger.error('Failed to load settings:', error);
       }
     };
 
@@ -58,9 +59,9 @@ export const Settings: React.FC = () => {
     try {
       setIsPersonalizationEnabled(newValue); // Update UI immediately
       await contextDb.saveSetting(SettingKeys.PERSONALIZATION_ENABLED, newValue);
-      console.log(`Personalization setting updated to: ${newValue}`);
+      logger.info(`Personalization setting updated to: ${newValue}`);
     } catch (error) {
-      console.error('Failed to save setting:', error);
+      logger.error('Failed to save setting:', error);
       // Revert UI state on error
       setIsPersonalizationEnabled(!newValue);
     } finally {

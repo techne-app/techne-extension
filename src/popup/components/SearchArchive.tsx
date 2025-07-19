@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { contextDb, type Search } from '../../background/contextDb';
 import { MessageType } from '../../types/messages';
+import { logger } from '../../utils/logger';
 
 export const SearchArchive: React.FC = () => {
   const [searches, setSearches] = useState<Search[]>([]);
@@ -13,7 +14,7 @@ export const SearchArchive: React.FC = () => {
       const records = await contextDb.getRecentSearches(10); // Get the 10 most recent searches
       setSearches(records);
     } catch (err) {
-      console.error('Failed to load searches:', err);
+      logger.error('Failed to load searches:', err);
       setError(err instanceof Error ? err.message : 'Unknown error');
     } finally {
       setLoading(false);
@@ -26,7 +27,7 @@ export const SearchArchive: React.FC = () => {
       await contextDb.clearSearches();
       setSearches([]);
     } catch (err) {
-      console.error('Failed to clear searches:', err);
+      logger.error('Failed to clear searches:', err);
       setError(err instanceof Error ? err.message : 'Unknown error');
     }
   };

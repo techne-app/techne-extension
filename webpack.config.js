@@ -7,8 +7,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 /** @type {import('webpack').Configuration} */
 const config = {
-  mode: "development",
-  devtool: "inline-source-map",
+  // Mode will be set by CLI argument (--mode=production or --mode=development)
+  devtool: process.env.NODE_ENV === 'production' ? false : "inline-source-map",
   entry: {
     'background/index': './src/background/index.ts',
     'popup/index': './src/popup/index.tsx',

@@ -1,6 +1,7 @@
 import { ChatConfig } from '../types/chat';
 import { contextDb, SettingKeys } from '../background/contextDb';
 import { CONFIG } from '../config';
+import { LogLevel } from './logger';
 
 class ConfigStore {
   private async loadConfig(): Promise<ChatConfig> {
@@ -19,6 +20,7 @@ class ConfigStore {
         maxTokens
       };
     } catch (error) {
+      // Use direct console.error here to avoid circular dependency since this is in configStore
       console.error('Failed to load chat config:', error);
       return {
         model: CONFIG.DEFAULT_MODEL,
@@ -83,6 +85,15 @@ class ConfigStore {
     }
     
     await Promise.all(promises);
+  }
+
+  async getLogLevel(): Promise<LogLevel> {
+    const defaultLevel = process.env.NODE_ENV === 'development' ? LogLevel.DEBUG : LogLevel.ERROR;
+    return await contextDb.getSettingValue(SettingKeys.LOG_LEVEL, defaultLevel);
+  }
+
+  async setLogLevel(level: LogLevel): Promise<void> {
+    await contextDb.saveSetting(SettingKeys.LOG_LEVEL, level);
   }
 }
 

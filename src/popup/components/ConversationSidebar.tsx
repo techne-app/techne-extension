@@ -21,9 +21,9 @@ export const ConversationSidebar: React.FC<ConversationSidebarProps> = ({
   return (
     <div className="w-80 bg-gray-800 flex flex-col h-full">
       {/* Header */}
-      <div className="p-4 border-b border-gray-700">
-        <div className="mb-4">
-          <h1 className="text-xl font-semibold text-white">Techne</h1>
+      <div className="flex-shrink-0 p-4">
+        <div>
+          <h2 className="text-lg font-semibold text-white">Techne</h2>
           <p className="text-sm text-gray-400">Your personalized navigator for Hacker News.</p>
         </div>
       </div>
@@ -77,7 +77,7 @@ export const ConversationSidebar: React.FC<ConversationSidebarProps> = ({
       </div>
 
       {/* Bottom actions */}
-      <div className="p-4 border-t border-gray-700">
+      <div className="flex-shrink-0 p-4">
         <button 
           onClick={onNewConversation}
           className="w-full p-2 bg-blue-600 rounded hover:bg-blue-500 transition-colors text-center text-sm font-medium text-white"

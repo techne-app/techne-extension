@@ -1,6 +1,7 @@
 import { CONFIG } from '../../config';
 import { fetchStoryTags, fetchThreadTags, addStoryTags, addThreadTag } from '../../utils/tag-utils';
 import { StoryData, ThreadData, CommentCategories, Tag } from '../../types';
+import { logger } from '../../utils/logger';
 
 function categorizeComments(comments: NodeListOf<Element>): CommentCategories {
     const threadIds: number[] = [];
@@ -69,7 +70,7 @@ async function init(): Promise<void> {
             });
         }
     } catch (error) {
-        console.error("Techne: Error fetching tags:", error);
+        logger.error("Techne: Error fetching tags:", error);
     }
 }
 

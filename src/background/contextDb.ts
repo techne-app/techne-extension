@@ -202,7 +202,8 @@ export const SettingKeys = {
   CHAT_MODEL: 'chat_model',
   CHAT_TEMPERATURE: 'chat_temperature',
   CHAT_TOP_P: 'chat_top_p',
-  CHAT_MAX_TOKENS: 'chat_max_tokens'
+  CHAT_MAX_TOKENS: 'chat_max_tokens',
+  LOG_LEVEL: 'log_level'
 };
 
 export const contextDb = new ContextDB();

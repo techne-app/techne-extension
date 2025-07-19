@@ -4,6 +4,7 @@ import { contextDb } from "./contextDb";
 import * as ort from 'onnxruntime-web';
 import './webllm';
 import { isPersonalizationEnabled } from '../utils/featureFlags';
+import { logger } from '../utils/logger';
 
 import { 
   MessageType, 
@@ -30,9 +31,9 @@ chrome.action.onClicked.addListener(async () => {
 // Optional: Handle extension installation/update
 chrome.runtime.onInstalled.addListener((details) => {
   if (details.reason === 'install') {
-    console.log('Extension installed');
+    logger.info('Extension installed');
   } else if (details.reason === 'update') {
-    console.log('Extension updated');
+    logger.info('Extension updated');
   }
 }); 
 
@@ -117,7 +118,7 @@ export function registerPersonalizeMessageListener() {
                   sendResponse({ success: false, error: `Unknown type: ${message.type}` });
               }
           } catch (error) {
-              console.error('Error in background script:', error);
+              logger.error('Error in background script:', error);
               sendResponse({ 
                   success: false, 
                   error: error instanceof Error ? error.message : String(error) 
@@ -140,14 +141,14 @@ export function registerTagMessageListener() {
   ) => {
     if (message.type === MessageType.NEW_TAG) {
       try {
-        console.log('NEW_TAG received:', message.data);
+        logger.debug('NEW_TAG received:', message.data);
         contextDb.storeTag(
           message.data.tag, 
           message.data.type,
           message.data.anchor
         )
           .then(() => {
-            console.log('Tag stored successfully, notifying popup');
+            logger.database('Tag stored successfully, notifying popup');
             // Send message to all extension pages
             try {
               chrome.runtime.sendMessage({
@@ -156,20 +157,20 @@ export function registerTagMessageListener() {
               });
             } catch (error) {
               // Ignore "Receiving end does not exist" errors - this is expected when popup is closed
-              console.debug('No listeners for TAGS_UPDATED message, this is expected');
+              logger.debug('No listeners for TAGS_UPDATED message, this is expected');
             }
           })
           .catch((error) => {
-            console.error('Error storing tag:', error);
+            logger.error('Error storing tag:', error);
           });
       } catch (error) {
-        console.error('Error processing message:', error);
+        logger.error('Error processing message:', error);
       }
       return true;
     }
   });
   
-  console.log('Tag message listener registered');
+  logger.info('Tag message listener registered');
 }
 
 // Add this function
@@ -190,7 +191,7 @@ export function registerTagMatchingListener() {
                 }
               });
             } catch (error) {
-              console.debug('No listeners for TAG_MATCH_RESPONSE message, this is expected');
+              logger.debug('No listeners for TAG_MATCH_RESPONSE message, this is expected');
             }
             return;
           }
@@ -232,10 +233,10 @@ export function registerTagMatchingListener() {
               data: { matches: topMatches }
             });
           } catch (error) {
-            console.debug('No listeners for TAG_MATCH_RESPONSE message, this is expected');
+            logger.debug('No listeners for TAG_MATCH_RESPONSE message, this is expected');
           }
         } catch (error) {
-          console.error('Error in tag matching:', error);
+          logger.error('Error in tag matching:', error);
           try {
             chrome.runtime.sendMessage({
               type: MessageType.TAG_MATCH_RESPONSE,
@@ -245,7 +246,7 @@ export function registerTagMatchingListener() {
               }
             });
           } catch (msgError) {
-            console.debug('No listeners for TAG_MATCH_RESPONSE message, this is expected');
+            logger.debug('No listeners for TAG_MATCH_RESPONSE message, this is expected');
           }
         }
       })();
@@ -253,7 +254,7 @@ export function registerTagMatchingListener() {
     }
   });
   
-  console.log('Tag matching listener registered');
+  logger.info('Tag matching listener registered');
 }
 
 // Add this function
@@ -266,10 +267,10 @@ export function registerSearchMessageListener() {
   ) => {
     if (message.type === MessageType.NEW_SEARCH) {
       try {
-        console.log('NEW_SEARCH received:', message.data);
+        logger.debug('NEW_SEARCH received:', message.data);
         contextDb.storeSearch(message.data.query)
           .then(() => {
-            console.log('Search stored successfully, notifying popup');
+            logger.database('Search stored successfully, notifying popup');
             // Send message to all extension pages
             try {
               chrome.runtime.sendMessage({
@@ -278,20 +279,20 @@ export function registerSearchMessageListener() {
               });
             } catch (error) {
               // Ignore "Receiving end does not exist" errors - this is expected when popup is closed
-              console.debug('No listeners for SEARCHES_UPDATED message, this is expected');
+              logger.debug('No listeners for SEARCHES_UPDATED message, this is expected');
             }
           })
           .catch((error) => {
-            console.error('Error storing search:', error);
+            logger.error('Error storing search:', error);
           });
       } catch (error) {
-        console.error('Error processing message:', error);
+        logger.error('Error processing message:', error);
       }
       return true;
     }
   });
   
-  console.log('Search message listener registered');
+  logger.info('Search message listener registered');
 }
 
 

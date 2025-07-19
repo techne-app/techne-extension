@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { contextDb, type Tag } from '../../background/contextDb';
 import { MessageType } from '../../types/messages';
 import { ThreadCard } from './ThreadCard';
+import { logger } from '../../utils/logger';
 
 export const ThreadHistory: React.FC = () => {
   const [tags, setTags] = useState<Tag[]>([]);
@@ -18,7 +19,7 @@ export const ThreadHistory: React.FC = () => {
       );
       setTags(validRecords);
     } catch (err) {
-      console.error('Failed to load tags:', err);
+      logger.error('Failed to load tags:', err);
       setError(err instanceof Error ? err.message : 'Unknown error');
     } finally {
       setLoading(false);
@@ -31,7 +32,7 @@ export const ThreadHistory: React.FC = () => {
       await contextDb.clearTags();
       setTags([]);
     } catch (err) {
-      console.error('Failed to clear tags:', err);
+      logger.error('Failed to clear tags:', err);
       setError(err instanceof Error ? err.message : 'Unknown error');
     }
   };
@@ -42,9 +43,9 @@ export const ThreadHistory: React.FC = () => {
 
     // Define the message listener function
     const handleMessage = (message: any) => {
-      console.log('ThreadHistory received message:', message);
+      logger.debug('ThreadHistory received message:', message);
       if (message.type === MessageType.TAGS_UPDATED) {
-        console.log('Reloading tags due to TAGS_UPDATED message');
+        logger.debug('Reloading tags due to TAGS_UPDATED message');
         loadTags();
       }
     };

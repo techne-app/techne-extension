@@ -4,6 +4,7 @@ import {
   InitProgressReport,
   prebuiltAppConfig
 } from "@mlc-ai/web-llm";
+import { logger } from './logger';
 
 export interface ChatOptions {
   messages: ChatCompletionMessageParam[];
@@ -99,9 +100,9 @@ export class WebLLMClient {
     };
 
     if (!this.initialized || this.isDifferentConfig(config)) {
-      console.log('🔄 Model needs initialization. Initialized:', this.initialized, 'Config different:', this.isDifferentConfig(config));
-      console.log('🔧 Current config:', this.llmConfig);
-      console.log('🔧 New config:', config);
+      logger.model('Model needs initialization. Initialized:', this.initialized, 'Config different:', this.isDifferentConfig(config));
+      logger.debug('Current config:', this.llmConfig);
+      logger.debug('New config:', config);
       
       this.llmConfig = { ...(this.llmConfig || {}), ...config };
       
@@ -122,12 +123,12 @@ export class WebLLMClient {
         if (errorMessage === "[object Object]") {
           errorMessage = JSON.stringify(err);
         }
-        console.error("Error while initializing the model", errorMessage);
+        logger.error('Error while initializing the model', errorMessage);
         options?.onError?.(errorMessage);
         return;
       }
     } else {
-      console.log('✅ Model already initialized and config unchanged, skipping initialization');
+      logger.model('Model already initialized and config unchanged, skipping initialization');
     }
 
     let reply: string | null = "";
@@ -169,7 +170,7 @@ export class WebLLMClient {
       if (errorMessage.includes('disconnected port') || 
           errorMessage.includes('port is null') ||
           errorMessage.includes('Attempting to use a disconnected port object')) {
-        console.log('Port disconnected, attempting to reinitialize and retry');
+        logger.model('Port disconnected, attempting to reinitialize and retry');
         try {
           await this.reset();
           const shouldContinue = await this.initModel({
@@ -186,13 +187,13 @@ export class WebLLMClient {
           // Retry the chat once after reconnection
           return this.chat(options);
         } catch (retryErr: any) {
-          console.error("Failed to reconnect and retry:", retryErr);
+          logger.error('Failed to reconnect and retry:', retryErr);
           options.onError?.("Connection lost. Please try again.");
           return;
         }
       }
       
-      console.error("Error in chatCompletion", errorMessage);
+      logger.error('Error in chatCompletion', errorMessage);
       options.onError?.(errorMessage);
     }
   }

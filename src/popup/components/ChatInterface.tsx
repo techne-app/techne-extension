@@ -7,6 +7,7 @@ import { configStore } from '../../utils/configStore';
 import MessageBubble from './MessageBubble';
 import { IntentDetector } from '../../utils/intentDetector';
 import { SearchService } from '../../utils/searchService';
+import { logger } from '../../utils/logger';
 
 
 interface ChatInterfaceProps {
@@ -43,11 +44,11 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   // Handle search request with streaming - reuse existing assistant message
   const handleSearchRequest = async (searchQuery: string, assistantMessageId: string) => {
     try {
-      console.log('🚀 Starting handleSearchRequest for:', searchQuery);
+      logger.search('Starting handleSearchRequest for:', searchQuery);
       
       // Execute search with streaming
       await SearchService.executeSearchStreaming(searchQuery, async (content) => {
-        console.log('📨 Received content update:', content.substring(0, 50) + '...');
+        logger.debug('Received content update:', content.substring(0, 50) + '...');
         
         // Update streaming message state
         setStreamingMessage(prev => prev ? {
@@ -63,10 +64,10 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
           content
         );
         
-        console.log('💾 Database updated with content');
+        logger.database('Database updated with content');
       });
       
-      console.log('✅ SearchService.executeSearchStreaming completed');
+      logger.search('SearchService.executeSearchStreaming completed');
       
       // Finalize the streaming message
       setStreamingMessage(prev => prev ? {
@@ -74,16 +75,16 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         isStreaming: false
       } : null);
       
-      console.log('🔄 Getting updated conversation...');
+      logger.debug('Getting updated conversation...');
       
       // Get updated conversation
       const updatedConversation = await ConversationManager.getConversation(activeConversation!.id);
       if (updatedConversation) {
         onConversationUpdated(updatedConversation);
-        console.log('🔄 Conversation updated in UI');
+        logger.debug('Conversation updated in UI');
       }
     } catch (error) {
-      console.error('❌ Search error:', error);
+      logger.error('Search error:', error);
       // Update the assistant message with error content
       const errorContent = `I encountered an error while searching for "${searchQuery}": ${error instanceof Error ? error.message : 'Unknown error'}`;
       await ConversationManager.updateMessage(
@@ -93,7 +94,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       );
       setError('Search failed. Please try again.');
     } finally {
-      console.log('🏁 handleSearchRequest finally block');
+      logger.debug('handleSearchRequest finally block');
       setIsLoading(false);
       setStreamingMessage(null);
     }
@@ -146,16 +147,16 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
 
       // Check if model is already loaded by checking webLLMClient state
       const isModelLoaded = webLLMClient.isModelLoaded();
-      console.log('🔍 Model loaded check:', isModelLoaded);
+      logger.model('Model loaded check:', isModelLoaded);
       
       if (isModelLoaded) {
-        console.log('🔍 Model already loaded, checking for search intent...');
+        logger.model('Model already loaded, checking for search intent...');
         try {
           const intentResult = await IntentDetector.detectSearchIntent(userMessage);
-          console.log('🎯 Intent detection result:', intentResult);
+          logger.intent('Intent detection result:', intentResult);
           
           if (intentResult.isSearch && intentResult.searchQuery && intentResult.confidence > 0.5) {
-            console.log('✅ Search intent detected with high confidence, executing search for:', intentResult.searchQuery);
+            logger.search('Search intent detected with high confidence, executing search for:', intentResult.searchQuery);
             // Update both streaming message and database with search status
             const searchStatusContent = `🔍 Searching for "${intentResult.searchQuery}"...`;
             setStreamingMessage(prev => prev ? {
@@ -180,17 +181,17 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
             }
             return;
           } else {
-            console.log('💬 No search intent detected or low confidence, continuing with chat. Confidence:', intentResult.confidence);
+            logger.chat('No search intent detected or low confidence, continuing with chat. Confidence:', intentResult.confidence);
           }
         } catch (error) {
-          console.error('Intent detection failed:', error);
+          logger.error('Intent detection failed:', error);
         }
       } else {
-        console.log('⏳ Model not loaded, will perform intent detection after loading');
+        logger.model('Model not loaded, will perform intent detection after loading');
       }
 
       // Only proceed with chat if we didn't intercept for search
-      console.log('🗨️ Starting chat conversation...');
+      logger.chat('Starting chat conversation...');
 
       // Use WebLLM client with web-llm-chat patterns
       try {
@@ -219,13 +220,13 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
           setModelLoadingText('');
           
           // Perform intent detection after model loads
-          console.log('🔍 Model loading complete, now checking for search intent...');
+          logger.model('Model loading complete, now checking for search intent...');
           try {
             const intentResult = await IntentDetector.detectSearchIntent(userMessage);
-            console.log('🎯 Intent detection result:', intentResult);
+            logger.intent('Intent detection result:', intentResult);
             
             if (intentResult.isSearch && intentResult.searchQuery && intentResult.confidence > 0.5) {
-              console.log('✅ Search intent detected with high confidence, executing search for:', intentResult.searchQuery);
+              logger.search('Search intent detected with high confidence, executing search for:', intentResult.searchQuery);
               // Update both streaming message and database with search status
               const searchStatusContent = `🔍 Searching for "${intentResult.searchQuery}"...`;
               setStreamingMessage(prev => prev ? {
@@ -250,10 +251,10 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
               }
               return false; // Abort chat
             } else {
-              console.log('💬 No search intent detected or low confidence, continuing with chat. Confidence:', intentResult.confidence);
+              logger.chat('No search intent detected or low confidence, continuing with chat. Confidence:', intentResult.confidence);
             }
           } catch (error) {
-            console.error('Intent detection failed:', error);
+            logger.error('Intent detection failed:', error);
           }
           
           return true; // Continue with chat
@@ -278,20 +279,20 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
           setStreamingMessage(null);
         },
         onError: (errorMessage) => {
-          console.error('WebLLM chat error:', errorMessage);
+          logger.error('WebLLM chat error:', errorMessage);
           setError(errorMessage);
           setStreamingMessage(null);
           setIsModelLoading(false);
         }
         });
       } catch (error) {
-        console.error('WebLLM chat failed:', error);
+        logger.error('WebLLM chat failed:', error);
         setIsModelLoading(false);
         setError('Chat failed to start');
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to get response');
-      console.error('Error during chat:', err);
+      logger.error('Error during chat:', err);
       setStreamingMessage(null);
       setIsModelLoading(false);
     } finally {
@@ -323,8 +324,8 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   return (
     <div className="flex-1 flex flex-col h-full bg-gray-900">
       {/* Header */}
-      <div className="flex-shrink-0 p-4 border-b border-gray-700">
-        <div className="flex items-center justify-between">
+      <div className="flex-shrink-0 p-4 border-b border-gray-700" style={{ minHeight: '88px' }}>
+        <div className="flex items-center justify-between h-full">
           <div>
             <h2 className="text-lg font-semibold text-white truncate">
               {activeConversation.title}
