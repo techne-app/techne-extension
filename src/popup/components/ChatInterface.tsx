@@ -67,6 +67,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       setError('Search failed. Please try again.');
     } finally {
       setIsLoading(false);
+      setStreamingMessage(null);
     }
   };
 
@@ -151,7 +152,12 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
           
           if (intentResult.isSearch && intentResult.searchQuery && intentResult.confidence > 0.5) {
             console.log('✅ Search intent detected with high confidence, executing search for:', intentResult.searchQuery);
-            setStreamingMessage(null);
+            // Update streaming message to show search status
+            setStreamingMessage(prev => prev ? {
+              ...prev,
+              content: `🔍 Searching for "${intentResult.searchQuery}"...`,
+              isStreaming: false
+            } : null);
             await handleSearchRequest(intentResult.searchQuery);
             return;
           } else {
@@ -201,7 +207,12 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
             
             if (intentResult.isSearch && intentResult.searchQuery && intentResult.confidence > 0.5) {
               console.log('✅ Search intent detected with high confidence, executing search for:', intentResult.searchQuery);
-              setStreamingMessage(null);
+              // Update streaming message to show search status
+              setStreamingMessage(prev => prev ? {
+                ...prev,
+                content: `🔍 Searching for "${intentResult.searchQuery}"...`,
+                isStreaming: false
+              } : null);
               await handleSearchRequest(intentResult.searchQuery);
               return false; // Abort chat
             } else {

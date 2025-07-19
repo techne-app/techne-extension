@@ -168,11 +168,13 @@ The interface uses an overlay menu bar for tab navigation and defaults to the ch
 
 ## Recent Changes
 
-### v1.8.5 - Agentic Search Implementation
+### v1.8.5 - Agentic Search Implementation & Chat Interface Improvements
 - **Intent Detection**: Added `IntentDetector` utility to detect search intent using local LLM
 - **Search Service**: Created `SearchService` to encapsulate search functionality
 - **Unified Chat Interface**: Chat now handles both conversational AI and search requests
-- **Debug Cleanup**: Removed verbose console.log statements while preserving event state tracking
+- **Model Loading Optimization**: Fixed unnecessary model reloading on every message
+- **Chat Interface Default**: Chat interface now enabled by default for new users
+- **Enhanced UX**: Improved search status messaging with clear feedback
 - **Configuration Centralization**: Moved default model configuration to `src/config.ts`
   - Default model is now `Llama-3.2-3B-Instruct-q4f16_1-MLC`
   - Easy to change by updating `CONFIG.DEFAULT_MODEL` in `config.ts`
@@ -182,10 +184,24 @@ The interface uses an overlay menu bar for tab navigation and defaults to the ch
 - `src/utils/searchService.ts`: Centralized search execution and tag matching
 - `src/popup/components/SearchResultMessage.tsx`: Search result display component
 
+### Performance & UX Improvements:
+- **Model Loading Fix**: WebLLM client now only loads model once, not on every message
+- **Smart Config Comparison**: Only model changes trigger reloading, not inference parameters
+- **Loading State Management**: Proper loading indicators that disappear when model is ready
+- **Intent Detection Optimization**: Works with both pre-loaded and fresh model instances
+- **Search Status Messages**: Clear feedback showing "🔍 Searching for 'query'..." instead of generic dots
+- **Default Experience**: Chat interface enabled by default, automatically opens to chat tab
+
 ### Architecture Notes:
 - Chat interface now intercepts search intents and routes to search functionality
 - Maintains backward compatibility with existing search and chat features
 - Prepares foundation for future MCP (Model Context Protocol) integration
+- Optimized for performance with minimal model reloading
+- Improved user experience with better status feedback
+
+### Known Issues & Future Work:
+- **Search Status Animation**: Search status message "🔍 Searching for 'query'..." briefly appears but still reverts to animated dots before showing results. Need to investigate streaming message state management in ChatInterface.tsx and MessageBubble.tsx interaction.
+- **Potential Solutions**: May need to rework how streaming messages are handled during search operations or create a separate status message component for non-streaming status updates.
 
 ## Agentic Search Evolution
 
