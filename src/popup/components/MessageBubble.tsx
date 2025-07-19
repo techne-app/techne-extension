@@ -1,4 +1,5 @@
 import React from 'react';
+import ReactMarkdown from 'react-markdown';
 import { ChatMessage } from '../../types/chat';
 
 interface MessageBubbleProps {
@@ -35,7 +36,21 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
               ? 'bg-blue-600 text-white'
               : 'bg-gray-700 text-gray-100'
           }`}>
-            <div className="whitespace-pre-wrap">{message.content}</div>
+            {isUser ? (
+              <div className="whitespace-pre-wrap">{message.content}</div>
+            ) : (
+              <div className="prose prose-invert prose-sm max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0 prose-a:text-blue-400 hover:prose-a:text-blue-300">
+                <ReactMarkdown 
+                  components={{
+                    a: ({ node, ...props }) => (
+                      <a {...props} target="_blank" rel="noopener noreferrer" className="underline hover:no-underline" />
+                    )
+                  }}
+                >
+                  {message.content || ''}
+                </ReactMarkdown>
+              </div>
+            )}
             {message.isStreaming && !message.content && (
               <div className="mt-2 flex items-center gap-1">
                 <div className="w-2 h-2 bg-current rounded-full animate-pulse"></div>
