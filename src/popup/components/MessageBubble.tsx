@@ -36,7 +36,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
               : 'bg-gray-700 text-gray-100'
           }`}>
             <div className="whitespace-pre-wrap">{message.content}</div>
-            {message.isStreaming && !message.content.includes('🔍 Searching for') && (
+            {message.isStreaming && !message.content && (
               <div className="mt-2 flex items-center gap-1">
                 <div className="w-2 h-2 bg-current rounded-full animate-pulse"></div>
                 <div className="w-2 h-2 bg-current rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>

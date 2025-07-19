@@ -7,7 +7,6 @@ import { configStore } from '../../utils/configStore';
 import MessageBubble from './MessageBubble';
 import { IntentDetector } from '../../utils/intentDetector';
 import { SearchService } from '../../utils/searchService';
-import { SearchResultMessage } from './SearchResultMessage';
 
 
 interface ChatInterfaceProps {
@@ -41,60 +40,65 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     }
   }, [activeConversation]);
 
-  // Handle search request
-  const handleSearchRequest = async (searchQuery: string) => {
+  // Handle search request with streaming - reuse existing assistant message
+  const handleSearchRequest = async (searchQuery: string, assistantMessageId: string) => {
     try {
-      // Execute search
-      const searchResult = await SearchService.executeSearch(searchQuery);
+      console.log('🚀 Starting handleSearchRequest for:', searchQuery);
       
-      // Format search results as HTML content
-      const searchResultContent = formatSearchResultsAsMessage(searchQuery, searchResult);
+      // Execute search with streaming
+      await SearchService.executeSearchStreaming(searchQuery, async (content) => {
+        console.log('📨 Received content update:', content.substring(0, 50) + '...');
+        
+        // Update streaming message state
+        setStreamingMessage(prev => prev ? {
+          ...prev,
+          content,
+          isStreaming: true
+        } : null);
+        
+        // Update database with current content (await the async operation)
+        await ConversationManager.updateMessage(
+          activeConversation!.id, 
+          assistantMessageId, 
+          content
+        );
+        
+        console.log('💾 Database updated with content');
+      });
       
-      // Add search result as assistant message
-      await ConversationManager.addMessage(
-        activeConversation!.id, 
-        'assistant', 
-        searchResultContent
-      );
+      console.log('✅ SearchService.executeSearchStreaming completed');
+      
+      // Finalize the streaming message
+      setStreamingMessage(prev => prev ? {
+        ...prev,
+        isStreaming: false
+      } : null);
+      
+      console.log('🔄 Getting updated conversation...');
       
       // Get updated conversation
       const updatedConversation = await ConversationManager.getConversation(activeConversation!.id);
       if (updatedConversation) {
         onConversationUpdated(updatedConversation);
+        console.log('🔄 Conversation updated in UI');
       }
     } catch (error) {
-      console.error('Search error:', error);
+      console.error('❌ Search error:', error);
+      // Update the assistant message with error content
+      const errorContent = `I encountered an error while searching for "${searchQuery}": ${error instanceof Error ? error.message : 'Unknown error'}`;
+      await ConversationManager.updateMessage(
+        activeConversation!.id, 
+        assistantMessageId, 
+        errorContent
+      );
       setError('Search failed. Please try again.');
     } finally {
+      console.log('🏁 handleSearchRequest finally block');
       setIsLoading(false);
       setStreamingMessage(null);
     }
   };
 
-  // Format search results as message content
-  const formatSearchResultsAsMessage = (query: string, searchResult: any) => {
-    if (searchResult.error) {
-      return `I encountered an error while searching for "${query}": ${searchResult.error}`;
-    }
-    
-    if (searchResult.matches.length === 0) {
-      return `I couldn't find any discussions about "${query}" in the recent top stories. Try a different search term or check back later.`;
-    }
-    
-    const matchesText = searchResult.matches.slice(0, 5).map((match: any, index: number) => 
-      `${index + 1}. **${match.tag}** (${match.type}, Score: ${match.score.toFixed(2)}) - [View Discussion](${match.anchor})`
-    ).join('\n');
-    
-    let response = `I found ${searchResult.matches.length} discussion${searchResult.matches.length !== 1 ? 's' : ''} about "${query}":\n\n${matchesText}`;
-    
-    if (searchResult.matches.length > 5) {
-      response += `\n\n... and ${searchResult.matches.length - 5} more result${searchResult.matches.length - 5 !== 1 ? 's' : ''}`;
-    }
-    
-    response += '\n\nClick any discussion link to open it in a new tab.';
-    
-    return response;
-  };
 
   const handleSubmit = async () => {
     if (!message.trim() || !activeConversation || isModelLoading) return;
@@ -152,13 +156,28 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
           
           if (intentResult.isSearch && intentResult.searchQuery && intentResult.confidence > 0.5) {
             console.log('✅ Search intent detected with high confidence, executing search for:', intentResult.searchQuery);
-            // Update streaming message to show search status
+            // Update both streaming message and database with search status
+            const searchStatusContent = `🔍 Searching for "${intentResult.searchQuery}"...`;
             setStreamingMessage(prev => prev ? {
               ...prev,
-              content: `🔍 Searching for "${intentResult.searchQuery}"...`,
+              content: searchStatusContent,
               isStreaming: false
             } : null);
-            await handleSearchRequest(intentResult.searchQuery);
+            
+            // Update the database message with search status
+            await ConversationManager.updateMessage(
+              activeConversation.id, 
+              assistantMessage.id, 
+              searchStatusContent
+            );
+            
+            await handleSearchRequest(intentResult.searchQuery, assistantMessage.id);
+            
+            // Get final updated conversation after search completes
+            const finalConversation = await ConversationManager.getConversation(activeConversation.id);
+            if (finalConversation) {
+              onConversationUpdated(finalConversation);
+            }
             return;
           } else {
             console.log('💬 No search intent detected or low confidence, continuing with chat. Confidence:', intentResult.confidence);
@@ -207,13 +226,28 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
             
             if (intentResult.isSearch && intentResult.searchQuery && intentResult.confidence > 0.5) {
               console.log('✅ Search intent detected with high confidence, executing search for:', intentResult.searchQuery);
-              // Update streaming message to show search status
+              // Update both streaming message and database with search status
+              const searchStatusContent = `🔍 Searching for "${intentResult.searchQuery}"...`;
               setStreamingMessage(prev => prev ? {
                 ...prev,
-                content: `🔍 Searching for "${intentResult.searchQuery}"...`,
+                content: searchStatusContent,
                 isStreaming: false
               } : null);
-              await handleSearchRequest(intentResult.searchQuery);
+              
+              // Update the database message with search status
+              await ConversationManager.updateMessage(
+                activeConversation.id, 
+                assistantMessage.id, 
+                searchStatusContent
+              );
+              
+              await handleSearchRequest(intentResult.searchQuery, assistantMessage.id);
+              
+              // Get final updated conversation after search completes
+              const finalConversation = await ConversationManager.getConversation(activeConversation.id);
+              if (finalConversation) {
+                onConversationUpdated(finalConversation);
+              }
               return false; // Abort chat
             } else {
               console.log('💬 No search intent detected or low confidence, continuing with chat. Confidence:', intentResult.confidence);

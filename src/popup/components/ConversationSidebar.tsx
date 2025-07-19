@@ -23,8 +23,8 @@ export const ConversationSidebar: React.FC<ConversationSidebarProps> = ({
       {/* Header */}
       <div className="p-4 border-b border-gray-700">
         <div className="mb-4">
-          <h1 className="text-xl font-semibold text-white">Techne Chat</h1>
-          <p className="text-sm text-gray-400">AI Models Running in Browser</p>
+          <h1 className="text-xl font-semibold text-white">Techne</h1>
+          <p className="text-sm text-gray-400">Your personalized navigator for Hacker News.</p>
         </div>
       </div>
 
