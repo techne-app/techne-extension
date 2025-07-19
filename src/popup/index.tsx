@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import { OverlayMenuBar } from './components/OverlayMenuBar';
-import { SearchPage } from './components/SearchPage';
 import { ActivityPage } from './components/ActivityPage';
 import { ChatPage } from './components/ChatPage';
 import { SettingsPage } from './components/SettingsPage';
@@ -10,7 +9,7 @@ import { isChatInterfaceEnabled } from '../utils/featureFlags';
 console.log("Popup script starting...");
 
 const App: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<string>('search');
+  const [activeTab, setActiveTab] = useState<string>('chat');
   const [chatEnabled, setChatEnabled] = useState<boolean>(false);
 
   // Check chat interface on startup and listen for changes
@@ -20,9 +19,11 @@ const App: React.FC = () => {
       const chatInterfaceEnabled = await isChatInterfaceEnabled();
       setChatEnabled(chatInterfaceEnabled);
       
-      // Set chat as default tab if enabled
+      // Set default tab: chat if enabled, otherwise settings
       if (chatInterfaceEnabled) {
         setActiveTab('chat');
+      } else {
+        setActiveTab('settings');
       }
     };
 
@@ -45,16 +46,14 @@ const App: React.FC = () => {
   // Render active page component
   const renderActiveTab = () => {
     switch (activeTab) {
-      case 'search':
-        return <SearchPage />;
       case 'activity':
         return <ActivityPage />;
       case 'chat':
-        return chatEnabled ? <ChatPage /> : <SearchPage />;
+        return chatEnabled ? <ChatPage /> : <SettingsPage />;
       case 'settings':
         return <SettingsPage />;
       default:
-        return <SearchPage />;
+        return <SettingsPage />;
     }
   };
 

@@ -99,4 +99,4 @@ export const SearchArchive: React.FC = () => {
       </div>
     </div>
   );
-}; 
+};
