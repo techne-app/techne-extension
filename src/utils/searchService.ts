@@ -44,7 +44,7 @@ export class SearchService {
       });
 
       if (onProgress) {
-        onProgress(`I'll search for "${query}" in recent Hacker News discussions...\n\n`);
+        await onProgress(`I'll search for "${query}" in recent Hacker News discussions...\n\n`);
         await new Promise(resolve => setTimeout(resolve, 500));
       }
 
@@ -57,7 +57,7 @@ export class SearchService {
       }
       
       if (onProgress) {
-        onProgress(`I'll search for "${query}" in recent Hacker News discussions...\n\nFetching latest stories from Hacker News...`);
+        await onProgress(`I'll search for "${query}" in recent Hacker News discussions...\n\nFetching latest stories from Hacker News...`);
         await new Promise(resolve => setTimeout(resolve, 300));
       }
       
@@ -69,7 +69,7 @@ export class SearchService {
       }
       
       if (onProgress) {
-        onProgress(`I'll search for "${query}" in recent Hacker News discussions...\n\nFetching latest stories from Hacker News...\n\nAnalyzing ${storyIds.length} top stories...`);
+        await onProgress(`I'll search for "${query}" in recent Hacker News discussions...\n\nFetching latest stories from Hacker News...\n\nAnalyzing ${storyIds.length} top stories...`);
         await new Promise(resolve => setTimeout(resolve, 400));
       }
       
@@ -85,7 +85,7 @@ export class SearchService {
       }
       
       if (onProgress) {
-        onProgress(`I'll search for "${query}" in recent Hacker News discussions...\n\nFetching latest stories from Hacker News...\n\nAnalyzing ${storyIds.length} top stories...\n\nPerforming semantic search...`);
+        await onProgress(`I'll search for "${query}" in recent Hacker News discussions...\n\nFetching latest stories from Hacker News...\n\nAnalyzing ${storyIds.length} top stories...\n\nPerforming semantic search...`);
         await new Promise(resolve => setTimeout(resolve, 300));
       }
       
@@ -114,7 +114,7 @@ export class SearchService {
         
         if (onProgress) {
           const errorContent = this.formatSearchResultsAsMessage(query, errorResult);
-          onProgress(errorContent);
+          await onProgress(errorContent);
         }
         
         return errorResult;
@@ -134,7 +134,7 @@ export class SearchService {
         
         if (onProgress) {
           logger.debug('Updating progress to Processing results...');
-          onProgress(`I'll search for "${query}" in recent Hacker News discussions...\n\nFetching latest stories from Hacker News...\n\nAnalyzing ${storyIds.length} top stories...\n\nPerforming semantic search...\n\nProcessing results...`);
+          await onProgress(`I'll search for "${query}" in recent Hacker News discussions...\n\nFetching latest stories from Hacker News...\n\nAnalyzing ${storyIds.length} top stories...\n\nPerforming semantic search...\n\nProcessing results...`);
           await new Promise(resolve => setTimeout(resolve, 200));
         }
         
@@ -152,7 +152,7 @@ export class SearchService {
           logger.debug('Formatting final content...');
           const finalContent = this.formatSearchResultsAsMessage(query, searchResult);
           logger.debug('Sending final content via onProgress:', finalContent.substring(0, 100) + '...');
-          onProgress(finalContent);
+          await onProgress(finalContent);
         }
         
         logger.search('executeSearchStreaming completed successfully');
@@ -167,7 +167,7 @@ export class SearchService {
         
         if (onProgress) {
           const errorContent = this.formatSearchResultsAsMessage(query, errorResult);
-          onProgress(errorContent);
+          await onProgress(errorContent);
         }
         
         return errorResult;
@@ -182,7 +182,7 @@ export class SearchService {
       
       if (onProgress) {
         const errorContent = this.formatSearchResultsAsMessage(query, errorResult);
-        onProgress(errorContent);
+        await onProgress(errorContent);
       }
       
       return errorResult;

@@ -48,23 +48,27 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       
       // Execute search with streaming
       await SearchService.executeSearchStreaming(searchQuery, async (content) => {
-        logger.debug('Received content update:', content.substring(0, 50) + '...');
-        
-        // Update streaming message state
-        setStreamingMessage(prev => prev ? {
-          ...prev,
-          content,
-          isStreaming: true
-        } : null);
-        
-        // Update database with current content (await the async operation)
-        await ConversationManager.updateMessage(
-          activeConversation!.id, 
-          assistantMessageId, 
-          content
-        );
-        
-        logger.database('Database updated with content');
+        try {
+          logger.debug('Received content update:', content.substring(0, 50) + '...');
+          
+          // Update streaming message state
+          setStreamingMessage(prev => prev ? {
+            ...prev,
+            content,
+            isStreaming: true
+          } : null);
+          
+          // Update database with current content (await the async operation)
+          await ConversationManager.updateMessage(
+            activeConversation!.id, 
+            assistantMessageId, 
+            content
+          );
+          
+          logger.database('Database updated with content');
+        } catch (error) {
+          logger.error('Error in search streaming callback:', error);
+        }
       });
       
       logger.search('SearchService.executeSearchStreaming completed');

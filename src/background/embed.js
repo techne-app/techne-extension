@@ -5,11 +5,16 @@ import { logger } from "../utils/logger.ts";
 class EmbedderSingleton {
   static async getInstance(progress_callback) {
     return (this.fn ??= async (...args) => {
-      this.instance ??= this.initializePipeline(progress_callback);
+      try {
+        this.instance ??= this.initializePipeline(progress_callback);
 
-      return (this.promise_chain = (
-        this.promise_chain ?? Promise.resolve()
-      ).then(async () => (await this.instance)(...args)));
+        return (this.promise_chain = (
+          this.promise_chain ?? Promise.resolve()
+        ).then(async () => (await this.instance)(...args)));
+      } catch (error) {
+        logger.error('Error in EmbedderSingleton getInstance:', error);
+        throw error;
+      }
     });
   }
 

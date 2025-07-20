@@ -154,6 +154,9 @@ export function registerTagMessageListener() {
               chrome.runtime.sendMessage({
                 type: MessageType.TAGS_UPDATED,
                 data: {}
+              }).catch((error) => {
+                // Ignore "Receiving end does not exist" errors - this is expected when popup is closed
+                logger.debug('No listeners for TAGS_UPDATED message, this is expected');
               });
             } catch (error) {
               // Ignore "Receiving end does not exist" errors - this is expected when popup is closed
@@ -189,6 +192,8 @@ export function registerTagMatchingListener() {
                   matches: [],
                   error: 'Invalid input or no tags available'
                 }
+              }).catch((error) => {
+                logger.debug('No listeners for TAG_MATCH_RESPONSE message, this is expected');
               });
             } catch (error) {
               logger.debug('No listeners for TAG_MATCH_RESPONSE message, this is expected');
@@ -231,6 +236,8 @@ export function registerTagMatchingListener() {
             chrome.runtime.sendMessage({
               type: MessageType.TAG_MATCH_RESPONSE,
               data: { matches: topMatches }
+            }).catch((error) => {
+              logger.debug('No listeners for TAG_MATCH_RESPONSE message, this is expected');
             });
           } catch (error) {
             logger.debug('No listeners for TAG_MATCH_RESPONSE message, this is expected');
@@ -244,6 +251,8 @@ export function registerTagMatchingListener() {
                 matches: [],
                 error: error instanceof Error ? error.message : String(error)
               }
+            }).catch((msgError) => {
+              logger.debug('No listeners for TAG_MATCH_RESPONSE message, this is expected');
             });
           } catch (msgError) {
             logger.debug('No listeners for TAG_MATCH_RESPONSE message, this is expected');
@@ -276,6 +285,9 @@ export function registerSearchMessageListener() {
               chrome.runtime.sendMessage({
                 type: MessageType.SEARCHES_UPDATED,
                 data: {}
+              }).catch((error) => {
+                // Ignore "Receiving end does not exist" errors - this is expected when popup is closed
+                logger.debug('No listeners for SEARCHES_UPDATED message, this is expected');
               });
             } catch (error) {
               // Ignore "Receiving end does not exist" errors - this is expected when popup is closed
