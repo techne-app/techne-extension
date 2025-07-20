@@ -22,6 +22,9 @@ class EmbedderSingleton {
         {
           progress_callback,
           device: "webgpu",
+          session_options: {
+            logSeverityLevel: 4, // Fatal only - suppress all non-fatal logs
+          },
         },
       );
     } catch (error) {
@@ -33,6 +36,9 @@ class EmbedderSingleton {
         {
           progress_callback,
           device: "cpu",
+          session_options: {
+            logSeverityLevel: 4, // Fatal only - suppress all non-fatal logs
+          },
         },
       );
     }

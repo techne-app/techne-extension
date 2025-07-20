@@ -20,7 +20,7 @@ const config = {
     alias: {
       "@huggingface/transformers": path.resolve(
         __dirname,
-        "node_modules/@huggingface/transformers",
+        "node_modules/@huggingface/transformers/dist/transformers.web.js",
       ),
     },
     extensions: ['.tsx', '.ts', '.js'],
