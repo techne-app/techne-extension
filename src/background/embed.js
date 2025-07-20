@@ -1,4 +1,5 @@
 import { pipeline } from "@huggingface/transformers";
+import { logger } from "../utils/logger.ts";
 
 
 class EmbedderSingleton {
@@ -25,7 +26,7 @@ class EmbedderSingleton {
       );
     } catch (error) {
       // Fallback to CPU if WebGPU fails
-      console.debug('WebGPU not available, falling back to CPU:', error);
+      logger.debug('WebGPU not available, falling back to CPU:', error);
       return await pipeline(
         "feature-extraction",
         "Xenova/all-MiniLM-L6-v2",
@@ -50,7 +51,7 @@ export const embed_tags = async (tags) => {
           return await embedder(tag, { pooling: 'mean', normalize: true });
         } catch (error) {
           // Log embedding errors but don't fail the entire operation
-          console.debug('Error embedding tag:', tag, error);
+          logger.debug('Error embedding tag:', tag, error);
           // Return a zero embedding as fallback
           return { data: new Float32Array(384), dims: [1, 384] };
         }
@@ -59,7 +60,7 @@ export const embed_tags = async (tags) => {
 
     return embeddings;
   } catch (error) {
-    console.error('Error in embed_tags:', error);
+    logger.error('Error in embed_tags:', error);
     // Return empty embeddings as fallback
     return tags.map(() => ({ data: new Float32Array(384), dims: [1, 384] }));
   }
