@@ -247,3 +247,106 @@ The following phases outline the roadmap for evolving from current chat-first se
 - **Intelligent Reasoning**: Multi-step queries that go beyond simple keyword matching
 - **Scalable Architecture**: Can accommodate any backend MCP tools as they become available
 - **Enhanced Discovery**: Find patterns and connections across time periods and topics
+
+## Chrome Extension Promise Handling Guidelines
+
+### Critical Chrome Extension Promise Error Patterns
+
+When working with Chrome extension APIs, always handle promises properly to avoid uncaught promise rejections that create user-facing console errors.
+
+#### Chrome Runtime Messages
+**Problem**: `chrome.runtime.sendMessage()` returns a Promise that can reject with "Could not establish connection. Receiving end does not exist" when the receiving end is closed/unavailable.
+
+**Solution**: Always add `.catch()` handlers to all `chrome.runtime.sendMessage()` calls:
+
+```javascript
+// ❌ BAD - Can cause uncaught promise rejection
+chrome.runtime.sendMessage({
+  type: 'SOME_MESSAGE',
+  data: {}
+});
+
+// ✅ GOOD - Handles promise rejection
+chrome.runtime.sendMessage({
+  type: 'SOME_MESSAGE', 
+  data: {}
+}).catch((error) => {
+  logger.debug('No listeners for message, this is expected');
+});
+```
+
+#### Async Callbacks in Streaming Operations
+**Problem**: When passing async callbacks to functions (like `onProgress` callbacks), the callback's Promise can reject and become uncaught.
+
+**Solution**: Always await async callbacks and wrap them in try-catch:
+
+```javascript
+// ❌ BAD - Async callback not awaited
+if (onProgress) {
+  onProgress(content); // Returns unhandled Promise
+}
+
+// ✅ GOOD - Async callback properly awaited
+if (onProgress) {
+  await onProgress(content); // Await the Promise
+}
+```
+
+#### Background Script Message Responses
+**Problem**: Background scripts sending response messages back to UI can fail if UI is closed, causing uncaught rejections.
+
+**Solution**: Combine try-catch blocks with `.catch()` handlers:
+
+```javascript
+// ✅ GOOD - Dual error handling
+try {
+  chrome.runtime.sendMessage({
+    type: 'RESPONSE_MESSAGE',
+    data: results
+  }).catch((error) => {
+    logger.debug('No listeners for response, this is expected');
+  });
+} catch (error) {
+  logger.debug('Synchronous error in sendMessage');
+}
+```
+
+### Transformers.js Browser Compatibility
+
+#### Webpack Configuration for Transformers.js 3.6+
+**Problem**: Newer versions include Node.js dependencies that break browser builds.
+
+**Solution**: Use the dedicated browser build via webpack alias:
+
+```javascript
+// webpack.config.js
+resolve: {
+  alias: {
+    "@huggingface/transformers": path.resolve(
+      __dirname,
+      "node_modules/@huggingface/transformers/dist/transformers.web.js"
+    ),
+  }
+}
+```
+
+#### ONNX Runtime Logging Suppression
+**Problem**: ONNX runtime produces verbose console logs that concern users.
+
+**Solution**: Set `logSeverityLevel: 4` in pipeline session options:
+
+```javascript
+const pipeline = await pipeline("feature-extraction", "model-name", {
+  device: "webgpu",
+  session_options: {
+    logSeverityLevel: 4, // Fatal only - suppress all non-fatal logs
+  },
+});
+```
+
+### Key Development Practices
+- **Always use `.catch()` on Chrome extension promises** to prevent user-facing console errors
+- **Await async callbacks** in streaming operations to handle their promise rejections
+- **Use browser-specific builds** for ML libraries when available
+- **Test extension message passing** with popup closed to verify error handling
+- **Suppress non-fatal logs** in production to avoid alarming users
