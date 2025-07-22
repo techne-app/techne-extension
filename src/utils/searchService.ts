@@ -363,7 +363,7 @@ export class SearchService {
     }
     
     const matchesText = searchResult.matches.slice(0, 5).map((match: TagMatch, index: number) => 
-      `${index + 1}. **${match.tag}** (${match.type}, Score: ${match.score.toFixed(2)}) - [View Discussion](${match.anchor})`
+      `${index + 1}. **${match.tag}** - [View Discussion](${match.anchor})`
     ).join('\n');
     
     let response = `I found ${searchResult.matches.length} discussion${searchResult.matches.length !== 1 ? 's' : ''} about "${query}":\n\n${matchesText}`;
