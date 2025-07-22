@@ -22,6 +22,18 @@ jobs:
     - name: Run tests
       run: npm test
     
+    - name: Bump patch version
+      id: version
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        npm run version:patch
+        NEW_VERSION=$(node -p "require('./package.json').version")
+        echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
+        git add package.json public/manifest.json package-lock.json
+        git commit -m "Bump version to $NEW_VERSION"
+        git push origin main
+    
     - name: Build with webpack
       run: npm run build
         
@@ -29,10 +41,6 @@ jobs:
       run: |
         cd dist
         zip -r ../extension.zip .
-        
-    - name: Get version from package.json
-      id: version
-      run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
         
     - name: Create and push tag
       run: |
