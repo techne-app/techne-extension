@@ -19,15 +19,6 @@ jobs:
     - name: Install dependencies
       run: npm install
     
-    - name: Bump patch version
-      run: |
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
-        npm run version:patch
-        git add package.json public/manifest.json package-lock.json
-        git commit -m "Auto-bump version to $(node -p "require('./package.json').version")"
-        git push
-        
     - name: Build with webpack
       run: npm run build
         
