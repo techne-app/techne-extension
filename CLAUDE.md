@@ -48,6 +48,99 @@ The version script automatically updates both `package.json` and `public/manifes
 4. Click "Load unpacked" and select the `dist/` folder
 5. Navigate to Hacker News to see the extension in action
 
+## Testing Infrastructure
+
+### Testing Framework: Jest
+This project uses **Jest** as the primary testing framework, chosen for its comprehensive Chrome extension and React support:
+
+```bash
+npm test              # Run all tests
+npm run test:watch    # Run tests in watch mode  
+npm run test:coverage # Run with coverage report
+```
+
+### Jest Configuration
+- **Config File**: `jest.config.cjs` (CommonJS for ES module compatibility)
+- **Test Environment**: jsdom for DOM manipulation testing
+- **TypeScript Support**: ts-jest with proper ES module handling
+- **Coverage**: HTML and LCOV reports generated in `coverage/` directory
+
+### Testing Approach
+
+#### 1. Pure Function Testing (High Priority)
+**Focus**: Business logic with clear inputs/outputs
+
+**Examples**:
+- `src/utils/intentDetector.ts` - JSON parsing, validation, prompt building
+- `src/background/personalize.ts` - Mathematical operations, similarity calculations  
+- `src/utils/configStore.ts` - Configuration management, default handling
+
+**Why**: These are the most reliable to test and provide the highest value for bug prevention.
+
+#### 2. Chrome Extension API Mocking
+**Global Mock Setup** (`src/test-setup.ts`):
+```javascript
+global.chrome = {
+  runtime: {
+    sendMessage: jest.fn().mockResolvedValue(undefined),
+    onMessage: { addListener: jest.fn(), removeListener: jest.fn() }
+  },
+  tabs: { create: jest.fn(), update: jest.fn() }
+};
+```
+
+**Best Practice**: Always mock Chrome APIs to avoid "Receiving end does not exist" errors during testing.
+
+#### 3. External Library Mocking
+**WebLLM & Transformers.js**: Heavy dependencies mocked to avoid ES module conflicts
+```javascript
+jest.mock('@mlc-ai/web-llm');
+jest.mock('@huggingface/transformers');
+```
+
+### Test Coverage Strategy
+
+#### Current Coverage (Intent Detection: ~98%)
+- ✅ **JSON parsing edge cases** - Malformed JSON, invalid types, missing fields
+- ✅ **Async operations** - Promise handling, error scenarios, timeouts
+- ✅ **Configuration validation** - Type checking, bounds validation, defaults
+- ✅ **Chrome API integration** - Message passing, error handling
+
+#### Future Testing Priorities
+1. **Search Service** - API integration, result formatting, error handling
+2. **React Components** - User interactions, state management, props validation
+3. **Background Scripts** - Message routing, ML pipeline integration
+4. **Content Scripts** - DOM manipulation, HN page integration
+
+### Testing Best Practices
+
+#### Jest + Chrome Extensions
+- Use `jest.config.cjs` for CommonJS compatibility with ES modules
+- Mock all Chrome APIs globally to prevent runtime errors
+- Test async operations with proper Promise handling
+- Validate both success and error paths for all functions
+
+#### Coverage Goals
+- **Pure Functions**: Aim for 95%+ coverage
+- **Integration Points**: Focus on error handling and edge cases  
+- **UI Components**: Test user interactions and state changes
+- **Overall**: Maintain >80% line coverage across the project
+
+#### Testing Commands
+```bash
+npm test                    # Run all tests once
+npm run test:watch         # Development mode with file watching
+npm run test:coverage      # Generate detailed coverage report
+```
+
+Coverage reports are generated in `coverage/` and ignored by git. Open `coverage/lcov-report/index.html` to view detailed coverage analysis.
+
+### GitHub Actions Integration
+Tests run automatically on every push and gate deployments:
+- **Tests must pass** before version bumping
+- **Build must succeed** before Chrome Web Store deployment
+- **Coverage reports** generated in CI for tracking trends
+
 ## Project Structure
 ```
 src/

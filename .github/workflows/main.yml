@@ -3,6 +3,14 @@ on:
   workflow_dispatch:
   push:
     branches: [ main ]
+    paths-ignore:
+      - 'CLAUDE.md'
+      - 'README.md'
+      - 'coverage/**'
+      - '*.md'
+      - '.vscode/**'
+      - '.idea/**'
+      - 'docs/**'
 jobs:
   build:
     runs-on: ubuntu-latest
