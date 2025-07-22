@@ -8,9 +8,9 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "version:patch": "npx tsx scripts/bump-version.ts patch",
-    "version:minor": "npx tsx scripts/bump-version.ts minor",
-    "version:major": "npx tsx scripts/bump-version.ts major"
+    "version:patch": "node scripts/bump-version.js patch",
+    "version:minor": "node scripts/bump-version.js minor",
+    "version:major": "node scripts/bump-version.js major"
   },
   "type": "module",
   "author": "Hugging Face",
@@ -39,7 +39,6 @@
     "null-loader": "^4.0.1",
     "ts-jest": "^29.1.0",
     "ts-loader": "^9.5.2",
-    "tsx": "^4.7.0",
     "typescript": "^5.7.3",
     "webpack": "^5.96.1",
     "webpack-cli": "^5.1.4"

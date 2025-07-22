@@ -9,28 +9,21 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const rootDir = path.join(__dirname, '..');
 
-type BumpType = 'major' | 'minor' | 'patch';
-
 // Files that need version updates
 const FILES = [
   path.join(rootDir, 'package.json'),
   path.join(rootDir, 'public/manifest.json'),
 ];
 
-interface PackageJson {
-  version: string;
-  [key: string]: any;
-}
-
 // Read the current version from package.json
-const packageJson: PackageJson = JSON.parse(fs.readFileSync(FILES[0], 'utf8'));
+const packageJson = JSON.parse(fs.readFileSync(FILES[0], 'utf8'));
 const currentVersion = packageJson.version;
 console.log(`Current version: ${currentVersion}`);
 
 // Parse command line arguments
 const args = process.argv.slice(2);
-const bumpType = (args[0] || 'patch') as BumpType;
-const validBumpTypes: BumpType[] = ['major', 'minor', 'patch'];
+const bumpType = args[0] || 'patch'; // Default to patch
+const validBumpTypes = ['major', 'minor', 'patch'];
 
 if (!validBumpTypes.includes(bumpType)) {
   console.error(`Error: Invalid bump type '${bumpType}'. Must be one of: ${validBumpTypes.join(', ')}`);
@@ -41,7 +34,7 @@ if (!validBumpTypes.includes(bumpType)) {
 const [major, minor, patch] = currentVersion.split('.').map(Number);
 
 // Calculate the new version
-let newVersion: string;
+let newVersion;
 switch (bumpType) {
   case 'major':
     newVersion = `${major + 1}.0.0`;
@@ -86,7 +79,7 @@ console.log('Updating package-lock.json...');
 try {
   execSync('npm install --package-lock-only', { cwd: rootDir, stdio: 'inherit' });
   console.log('package-lock.json updated');
-} catch (error: any) {
+} catch (error) {
   console.error('Failed to update package-lock.json:', error.message);
 }
 
