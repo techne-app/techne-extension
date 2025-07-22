@@ -4,3 +4,6 @@ package-lock.json
 *.js
 dist/
 .DS_Store
+
+# Test coverage reports
+coverage/
