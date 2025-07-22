@@ -442,4 +442,4 @@ const pipeline = await pipeline("feature-extraction", "model-name", {
 - **Await async callbacks** in streaming operations to handle their promise rejections
 - **Use browser-specific builds** for ML libraries when available
 - **Test extension message passing** with popup closed to verify error handling
-- **Suppress non-fatal logs** in production to avoid alarming users
+- **Suppress non-fatal logs** in production to avoid alarming usersThis change to CLAUDE.md should NOT trigger the deployment pipeline.
