@@ -20,11 +20,29 @@ export const ConversationSidebar: React.FC<ConversationSidebarProps> = ({
 
   return (
     <div className="w-80 bg-gray-800 flex flex-col h-full">
-      {/* Header */}
+      {/* Header with New Chat button */}
       <div className="flex-shrink-0 p-4">
-        <div>
-          <h2 className="text-lg font-semibold text-white">Techne</h2>
-          <p className="text-sm text-gray-400">Your personalized navigator for Hacker News.</p>
+        <div className="flex items-center justify-between mb-4">
+          {/* New Chat button - top left */}
+          <div className="flex items-center gap-3">
+            {/* Circular icon with + - clickable */}
+            <button 
+              onClick={onNewConversation}
+              className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-500 transition-colors"
+              title="New Chat"
+            >
+              <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+              </svg>
+            </button>
+            {/* Text outside the circle - also clickable */}
+            <button 
+              onClick={onNewConversation}
+              className="text-sm font-medium text-white hover:text-gray-200 transition-colors"
+            >
+              New chat
+            </button>
+          </div>
         </div>
       </div>
 
@@ -73,15 +91,6 @@ export const ConversationSidebar: React.FC<ConversationSidebarProps> = ({
         </div>
       </div>
 
-      {/* Bottom actions */}
-      <div className="flex-shrink-0 p-4">
-        <button 
-          onClick={onNewConversation}
-          className="w-full p-2 bg-blue-600 rounded hover:bg-blue-500 transition-colors text-center text-sm font-medium text-white"
-        >
-          New Chat
-        </button>
-      </div>
     </div>
   );
 };
