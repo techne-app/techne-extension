@@ -328,15 +328,12 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   return (
     <div className="flex-1 flex flex-col h-full bg-gray-900">
       {/* Header */}
-      <div className="flex-shrink-0 p-4 border-b border-gray-700" style={{ minHeight: '88px' }}>
-        <div className="flex items-center justify-between h-full">
+      <div className="flex-shrink-0 p-4 border-b border-gray-700">
+        <div className="flex items-center justify-between">
           <div>
             <h2 className="text-lg font-semibold text-white truncate">
               {activeConversation.title}
             </h2>
-            <p className="text-sm text-gray-400">
-              {activeConversation.messages.length} messages
-            </p>
           </div>
           <div></div>
         </div>

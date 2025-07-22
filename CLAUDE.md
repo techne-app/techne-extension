@@ -9,7 +9,7 @@ Techne is a sophisticated browser extension that enhances the Hacker News experi
 - **Conversational Search**: Chat-first interface with LLM-powered intent detection for natural language search
 - **Local AI Chat**: Fully local WebLLM-powered conversational interface with search integration
 - **User Data Management**: Local storage with IndexedDB for privacy
-- **Streamlined UI**: Clean 3-tab interface (Chat, Activity, Settings) with chat as primary interaction mode
+- **Streamlined UI**: Clean 3-tab interface (Chat, Memory, Settings) with chat as primary interaction mode
 
 ## Tech Stack
 - **Frontend**: React 19 + TypeScript
@@ -140,7 +140,7 @@ All user data is stored locally using IndexedDB:
 ## User Interface
 The popup provides a streamlined 3-tab interface:
 - **Chat Tab**: Primary interface for both conversational AI and search functionality with LLM-powered intent detection
-- **Activity Tab**: History of visited threads, clicked tags, and recent searches displayed in a two-column layout
+- **Memory Tab**: History of visited threads, clicked tags, and recent searches displayed in a two-column layout
 - **Settings Tab**: User preferences and feature toggles
 
 The interface uses an overlay menu bar for tab navigation and defaults to the chat tab (or settings if chat is disabled). All search functionality has been integrated into the conversational chat interface, eliminating the need for a separate search tab.
@@ -184,7 +184,7 @@ The following phases outline the roadmap for evolving from current chat-first se
 - **Chat-First Interface**: Removed standalone search tab, all search happens through conversational interface
 - **SearchService Integration**: Backend search functionality preserved and accessible via chat
 - **Intent Detection Foundation**: Basic intent detection with `IntentDetector` utility using local LLM
-- **Unified UX**: Single interface for both chat and search, with recent searches in Activity tab
+- **Unified UX**: Single interface for both chat and search, with recent searches in Memory tab
 - **Backend**: Azure Functions with basic tag APIs, evolving toward MCP server capabilities
 
 ### Phase 2: Enhanced Intent Detection & Function Calling
