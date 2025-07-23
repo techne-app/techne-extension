@@ -328,7 +328,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   return (
     <div className="flex-1 flex flex-col h-full bg-gray-900">
       {/* Header */}
-      <div className="flex-shrink-0 p-4 border-b border-gray-700">
+      <div className="flex-shrink-0 p-4">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-lg font-semibold text-white truncate">
@@ -354,32 +354,23 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       </div>
 
       {/* Input Area */}
-      <div className="flex-shrink-0 p-4 border-t border-gray-700">
+      <div className="flex-shrink-0 p-4">
         <div className="max-w-4xl mx-auto">
           {error && (
             <div className="error-message text-red-400 mb-4 text-sm">
               {error}
             </div>
           )}
-          <div className="flex gap-2">
-            <textarea
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              onKeyDown={handleKeyPress}
-              placeholder={isModelLoading ? "Loading model, please wait..." : "Enter to send, Shift + Enter to wrap, # to memorize"}
-              disabled={isLoading || isModelLoading}
-              className="flex-1 p-3 bg-gray-800 text-white rounded border border-gray-600 resize-none focus:outline-none focus:border-blue-500"
-              rows={1}
-              style={{ minHeight: '44px', maxHeight: '120px' }}
-            />
-            <button 
-              onClick={handleSubmit}
-              disabled={isLoading || isModelLoading || !message.trim()}
-              className="px-6 py-3 bg-blue-600 text-white rounded disabled:bg-gray-500 hover:bg-blue-700 transition-colors font-medium"
-            >
-              {isModelLoading ? 'Loading...' : 'Send'}
-            </button>
-          </div>
+          <textarea
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            onKeyDown={handleKeyPress}
+            placeholder={isModelLoading ? "Loading model, please wait..." : "Enter to send"}
+            disabled={isLoading || isModelLoading}
+            className="w-full p-3 bg-gray-800 text-white rounded border border-gray-600 resize-none focus:outline-none focus:border-blue-500"
+            rows={1}
+            style={{ minHeight: '44px', maxHeight: '120px' }}
+          />
           
           {/* Status indicator - small reserved space, prominent when active */}
           <div className="flex items-center justify-center mt-2 h-6">
