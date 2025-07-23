@@ -8,3 +8,4 @@ dist/
 
 # Test coverage reports
 coverage/
+models/

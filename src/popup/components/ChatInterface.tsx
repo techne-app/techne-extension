@@ -366,7 +366,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               onKeyDown={handleKeyPress}
-              placeholder={isModelLoading ? "Loading model, please wait..." : "Enter to send, Shift + Enter to wrap, / to search prompts, : to use commands"}
+              placeholder={isModelLoading ? "Loading model, please wait..." : "Enter to send, Shift + Enter to wrap, # to memorize"}
               disabled={isLoading || isModelLoading}
               className="flex-1 p-3 bg-gray-800 text-white rounded border border-gray-600 resize-none focus:outline-none focus:border-blue-500"
               rows={1}
