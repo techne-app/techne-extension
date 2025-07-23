@@ -198,7 +198,6 @@ export interface UserSetting {
 // Define setting keys as constants
 export const SettingKeys = {
   PERSONALIZATION_ENABLED: 'personalization_enabled',
-  CHAT_INTERFACE_ENABLED: 'chat_interface_enabled',
   CHAT_MODEL: 'chat_model',
   CHAT_TEMPERATURE: 'chat_temperature',
   CHAT_TOP_P: 'chat_top_p',

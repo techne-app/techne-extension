@@ -161,20 +161,53 @@ src/
 └── styles/              # CSS/Tailwind styles
 ```
 
-## Configuration Files
+## Configuration Architecture
 
-### `src/config.ts`
-Static application configuration:
+This project uses **two separate configuration systems** that serve distinct purposes. Understanding when to use each is critical for maintainability.
+
+### `src/config.ts` - Static Application Configuration
+**Purpose**: Immutable application constants determined at build time.
+
+**Contents**:
 - **API URLs**: Backend endpoints and base URLs
 - **UI Styling**: Default colors and styling constants  
 - **Business Rules**: MAX_STORY_TAGS, etc.
 - **DEFAULT_MODEL**: Default AI model (`Llama-3.2-3B-Instruct-q4f16_1-MLC`)
 
-### `src/utils/configStore.ts`
-User preferences and runtime settings:
+**Characteristics**:
+- **Synchronous access**: Direct property access (`CONFIG.MAX_STORY_TAGS`)
+- **No dependencies**: No database or async operations
+- **Build-time values**: Environment-dependent (dev vs prod)
+- **High performance**: Values cached in memory
+
+**When to use**: API endpoints, styling constants, business rules, feature defaults that should never change during runtime.
+
+### `src/utils/configStore.ts` - Dynamic User Configuration
+**Purpose**: Mutable user preferences that persist across browser sessions.
+
+**Contents**:
 - **Chat Configuration**: Model selection, temperature, topP, maxTokens
-- **Database Integration**: Saves/loads user preferences to IndexedDB
-- **Dynamic Settings**: User-changeable settings that persist across sessions
+- **User Preferences**: Log levels and other personalization settings
+- **Database Integration**: Async methods for IndexedDB persistence
+
+**Characteristics**:
+- **Asynchronous access**: All methods return Promises (`await configStore.getModel()`)
+- **Database-backed**: Values persisted in IndexedDB via `contextDb`
+- **User-configurable**: Settings that users can modify (even if UI is removed)
+- **Error handling**: Fallback to static defaults on database errors
+
+**When to use**: User preferences, settings that need persistence, values that might change during runtime.
+
+### **Architecture Decision: Why Two Systems?**
+
+**DO NOT consolidate these systems**. They serve fundamentally different purposes:
+
+1. **Performance**: Static config provides immediate access; dynamic config requires async database calls
+2. **Lifecycle**: Static values determined at build time; dynamic values change throughout user sessions  
+3. **Testing**: Static config easily mockable; dynamic config requires database mocking
+4. **Maintenance**: Different deployment implications for static vs user-configurable values
+
+**Rule of Thumb**: If a value could theoretically be user-configurable or needs to persist across sessions, use `configStore`. If it's an application constant that should never change during runtime, use `CONFIG`.
 
 ### `public/manifest.json`
 Extension configuration and permissions. Key settings:

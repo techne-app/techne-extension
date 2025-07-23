@@ -1,19 +1,11 @@
 import { ExtensionServiceWorkerMLCEngineHandler } from "@mlc-ai/web-llm";
-import { isChatInterfaceEnabled } from '../utils/featureFlags';
 import { logger } from '../utils/logger';
 
 let mlcHandler: ExtensionServiceWorkerMLCEngineHandler | undefined;
 
-// Always set up the connection listener, but check feature flag inside
+// Set up the connection listener for WebLLM
 chrome.runtime.onConnect.addListener(async function (port) {
   if (port.name === "web_llm_service_worker") {
-    const chatEnabled = await isChatInterfaceEnabled();
-    
-    if (!chatEnabled) {
-      logger.info('Chat interface is disabled');
-      return;
-    }
-    
     try {
       // Always create new handler for fresh connections to avoid port disconnection issues
       mlcHandler = new ExtensionServiceWorkerMLCEngineHandler(port);
