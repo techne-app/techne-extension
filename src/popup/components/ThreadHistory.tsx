@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { contextDb, type Tag } from '../../background/contextDb';
 import { MessageType } from '../../types/messages';
-import { ThreadCard } from './ThreadCard';
+import { TagHistoryCard } from './TagHistoryCard';
 import { logger } from '../../utils/logger';
 
 export const ThreadHistory: React.FC = () => {
@@ -92,7 +92,7 @@ export const ThreadHistory: React.FC = () => {
       </div>
       <div className="space-y-2">
         {tags.map((tag) => (
-          <ThreadCard
+          <TagHistoryCard
             key={tag.id}
             tag={tag.tag || ''}
             type={tag.type || ''}

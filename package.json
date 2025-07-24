@@ -19,7 +19,7 @@
     "@huggingface/transformers": "^3.0.2",
     "@mlc-ai/web-llm": "^0.2.79",
     "@tailwindcss/typography": "^0.5.16",
-    "@techne/ui-components": "github:techne-app/techne-ui-components#v0.1.2",
+    "@techne/ui-components": "github:techne-app/techne-ui-components#v0.1.5",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
     "dexie": "^4.0.11",

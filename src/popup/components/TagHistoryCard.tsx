@@ -1,6 +1,6 @@
 import React from 'react';
 
-interface ThreadCardProps {
+interface TagHistoryCardProps {
   tag: string;
   type: string;
   anchor: string;
@@ -9,7 +9,7 @@ interface ThreadCardProps {
   onThreadClick?: () => void;
 }
 
-export const ThreadCard: React.FC<ThreadCardProps> = ({
+export const TagHistoryCard: React.FC<TagHistoryCardProps> = ({
   tag,
   type,
   anchor,

@@ -1,13 +1,23 @@
 /* Import design tokens from shared ui-components package */
 @import '@techne/ui-components/tokens.css';
 
+/* Import shared component styles */
+@import '@techne/ui-components/src/styles/globals.css';
+
 /* Import Tailwind CSS */
 @import "tailwindcss";
+
+/* Custom animations matching landing page */
+@keyframes subtle-glow {
+  0% { box-shadow: 0 0 0 0 rgba(255, 102, 0, 0.15); }
+  50% { box-shadow: 0 0 4px 1px rgba(255, 102, 0, 0.1); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 102, 0, 0); }
+}
 
 /* Component-specific utilities for extension */
 @layer components {
   .animate-subtle-glow {
-    @apply ring-2 ring-orange-400/50 ring-offset-2 ring-offset-slate-900;
+    animation: subtle-glow 2s ease-in-out;
   }
   
   .line-clamp-2 {
@@ -22,5 +32,13 @@
     -webkit-line-clamp: 7;
     -webkit-box-orient: vertical;
     overflow: hidden;
+  }
+}
+
+/* Respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .animate-subtle-glow,
+  .animate-pulse {
+    animation: none !important;
   }
 }
