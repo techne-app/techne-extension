@@ -1,0 +1,26 @@
+/* Import design tokens from shared ui-components package */
+@import '@techne/ui-components/tokens.css';
+
+/* Import Tailwind CSS */
+@import "tailwindcss";
+
+/* Component-specific utilities for extension */
+@layer components {
+  .animate-subtle-glow {
+    @apply ring-2 ring-orange-400/50 ring-offset-2 ring-offset-slate-900;
+  }
+  
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
+  .line-clamp-7 {
+    display: -webkit-box;
+    -webkit-line-clamp: 7;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}

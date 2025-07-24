@@ -2,6 +2,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 import CopyPlugin from "copy-webpack-plugin";
+import MiniCssExtractPlugin from "mini-css-extract-plugin";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -12,6 +13,7 @@ const config = {
   entry: {
     'background/index': './src/background/index.ts',
     'popup/index': './src/popup/index.tsx',
+    'popup/styles': './src/styles/popup.css',
     'content-scripts/main-page/index': './src/content-scripts/main-page/index.ts',
     'content-scripts/item-page/index': './src/content-scripts/item-page/index.ts',
     'content-scripts/profile-page/index': './src/content-scripts/profile-page/index.ts',
@@ -41,6 +43,9 @@ const config = {
         }
       ],
     }),
+    new MiniCssExtractPlugin({
+      filename: '[name].css',
+    }),
   ],
   module: {
     parser: {
@@ -53,6 +58,14 @@ const config = {
         test: /\.tsx?$/,
         use: 'ts-loader',
         exclude: /node_modules/,
+      },
+      {
+        test: /\.css$/,
+        use: [
+          MiniCssExtractPlugin.loader,
+          'css-loader',
+          'postcss-loader',
+        ],
       }
     ]
   },

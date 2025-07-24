@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { OverlayMenuBar } from './components/OverlayMenuBar';
 import { ActivityPage } from './components/ActivityPage';
 import { ChatPage } from './components/ChatPage';
+import { FeedPage } from '@techne/ui-components';
 import { SettingsPage } from './components/SettingsPage';
 import { logger } from '../utils/logger';
 
@@ -18,6 +19,19 @@ const App: React.FC = () => {
         return <ActivityPage />;
       case 'chat':
         return <ChatPage />;
+      case 'feed':
+        return (
+          <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900">
+            <FeedPage
+              feedId="personalized"
+              title=""
+              description=""
+              hoursBack={24}
+              numCards={20}
+              sortBy="karma_density"
+            />
+          </div>
+        );
       case 'settings':
         return <SettingsPage />;
       default:
