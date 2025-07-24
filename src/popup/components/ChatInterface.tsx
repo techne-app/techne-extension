@@ -9,6 +9,15 @@ import { IntentDetector } from '../../utils/intentDetector';
 import { SearchService } from '../../utils/searchService';
 import { logger } from '../../utils/logger';
 
+// Helper function to convert technical errors to user-friendly messages
+const getUserFriendlyErrorMessage = (error: string): string => {
+  const lowerError = error.toLowerCase();
+  if (lowerError.includes('cache') || lowerError.includes('failed to execute') || lowerError.includes('networkerror')) {
+    return 'Unable to download AI model - please check your connection and try again';
+  }
+  // Default case for other errors
+  return 'Something went wrong - please try again';
+};
 
 interface ChatInterfaceProps {
   activeConversation: Conversation | null;
@@ -26,7 +35,6 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   const [loadedModelName, setLoadedModelName] = useState<string>('');
   const [isModelLoading, setIsModelLoading] = useState(false);
   const [modelLoadingProgress, setModelLoadingProgress] = useState(0);
-  const [modelLoadingText, setModelLoadingText] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll to bottom when new messages arrive
@@ -212,16 +220,13 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         onModelLoadingStart: !isModelLoaded ? () => {
           setIsModelLoading(true);
           setModelLoadingProgress(0);
-          setModelLoadingText(`Loading ${loadedModelName || 'AI Model'}`);
         } : undefined,
-        onModelLoadingProgress: !isModelLoaded ? (progress, text) => {
+        onModelLoadingProgress: !isModelLoaded ? (progress) => {
           setModelLoadingProgress(progress);
-          setModelLoadingText(text);
         } : undefined,
         onModelLoadingComplete: !isModelLoaded ? async () => {
           setIsModelLoading(false);
           setModelLoadingProgress(1);
-          setModelLoadingText('');
           
           // Perform intent detection after model loads
           logger.model('Model loading complete, now checking for search intent...');
@@ -356,11 +361,6 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       {/* Input Area */}
       <div className="flex-shrink-0 p-4">
         <div className="max-w-4xl mx-auto">
-          {error && (
-            <div className="error-message text-red-400 mb-4 text-sm">
-              {error}
-            </div>
-          )}
           <textarea
             value={message}
             onChange={(e) => setMessage(e.target.value)}
@@ -385,6 +385,14 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                   />
                 </div>
                 <span>{Math.round(modelLoadingProgress * 100)}%</span>
+              </div>
+            )}
+            {error && (
+              <div className="flex items-center gap-2 text-xs text-red-400">
+                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+                <span>{getUserFriendlyErrorMessage(error)}</span>
               </div>
             )}
           </div>
