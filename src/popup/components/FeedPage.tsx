@@ -217,7 +217,7 @@ export const FeedPage: React.FC<FeedPageProps> = ({
                     animation: `fadeInUp 0.5s ease-out ${Math.min(index * 0.05, 1)}s forwards`
                   }}
                 >
-                  <ThreadCard {...thread} minHeight="440px" />
+                  <ThreadCard {...thread} />
                 </div>
               ))}
             </div>
