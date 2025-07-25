@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { OverlayMenuBar } from './components/OverlayMenuBar';
 import { ActivityPage } from './components/ActivityPage';
 import { ChatPage } from './components/ChatPage';
-import { FeedPage } from '@techne/ui-components';
+import { FeedPage } from './components/FeedPage';
 import { SettingsPage } from './components/SettingsPage';
 import { logger } from '../utils/logger';
 
