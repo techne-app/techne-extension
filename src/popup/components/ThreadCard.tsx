@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { MessageCircle, ExternalLink } from "lucide-react";
+import { MessageType, NewTagRequest } from "../../types/messages";
+import { logger } from "../../utils/logger";
 
 // ThreadCard data interface (matching the shared component)
 interface ThreadCardData {
@@ -124,6 +126,24 @@ export const ThreadCard: React.FC<ThreadCardProps> = ({
     return `${diffDays}d ago`;
   };
 
+  // Handle click on "Join the thread" link
+  const handleThreadClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    // Don't prevent default - let the link open
+    // But track the visit in memory
+    const msg: NewTagRequest = {
+      type: MessageType.NEW_TAG,
+      data: {
+        tag: theme, // Use the theme as the tag name
+        type: 'visited_thread', // Special type for visited threads
+        anchor: anchor // The HN thread URL
+      }
+    };
+    
+    chrome.runtime.sendMessage(msg).catch((error) => {
+      logger.debug('No listeners for NEW_TAG message, this is expected');
+    });
+  };
+
   // Combine height-related styles
   const cardStyle: React.CSSProperties = {
     backgroundColor: 'var(--card-bg)',
@@ -181,6 +201,7 @@ export const ThreadCard: React.FC<ThreadCardProps> = ({
               rel="noopener noreferrer"
               className="flex items-center gap-1 hover:underline"
               style={{ color: 'var(--link-color)' }}
+              onClick={handleThreadClick}
             >
               <MessageCircle 
                 className={`w-3 h-3 transition-all duration-500 ${
