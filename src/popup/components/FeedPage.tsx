@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { RefreshCw } from "lucide-react";
-import { ThreadCard } from "@techne/ui-components";
+import { ThreadCard } from "./ThreadCard";
 
 // Use the proper ThreadCardData type to match the shared components
 interface ThreadCardData {
@@ -199,8 +199,8 @@ export const FeedPage: React.FC<FeedPageProps> = ({
           </div>
         </div>
 
-        {/* Thread List */}
-        <div className="space-y-8">
+        {/* Thread List - Debug version with explicit styles */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
           {error && (
             <div className="bg-red-500/20 text-red-200 p-4 rounded-lg border border-red-500/30">
               Error: {error}
@@ -208,7 +208,7 @@ export const FeedPage: React.FC<FeedPageProps> = ({
           )}
           
           {isClient && threads.length > 0 ? (
-            <div className="space-y-8">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
               {threads.map((thread, index) => (
                 <div
                   key={thread.id}
@@ -217,7 +217,7 @@ export const FeedPage: React.FC<FeedPageProps> = ({
                     animation: `fadeInUp 0.5s ease-out ${Math.min(index * 0.05, 1)}s forwards`
                   }}
                 >
-                  <ThreadCard {...thread} />
+                  <ThreadCard {...thread} minHeight="440px" />
                 </div>
               ))}
             </div>
