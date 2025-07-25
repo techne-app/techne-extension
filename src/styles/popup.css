@@ -1,8 +1,8 @@
-/* Import design tokens from shared ui-components package */
-@import '@techne/ui-components/tokens.css';
+/* Import local design tokens */
+@import './tokens.css';
 
-/* Import shared component styles */
-@import '@techne/ui-components/src/styles/globals.css';
+/* Import local shared component styles */
+@import './globals.css';
 
 /* Import Tailwind CSS */
 @import "tailwindcss";
