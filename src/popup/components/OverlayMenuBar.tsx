@@ -20,23 +20,23 @@ export const OverlayMenuBar: React.FC<OverlayMenuBarProps> = ({
   const hideTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Static tabs - chat is always enabled
+  // Static tabs - feed is first, chat is always enabled
   const tabs: MenuTab[] = [
+    { 
+      id: 'feed', 
+      label: 'Your Feed', 
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+        </svg>
+      )
+    },
     { 
       id: 'chat', 
       label: 'Chat', 
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-        </svg>
-      )
-    },
-    { 
-      id: 'feed', 
-      label: 'Feed', 
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-3-4a2 2 0 01-2-2V2a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2z" />
         </svg>
       )
     },

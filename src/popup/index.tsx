@@ -10,7 +10,7 @@ import { logger } from '../utils/logger';
 logger.info("Popup script starting...");
 
 const App: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<string>('chat');
+  const [activeTab, setActiveTab] = useState<string>('feed');
 
   // Render active page component
   const renderActiveTab = () => {
