@@ -6,7 +6,7 @@ Techne is a sophisticated browser extension that enhances the Hacker News experi
 ## Key Features
 - **AI-Powered Content Tagging**: Automatic tag generation for HN stories and comments
 - **Personalized Tag Ranking**: ML-based tag ranking using user browsing history
-- **Personalized Feed**: Curated feed of relevant HN discussions using shared UI components with landing page
+- **Personalized Feed**: Curated feed of relevant HN discussions
 - **Conversational Search**: Chat-first interface with LLM-powered intent detection for natural language search
 - **Local AI Chat**: Fully local WebLLM-powered conversational interface with search integration
 - **User Data Management**: Local storage with IndexedDB for privacy
@@ -210,13 +210,10 @@ This project uses **two separate configuration systems** that serve distinct pur
 
 **Rule of Thumb**: If a value could theoretically be user-configurable or needs to persist across sessions, use `configStore`. If it's an application constant that should never change during runtime, use `CONFIG`.
 
-## Shared Component Architecture
 
-This extension uses a shared component library (`@techne/ui-components`) to maintain consistent UI across the Techne ecosystem, specifically sharing components with the landing page project.
+## UI Components
 
-### Component Library: `@techne/ui-components`
-
-**Purpose**: Reusable UI components with consistent styling and behavior across multiple Techne projects.
+**Purpose**: Reusable UI components with consistent styling and behavior.
 
 **Key Components**:
 - **`FeedPage`**: Complete feed layout with refresh functionality and API integration
@@ -224,16 +221,10 @@ This extension uses a shared component library (`@techne/ui-components`) to main
 - **`Tag`**: Category and theme tags with processing states
 - **`Card`**: Base card component for consistent styling
 
-**Package Details**:
-- **Installation**: `npm install @techne/ui-components@^0.1.2`
-- **Source**: GitHub Packages at `github:techne-app/techne-ui-components`
-- **Build**: Automatic building via `prepare` script during installation
+### CSS Architecture
 
-### Design Tokens System
+The extension uses **CSS custom properties** for consistent theming:
 
-The shared components use a **CSS custom properties** approach for consistent theming:
-
-**Token Location**: `@techne/ui-components/tokens.css`
 ```css
 :root {
   --hn-bg: #f6f6ef;           /* HN beige background */
@@ -249,27 +240,12 @@ The shared components use a **CSS custom properties** approach for consistent th
 
 **Component Usage**:
 ```jsx
-// Shared components use CSS variables for theming
+// Components use CSS variables for theming
 <div style={{ backgroundColor: 'var(--card-bg)', color: 'var(--hn-orange)' }}>
 ```
 
-### Two-Layer CSS Architecture
-
-**1. Shared Design Tokens** (from `@techne/ui-components/tokens.css`):
-- Cross-project color palette and design constants
-- HN-style theming with beige backgrounds and orange accents
-- Imported by consuming projects for consistent styling
-
-**2. Project-Specific CSS** (from `src/styles/popup.css`):
-- Tailwind CSS compilation and utilities
-- Extension-specific features (animations, layout utilities)
-- Local customizations not needed by other projects
-
-**Extension CSS Structure**:
+**Extension CSS Structure** (from `src/styles/popup.css`):
 ```css
-/* Import shared design tokens */
-@import '@techne/ui-components/tokens.css';
-
 /* Import Tailwind for utilities */
 @import "tailwindcss";
 
@@ -279,41 +255,6 @@ The shared components use a **CSS custom properties** approach for consistent th
   .line-clamp-2 { /* Text truncation */ }
 }
 ```
-
-### Feed Tab Implementation
-
-The extension's Feed tab uses the shared `FeedPage` component directly:
-
-**Direct Import** (in `src/popup/index.tsx`):
-```tsx
-import { FeedPage } from '@techne/ui-components';
-
-// Feed tab renders shared component with extension styling
-<div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900">
-  <FeedPage
-    feedId="personalized"
-    title=""
-    description=""
-    hoursBack={24}
-    numCards={20}
-    sortBy="karma_density"
-  />
-</div>
-```
-
-**Layout Consistency**: 
-- **Same dimensions**: ThreadCards match landing page exactly
-- **Same spacing**: 32px vertical gaps between cards (`space-y-8`)
-- **Same layout**: Single-column with max-width container (`max-w-md mx-auto`)
-- **Same styling**: HN beige backgrounds, orange themes, blue links
-
-### Benefits of Shared Architecture
-
-**✅ Consistent UI/UX**: Identical components and styling across projects  
-**✅ Single Source of Truth**: One component to maintain and update  
-**✅ Shared Bug Fixes**: Improvements benefit all consuming projects  
-**✅ Design Token System**: Centralized theming with CSS custom properties  
-**✅ No Code Duplication**: Reusable components eliminate redundant implementations
 
 ### `public/manifest.json`
 Extension configuration and permissions. Key settings:
@@ -347,7 +288,6 @@ Build configuration with multiple entry points:
 - **Hacker News API**: Firebase API for story metadata
 
 ## Key Dependencies
-- `@techne/ui-components`: Shared UI components (ThreadCard, FeedPage) with design tokens
 - `@huggingface/transformers`: AI text embeddings
 - `@mlc-ai/web-llm`: Local AI chat models
 - `dexie`: IndexedDB operations
@@ -374,7 +314,7 @@ All user data is stored locally using IndexedDB:
 The popup provides a streamlined 4-tab interface:
 - **Chat Tab**: Primary interface for both conversational AI and search functionality with LLM-powered intent detection
 - **Memory Tab**: History of visited threads, clicked tags, and recent searches displayed in a two-column layout
-- **Feed Tab**: Personalized feed of curated HN discussions using shared components with identical layout to landing page
+- **Feed Tab**: Personalized feed of curated HN discussions
 - **Settings Tab**: User preferences and feature toggles
 
 The interface uses an overlay menu bar for tab navigation and defaults to the chat tab (or settings if chat is disabled). All search functionality has been integrated into the conversational chat interface, eliminating the need for a separate search tab.
