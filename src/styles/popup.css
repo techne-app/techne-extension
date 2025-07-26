@@ -1,11 +1,11 @@
 /* Import local design tokens */
 @import './tokens.css';
 
-/* Import local shared component styles */
-@import './globals.css';
-
-/* Import Tailwind CSS */
+/* Import Tailwind CSS BEFORE custom components */
 @import "tailwindcss";
+
+/* Import local shared component styles AFTER Tailwind */
+@import './globals.css';
 
 /* Custom animations matching landing page */
 @keyframes subtle-glow {
