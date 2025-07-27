@@ -16,9 +16,16 @@
   /* Card components */
   --card-bg: var(--hn-bg);    /* Card backgrounds */
   --card-text: var(--hn-text); /* Card text */
+  --card-border: var(--hn-border); /* Card borders */
   --card-padding: 1rem;
   --card-radius: 0.5rem;
   --card-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  
+  /* Text and link colors */
+  --tag-text: white;           /* Tag text color (white on orange) */
+  --meta-text: var(--hn-gray); /* Meta text like timestamps */
+  --link-color: var(--hn-link); /* Link color */
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 /* Thread card styles */
