@@ -27,7 +27,7 @@ const App: React.FC = () => {
               title=""
               description=""
               hoursBack={24}
-              numCards={20}
+              numCards={5}
               sortBy="karma_density"
             />
           </div>
