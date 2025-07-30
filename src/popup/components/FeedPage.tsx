@@ -46,7 +46,7 @@ const fetchThreadCards = async (
   numCards?: number,
   sortBy?: 'karma' | 'karma_density' | 'engagement',
   excludeCategories?: string[],
-  densityMinCommentConstant: number = 10,
+  densityMinCommentConstant: number = 100,
   offset?: number,
   includeCategories?: string[],
   keywordFilter?: string[]
@@ -119,7 +119,7 @@ export const FeedPage: React.FC<FeedPageProps> = ({
   description,
   initialThreads = [],
   hoursBack = 24,
-  numCards = 20,
+  numCards = 5,
   sortBy = 'karma_density',
   excludeCategories,
   includeCategories,
@@ -143,7 +143,7 @@ export const FeedPage: React.FC<FeedPageProps> = ({
         numCards,
         sortBy,
         excludeCategories,
-        10, // densityMinCommentConstant
+        100, // densityMinCommentConstant
         undefined, // offset
         includeCategories,
         keywordFilter
