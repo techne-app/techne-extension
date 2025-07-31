@@ -11,6 +11,7 @@ import { logger } from '../../utils/logger';
 import { Modal } from './Modal';
 import { ActivityPage } from './ActivityPage';
 import { SettingsPage } from './SettingsPage';
+import { FeedPage } from './FeedPage';
 
 // Helper function to convert technical errors to user-friendly messages
 const getUserFriendlyErrorMessage = (error: string): string => {
@@ -40,6 +41,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   const [modelLoadingProgress, setModelLoadingProgress] = useState(0);
   const [isMemoryModalOpen, setIsMemoryModalOpen] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+  const [isFeedModalOpen, setIsFeedModalOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll to bottom when new messages arrive
@@ -346,6 +348,17 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
             </h2>
           </div>
           <div className="flex items-center space-x-2">
+            {/* Feed Icon */}
+            <button
+              onClick={() => setIsFeedModalOpen(true)}
+              className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
+              title="Feed"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+              </svg>
+            </button>
+            
             {/* Memory Icon */}
             <button
               onClick={() => setIsMemoryModalOpen(true)}
@@ -426,6 +439,24 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Feed Modal */}
+      <Modal
+        isOpen={isFeedModalOpen}
+        onClose={() => setIsFeedModalOpen(false)}
+        title="Feed"
+      >
+        <div className="min-h-full bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900">
+          <FeedPage
+            feedId="personalized"
+            title=""
+            description=""
+            hoursBack={24}
+            numCards={3}
+            sortBy="karma_density"
+          />
+        </div>
+      </Modal>
 
       {/* Memory Modal */}
       <Modal

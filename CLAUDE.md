@@ -10,7 +10,7 @@ Techne is a sophisticated browser extension that enhances the Hacker News experi
 - **Conversational Search**: Chat-first interface with LLM-powered intent detection for natural language search
 - **Local AI Chat**: Fully local WebLLM-powered conversational interface with search integration
 - **User Data Management**: Local storage with IndexedDB for privacy
-- **Streamlined UI**: Clean 2-tab interface (Feed, Chat) with Memory and Settings as modals in the chat interface
+- **Streamlined UI**: Pure chat-first interface with Feed, Memory, and Settings accessible as modals
 
 ## Tech Stack
 - **Frontend**: React 19 + TypeScript
@@ -311,17 +311,18 @@ All user data is stored locally using IndexedDB:
 - **Embeddings**: Cached text embeddings for performance
 
 ## User Interface
-The popup provides a streamlined 2-tab interface with modal-based secondary features:
+The popup provides a pure chat-first interface with all features accessible through modals:
 
-### Main Navigation (Overlay Menu Bar)
-- **Feed Tab**: Personalized feed of curated HN discussions
-- **Chat Tab**: Primary interface for both conversational AI and search functionality with LLM-powered intent detection
+### Primary Interface
+- **Chat Interface**: The main and only screen, providing conversational AI and search functionality with LLM-powered intent detection
+- **Always Visible**: Chat interface is always the primary view, eliminating tab switching
 
-### Modal Interface (Accessible from Chat)
-- **Memory Modal**: History of visited threads, clicked tags, and recent searches displayed in a two-column layout (accessible via bookmark icon in chat header)
+### Modal Interface (Accessible from Chat Header Icons)
+- **Feed Modal**: Personalized feed of curated HN discussions (accessible via list icon in chat header)
+- **Memory Modal**: History of visited threads, clicked tags, and recent searches displayed in a two-column layout (accessible via bookmark icon in chat header)  
 - **Settings Modal**: User preferences and feature toggles (accessible via gear icon in chat header)
 
-The interface uses an overlay menu bar for primary tab navigation and defaults to the feed tab. Memory and Settings are accessible as modals from the chat interface, providing a cleaner, more focused user experience. All search functionality has been integrated into the conversational chat interface, eliminating the need for a separate search tab.
+The interface eliminates all tab navigation in favor of a single chat-centric view with modal-based access to all secondary features. This provides the most focused, distraction-free user experience with chat as the primary interaction mode. All search functionality is integrated into the conversational interface.
 
 ### Modal Architecture
 The extension uses a reusable modal system for secondary interfaces:
@@ -334,10 +335,12 @@ The extension uses a reusable modal system for secondary interfaces:
 - **Dark Theme Integration**: Styled to match the dark extension theme
 
 **Current Modals:**
+- **Feed Modal**: Personalized HN discussion feed with gradient background
 - **Memory Modal**: Two-column layout with "Visited Threads" and "Recent Searches"
 - **Settings Modal**: Configuration interface for user preferences
 
 **Modal Triggers:**
+- Feed: List icon in chat interface header
 - Memory: Bookmark icon in chat interface header
 - Settings: Gear icon in chat interface header
 
@@ -360,10 +363,10 @@ The extension uses a reusable modal system for secondary interfaces:
 - TypeScript strict mode enabled for type safety
 - Tailwind CSS for responsive design
 - Chat interface runs entirely locally with WebLLM models
-- Chat interface is the primary interaction mode with integrated search functionality
-- Memory and Settings implemented as modals accessible from chat interface
+- Pure chat-first interface eliminates all tab navigation
+- All features (Feed, Memory, Settings) implemented as modals accessible from chat header
 - Modal system provides consistent UI with fixed sizing and clean backdrop dismissal
-- Feature flags control interface availability and default tabs
+- Single-page application architecture with chat as the primary and only view
 
 ### Logging
 This codebase uses a custom logger system (`src/utils/logger.ts`) instead of direct console statements:
