@@ -59,27 +59,6 @@ export const ThreadHistory: React.FC = () => {
     };
   }, []);
 
-  // Loading state
-  if (loading) {
-    return (
-      <div className="p-4 text-gray-400">Loading tags...</div>
-    );
-  }
-
-  // Error state
-  if (error) {
-    return (
-      <div className="p-4 text-red-400">Error: {error}</div>
-    );
-  }
-
-  // Empty state
-  if (!tags.length) {
-    return (
-      <div className="p-4 text-gray-400">No threads visited yet. Try some.</div>
-    );
-  }
-
   return (
     <div className="p-4">
       <div className="flex justify-between items-center mb-4">
@@ -91,16 +70,26 @@ export const ThreadHistory: React.FC = () => {
           Clear
         </button>
       </div>
+      
+      {/* Content area */}
       <div className="space-y-2">
-        {tags.map((tag) => (
-          <TagHistoryCard
-            key={tag.id}
-            tag={tag.tag || ''}
-            type={tag.type || ''}
-            anchor={tag.anchor || ''}
-            timestamp={tag.timestamp}
-          />
-        ))}
+        {loading ? (
+          <div className="text-gray-400">Loading tags...</div>
+        ) : error ? (
+          <div className="text-red-400">Error: {error}</div>
+        ) : !tags.length ? (
+          <div className="text-gray-400">No threads visited yet. Try some.</div>
+        ) : (
+          tags.map((tag) => (
+            <TagHistoryCard
+              key={tag.id}
+              tag={tag.tag || ''}
+              type={tag.type || ''}
+              anchor={tag.anchor || ''}
+              timestamp={tag.timestamp}
+            />
+          ))
+        )}
       </div>
     </div>
   );

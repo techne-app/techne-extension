@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { ChatInterface } from './ChatInterface';
-import { ConversationSidebar } from './ConversationSidebar';
 import { Conversation } from '../../types/chat';
 import { ConversationManager } from '../../utils/conversationUtils';
 import { configStore } from '../../utils/configStore';
@@ -30,15 +29,33 @@ export const ChatPage: React.FC = () => {
       const convs = await ConversationManager.getConversations();
       setConversations(convs);
       
-      // Select the first conversation if available, or create new one if none exist
+      // Select the first conversation if available, otherwise create a draft
       if (convs.length > 0 && !activeConversationId) {
         setActiveConversationId(convs[0].id);
       } else if (convs.length === 0) {
-        // Auto-create new conversation if none exist
-        await handleNewConversation();
+        // Create a draft conversation so user can start typing immediately
+        const config = await configStore.getConfig();
+        const draftConv = ConversationManager.createDraftConversation(
+          'New Conversation',
+          config.model
+        );
+        setConversations([draftConv]);
+        setActiveConversationId(draftConv.id);
       }
     } catch (error) {
       logger.error('Error loading conversations:', error);
+      // Create a draft conversation as fallback
+      try {
+        const config = await configStore.getConfig();
+        const draftConv = ConversationManager.createDraftConversation(
+          'New Conversation',
+          config.model
+        );
+        setConversations([draftConv]);
+        setActiveConversationId(draftConv.id);
+      } catch (fallbackError) {
+        logger.error('Error creating fallback draft conversation:', fallbackError);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -69,11 +86,20 @@ export const ChatPage: React.FC = () => {
   };
 
   const handleConversationUpdated = (updatedConversation: Conversation) => {
-    setConversations(prev => 
-      prev.map(conv => 
-        conv.id === updatedConversation.id ? updatedConversation : conv
-      )
-    );
+    setConversations(prev => {
+      const existingIndex = prev.findIndex(conv => conv.id === updatedConversation.id);
+      if (existingIndex >= 0) {
+        // Update existing conversation
+        return prev.map(conv => 
+          conv.id === updatedConversation.id ? updatedConversation : conv
+        );
+      } else {
+        // Add new conversation to the beginning of the list
+        return [updatedConversation, ...prev];
+      }
+    });
+    // Always update active conversation ID to the updated/new conversation
+    setActiveConversationId(updatedConversation.id);
   };
 
   const activeConversation = conversations.find(conv => conv.id === activeConversationId) || null;
@@ -90,17 +116,11 @@ export const ChatPage: React.FC = () => {
   }
 
   return (
-    <div className="h-full flex bg-gray-900">
-      <ConversationSidebar
-        conversations={conversations}
-        activeConversationId={activeConversationId}
-        onSelectConversation={handleSelectConversation}
-        onNewConversation={handleNewConversation}
-        onDeleteConversation={handleDeleteConversation}
-      />
+    <div className="h-full bg-gray-900">
       <ChatInterface
         activeConversation={activeConversation}
         onConversationUpdated={handleConversationUpdated}
+        conversations={conversations}
       />
     </div>
   );

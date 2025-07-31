@@ -1,12 +1,30 @@
 import React from 'react';
 import { ThreadHistory } from './ThreadHistory';
 import { SearchArchive } from './SearchArchive';
+import { ConversationHistory } from './ConversationHistory';
 
-export const ActivityPage: React.FC = () => {
+interface ActivityPageProps {
+  activeConversationId?: string | null;
+  onSelectConversation?: (id: string) => void;
+  onDeleteConversation?: (id: string) => void;
+}
+
+export const ActivityPage: React.FC<ActivityPageProps> = ({
+  activeConversationId,
+  onSelectConversation,
+  onDeleteConversation
+}) => {
   return (
     <div className="h-full flex flex-col">
       <div className="flex-1 overflow-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 h-full min-h-full">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 h-full min-h-full">
+          <div className="overflow-auto">
+            <ConversationHistory 
+              activeConversationId={activeConversationId}
+              onSelectConversation={onSelectConversation}
+              onDeleteConversation={onDeleteConversation}
+            />
+          </div>
           <div className="overflow-auto">
             <ThreadHistory />
           </div>

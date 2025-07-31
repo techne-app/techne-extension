@@ -2,6 +2,34 @@ import { contextDb } from '../background/contextDb';
 import { Conversation, ChatMessage, MODEL_OPTIONS } from '../types/chat';
 
 export class ConversationManager {
+  // Create a draft conversation that exists only in memory until first user message
+  static createDraftConversation(
+    title: string = 'New Conversation',
+    modelValue: string = MODEL_OPTIONS[0].value
+  ): Conversation {
+    const modelOption = MODEL_OPTIONS.find(m => m.value === modelValue) || MODEL_OPTIONS[0];
+    return {
+      id: `draft_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      title,
+      messages: [],
+      model: modelValue,
+      modelDisplayName: modelOption.name,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+  }
+
+  // Save a draft conversation to the database (called when first user message is sent)
+  static async saveDraftConversation(conversation: Conversation): Promise<Conversation> {
+    // Give it a proper ID for the database
+    const savedConversation = {
+      ...conversation,
+      id: `conv_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    };
+    await contextDb.conversations.put(savedConversation);
+    return savedConversation;
+  }
+
   static async createNewConversation(
     title: string = 'New Conversation',
     modelValue: string = MODEL_OPTIONS[0].value
@@ -96,6 +124,20 @@ export class ConversationManager {
         msg.content.toLowerCase().includes(lowerQuery)
       )
     );
+  }
+
+  // Utility function to clean up empty conversations (conversations with no messages)
+  static async cleanupEmptyConversations(): Promise<number> {
+    const conversations = await this.getConversations();
+    const emptyConversations = conversations.filter(conv => 
+      conv.messages.length === 0 && conv.title === 'New Conversation'
+    );
+    
+    for (const conv of emptyConversations) {
+      await this.deleteConversation(conv.id);
+    }
+    
+    return emptyConversations.length;
   }
 }
 

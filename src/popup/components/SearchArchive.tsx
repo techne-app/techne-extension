@@ -52,27 +52,6 @@ export const SearchArchive: React.FC = () => {
     };
   }, []);
 
-  // Loading state
-  if (loading) {
-    return (
-      <div className="p-4 text-gray-400">Loading search history...</div>
-    );
-  }
-
-  // Error state
-  if (error) {
-    return (
-      <div className="p-4 text-red-400">Error: {error}</div>
-    );
-  }
-
-  // Empty state
-  if (!searches.length) {
-    return (
-      <div className="p-4 text-gray-400">No search history yet.</div>
-    );
-  }
-
   return (
     <div className="p-4">
       <div className="flex justify-between items-center mb-4">
@@ -84,19 +63,29 @@ export const SearchArchive: React.FC = () => {
           Clear
         </button>
       </div>
+      
+      {/* Content area */}
       <div className="space-y-2">
-        {searches.map((search) => (
-          <div key={search.id} className="bg-gray-800 border border-gray-600 p-3 rounded-lg hover:bg-gray-750 transition-colors">
-            <div className="flex justify-between items-center">
-              <div className="font-medium text-white">
-                {search.query}
-              </div>
-              <div className="text-sm text-gray-400">
-                {new Date(search.timestamp).toLocaleString()}
+        {loading ? (
+          <div className="text-gray-400">Loading search history...</div>
+        ) : error ? (
+          <div className="text-red-400">Error: {error}</div>
+        ) : !searches.length ? (
+          <div className="text-gray-400">No search history yet.</div>
+        ) : (
+          searches.map((search) => (
+            <div key={search.id} className="bg-gray-800 border border-gray-600 p-3 rounded-lg hover:bg-gray-750 transition-colors">
+              <div className="flex justify-between items-center">
+                <div className="font-medium text-white">
+                  {search.query}
+                </div>
+                <div className="text-sm text-gray-400">
+                  {new Date(search.timestamp).toLocaleString()}
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
     </div>
   );
