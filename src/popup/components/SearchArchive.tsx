@@ -55,43 +55,43 @@ export const SearchArchive: React.FC = () => {
   // Loading state
   if (loading) {
     return (
-      <div className="p-4 text-gray-600">Loading search history...</div>
+      <div className="p-4 text-gray-400">Loading search history...</div>
     );
   }
 
   // Error state
   if (error) {
     return (
-      <div className="p-4 text-red-600">Error: {error}</div>
+      <div className="p-4 text-red-400">Error: {error}</div>
     );
   }
 
   // Empty state
   if (!searches.length) {
     return (
-      <div className="p-4 text-gray-600">No search history yet.</div>
+      <div className="p-4 text-gray-400">No search history yet.</div>
     );
   }
 
   return (
     <div className="p-4">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold">Recent Searches</h2>
+        <h2 className="text-xl font-bold text-white">Recent Searches</h2>
         <button
           onClick={handleClearAll}
           className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
         >
-          Clear All
+          Clear
         </button>
       </div>
       <div className="space-y-2">
         {searches.map((search) => (
-          <div key={search.id} className="border p-3 rounded">
+          <div key={search.id} className="bg-gray-800 border border-gray-600 p-3 rounded-lg hover:bg-gray-750 transition-colors">
             <div className="flex justify-between items-center">
-              <div className="font-medium">
+              <div className="font-medium text-white">
                 {search.query}
               </div>
-              <div className="text-sm text-gray-500">
+              <div className="text-sm text-gray-400">
                 {new Date(search.timestamp).toLocaleString()}
               </div>
             </div>

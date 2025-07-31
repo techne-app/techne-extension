@@ -62,32 +62,33 @@ export const ThreadHistory: React.FC = () => {
   // Loading state
   if (loading) {
     return (
-      <div className="p-4 text-gray-600">Loading tags...</div>
+      <div className="p-4 text-gray-400">Loading tags...</div>
     );
   }
 
   // Error state
   if (error) {
     return (
-      <div className="p-4 text-red-600">Error: {error}</div>
+      <div className="p-4 text-red-400">Error: {error}</div>
     );
   }
 
   // Empty state
   if (!tags.length) {
     return (
-      <div className="p-4 text-gray-600">No threads visited yet. Try some.</div>
+      <div className="p-4 text-gray-400">No threads visited yet. Try some.</div>
     );
   }
 
   return (
     <div className="p-4">
-      <div className="flex justify-end items-center mb-4">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-bold text-white">Visited Threads</h2>
         <button
           onClick={handleClearAll}
           className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
         >
-          Clear All
+          Clear
         </button>
       </div>
       <div className="space-y-2">

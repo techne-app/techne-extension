@@ -6,7 +6,7 @@ export const ActivityPage: React.FC = () => {
   return (
     <div className="h-full flex flex-col">
       <div className="flex-1 overflow-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 h-full">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 h-full min-h-full">
           <div className="overflow-auto">
             <ThreadHistory />
           </div>
