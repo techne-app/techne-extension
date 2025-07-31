@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { OverlayMenuBar } from './components/OverlayMenuBar';
-import { ActivityPage } from './components/ActivityPage';
 import { ChatPage } from './components/ChatPage';
 import { FeedPage } from './components/FeedPage';
-import { SettingsPage } from './components/SettingsPage';
 import { logger } from '../utils/logger';
 
 logger.info("Popup script starting...");
@@ -15,8 +13,6 @@ const App: React.FC = () => {
   // Render active page component
   const renderActiveTab = () => {
     switch (activeTab) {
-      case 'activity':
-        return <ActivityPage />;
       case 'chat':
         return <ChatPage />;
       case 'feed':
@@ -32,8 +28,6 @@ const App: React.FC = () => {
             />
           </div>
         );
-      case 'settings':
-        return <SettingsPage />;
       default:
         return <ChatPage />;
     }
