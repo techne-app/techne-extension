@@ -10,7 +10,7 @@ Techne is a sophisticated browser extension that enhances the Hacker News experi
 - **Conversational Search**: Chat-first interface with LLM-powered intent detection for natural language search
 - **Local AI Chat**: Fully local WebLLM-powered conversational interface with search integration
 - **User Data Management**: Local storage with IndexedDB for privacy
-- **Streamlined UI**: Clean 4-tab interface (Chat, Memory, Feed, Settings) with chat as primary interaction mode
+- **Streamlined UI**: Clean 2-tab interface (Feed, Chat) with Memory and Settings as modals in the chat interface
 
 ## Tech Stack
 - **Frontend**: React 19 + TypeScript
@@ -311,13 +311,35 @@ All user data is stored locally using IndexedDB:
 - **Embeddings**: Cached text embeddings for performance
 
 ## User Interface
-The popup provides a streamlined 4-tab interface:
-- **Chat Tab**: Primary interface for both conversational AI and search functionality with LLM-powered intent detection
-- **Memory Tab**: History of visited threads, clicked tags, and recent searches displayed in a two-column layout
-- **Feed Tab**: Personalized feed of curated HN discussions
-- **Settings Tab**: User preferences and feature toggles
+The popup provides a streamlined 2-tab interface with modal-based secondary features:
 
-The interface uses an overlay menu bar for tab navigation and defaults to the chat tab (or settings if chat is disabled). All search functionality has been integrated into the conversational chat interface, eliminating the need for a separate search tab.
+### Main Navigation (Overlay Menu Bar)
+- **Feed Tab**: Personalized feed of curated HN discussions
+- **Chat Tab**: Primary interface for both conversational AI and search functionality with LLM-powered intent detection
+
+### Modal Interface (Accessible from Chat)
+- **Memory Modal**: History of visited threads, clicked tags, and recent searches displayed in a two-column layout (accessible via bookmark icon in chat header)
+- **Settings Modal**: User preferences and feature toggles (accessible via gear icon in chat header)
+
+The interface uses an overlay menu bar for primary tab navigation and defaults to the feed tab. Memory and Settings are accessible as modals from the chat interface, providing a cleaner, more focused user experience. All search functionality has been integrated into the conversational chat interface, eliminating the need for a separate search tab.
+
+### Modal Architecture
+The extension uses a reusable modal system for secondary interfaces:
+
+**Modal Component Features:**
+- **Fixed Sizing**: Consistent modal size (max-w-4xl width, 80vh height) regardless of content
+- **Backdrop Dismissal**: Click outside modal to close
+- **Header with Close Button**: Standard modal header with title and X button
+- **Scroll Handling**: Content area scrolls independently when needed
+- **Dark Theme Integration**: Styled to match the dark extension theme
+
+**Current Modals:**
+- **Memory Modal**: Two-column layout with "Visited Threads" and "Recent Searches"
+- **Settings Modal**: Configuration interface for user preferences
+
+**Modal Triggers:**
+- Memory: Bookmark icon in chat interface header
+- Settings: Gear icon in chat interface header
 
 ## Security & Privacy
 - **Local-First**: All data stored locally
@@ -339,6 +361,8 @@ The interface uses an overlay menu bar for tab navigation and defaults to the ch
 - Tailwind CSS for responsive design
 - Chat interface runs entirely locally with WebLLM models
 - Chat interface is the primary interaction mode with integrated search functionality
+- Memory and Settings implemented as modals accessible from chat interface
+- Modal system provides consistent UI with fixed sizing and clean backdrop dismissal
 - Feature flags control interface availability and default tabs
 
 ### Logging
