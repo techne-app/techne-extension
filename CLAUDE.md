@@ -6,11 +6,11 @@ Techne is a sophisticated browser extension that enhances the Hacker News experi
 ## Key Features
 - **AI-Powered Content Tagging**: Automatic tag generation for HN stories and comments
 - **Personalized Tag Ranking**: ML-based tag ranking using user browsing history
-- **Personalized Feed**: Curated feed of relevant HN discussions
-- **Conversational Search**: Chat-first interface with LLM-powered intent detection for natural language search
+- **Context-Aware Chat Interface**: Chat-first interface with live context sidebar showing relevant HN threads
+- **Conversational Search**: LLM-powered intent detection for natural language search
 - **Local AI Chat**: Fully local WebLLM-powered conversational interface with search integration
 - **User Data Management**: Local storage with IndexedDB for privacy
-- **Streamlined UI**: Pure chat-first interface with Feed, Memory, and Settings accessible as modals
+- **Streamlined UI**: Pure chat-first interface with contextual sidebar and essential modals
 
 ## Tech Stack
 - **Frontend**: React 19 + TypeScript
@@ -216,10 +216,10 @@ This project uses **two separate configuration systems** that serve distinct pur
 **Purpose**: Reusable UI components with consistent styling and behavior.
 
 **Key Components**:
-- **`FeedPage`**: Complete feed layout with refresh functionality and API integration
-- **`ThreadCard`**: Individual HN discussion cards with HN-style theming  
+- **`ThreadCard`**: Individual HN discussion cards with HN-style theming, supports compact sidebar variant
 - **`Tag`**: Category and theme tags with processing states
 - **`Card`**: Base card component for consistent styling
+- **`Modal`**: Reusable modal system for secondary interfaces
 
 ### CSS Architecture
 
@@ -311,18 +311,24 @@ All user data is stored locally using IndexedDB:
 - **Embeddings**: Cached text embeddings for performance
 
 ## User Interface
-The popup provides a pure chat-first interface with all features accessible through modals:
+The popup provides a pure chat-first interface with contextual awareness and essential modals:
 
 ### Primary Interface
-- **Chat Interface**: The main and only screen, providing conversational AI and search functionality with LLM-powered intent detection
-- **Always Visible**: Chat interface is always the primary view, eliminating tab switching
+- **Context Sidebar**: Left sidebar displaying 3 live HN thread cards as conversation context, fetched from the backend API
+- **Chat Interface**: Main area providing conversational AI and search functionality with LLM-powered intent detection
+- **Integrated Layout**: Context cards and chat work together to provide relevant discussion awareness
+
+### Context Thread Cards
+- **Live Content**: Three relevant HN discussions updated from the backend API (24-hour lookback, karma density sorted)
+- **Compact Design**: 260px height cards with generous internal spacing, showing category, theme, comment count, and story links
+- **No Summary**: Streamlined to show essential information without cluttering the sidebar
+- **Direct Links**: "Join the thread" links navigate directly to HN discussions
 
 ### Modal Interface (Accessible from Chat Header Icons)
-- **Feed Modal**: Personalized feed of curated HN discussions (accessible via list icon in chat header)
 - **Memory Modal**: History of visited threads, clicked tags, and recent searches displayed in a two-column layout (accessible via bookmark icon in chat header)  
 - **Settings Modal**: User preferences and feature toggles (accessible via gear icon in chat header)
 
-The interface eliminates all tab navigation in favor of a single chat-centric view with modal-based access to all secondary features. This provides the most focused, distraction-free user experience with chat as the primary interaction mode. All search functionality is integrated into the conversational interface.
+The interface provides constant contextual awareness through the sidebar while maintaining the clean chat-first design. The context cards serve as reference material for ongoing conversations without requiring modal interactions.
 
 ### Modal Architecture
 The extension uses a reusable modal system for secondary interfaces:
@@ -335,12 +341,10 @@ The extension uses a reusable modal system for secondary interfaces:
 - **Dark Theme Integration**: Styled to match the dark extension theme
 
 **Current Modals:**
-- **Feed Modal**: Personalized HN discussion feed with gradient background
 - **Memory Modal**: Two-column layout with "Visited Threads" and "Recent Searches"
 - **Settings Modal**: Configuration interface for user preferences
 
 **Modal Triggers:**
-- Feed: List icon in chat interface header
 - Memory: Bookmark icon in chat interface header
 - Settings: Gear icon in chat interface header
 
@@ -363,10 +367,10 @@ The extension uses a reusable modal system for secondary interfaces:
 - TypeScript strict mode enabled for type safety
 - Tailwind CSS for responsive design
 - Chat interface runs entirely locally with WebLLM models
-- Pure chat-first interface eliminates all tab navigation
-- All features (Feed, Memory, Settings) implemented as modals accessible from chat header
+- Context-aware interface with live sidebar showing relevant HN threads
+- Essential features (Memory, Settings) implemented as modals accessible from chat header
 - Modal system provides consistent UI with fixed sizing and clean backdrop dismissal
-- Single-page application architecture with chat as the primary and only view
+- Sidebar + chat layout architecture with contextual thread awareness
 
 ### Logging
 This codebase uses a custom logger system (`src/utils/logger.ts`) instead of direct console statements:
