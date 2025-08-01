@@ -26,15 +26,17 @@ interface ThreadCardProps extends ThreadCardData {
   maxHeight?: string | number;
   className?: string;
   style?: React.CSSProperties;
+  onClick?: () => void;
 }
 
 // Simple local Card component
 const Card: React.FC<{ 
   className?: string; 
   style?: React.CSSProperties; 
-  children: React.ReactNode 
-}> = ({ className = "", style = {}, children }) => (
-  <div className={className} style={style}>
+  children: React.ReactNode;
+  onClick?: () => void;
+}> = ({ className = "", style = {}, children, onClick }) => (
+  <div className={className} style={style} onClick={onClick}>
     {children}
   </div>
 );
@@ -71,7 +73,8 @@ export const ThreadCard: React.FC<ThreadCardProps> = ({
   minHeight,
   maxHeight,
   className = "",
-  style = {}
+  style = {},
+  onClick
 }) => {
   // Track comment count changes for animation
   const [previousCount, setPreviousCount] = useState(comment_count);
@@ -159,42 +162,45 @@ export const ThreadCard: React.FC<ThreadCardProps> = ({
     <Card 
       className={`w-full h-full rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden ${
         isAnimating ? 'animate-subtle-glow' : ''
-      } ${className}`}
+      } ${onClick ? 'cursor-pointer' : ''} ${className}`}
       style={cardStyle}
+      onClick={onClick}
     >
-      <div className="p-4 h-full flex flex-col justify-between">
+      <div className={`${summary ? 'p-4' : 'p-6'} h-full flex flex-col justify-between`}>
         <div className="flex-1 flex flex-col">
           {/* Header: Category and Time */}
-          <div className="flex items-center justify-between mb-3 text-sm">
+          <div className={`flex items-center justify-between ${summary ? 'mb-3' : 'mb-5'} text-sm`}>
             <Tag label={category} />
             <span className="text-xs" style={{ color: 'var(--meta-text)' }}>{formatTimeAgo(updated_at)}</span>
           </div>
           
           {/* Divider */}
-          <div className="border-b mb-3" style={{ borderColor: 'var(--card-border)' }}></div>
+          <div className={`border-b ${summary ? 'mb-3' : 'mb-5'}`} style={{ borderColor: 'var(--card-border)' }}></div>
           
           {/* Theme Title */}
-          <div className="mb-3 text-center">
+          <div className={`${summary ? 'mb-3' : 'mb-6'} text-center`}>
             <h2 className="text-base font-semibold leading-tight" style={{ color: 'var(--hn-orange)' }}>
               {theme}
             </h2>
           </div>
 
-          {/* Summary */}
-          <div className="flex-1 mb-4">
-            <p 
-              className="text-sm leading-6 line-clamp-7 text-center"
-              style={{ 
-                color: 'var(--card-text)',
-                fontFamily: 'var(--font-sans)'
-              }}
-            >
-              {summary}
-            </p>
-          </div>
+          {/* Summary - only show if provided */}
+          {summary && (
+            <div className="flex-1 mb-4">
+              <p 
+                className="text-sm leading-6 line-clamp-7 text-center"
+                style={{ 
+                  color: 'var(--card-text)',
+                  fontFamily: 'var(--font-sans)'
+                }}
+              >
+                {summary}
+              </p>
+            </div>
+          )}
 
           {/* Metrics Row */}
-          <div className="mb-3 flex justify-center text-xs font-mono">
+          <div className={`${summary ? 'mb-3' : 'mb-5'} flex justify-center text-xs font-mono`}>
             <a
               href={anchor}
               target="_blank"
@@ -225,7 +231,7 @@ export const ThreadCard: React.FC<ThreadCardProps> = ({
           </div>
 
           {/* Divider */}
-          <div className="border-b mb-3" style={{ borderColor: 'var(--card-border)' }}></div>
+          <div className={`border-b ${summary ? 'mb-3' : 'mb-5'}`} style={{ borderColor: 'var(--card-border)' }}></div>
         </div>
 
         {/* Source Story - Fixed to bottom with consistent spacing */}

@@ -461,27 +461,30 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       {/* Left Sidebar - Context Thread Cards */}
       <div className="w-80 flex-shrink-0 border-r border-gray-700 overflow-y-auto">
         <div className="p-4">
-          <h3 className="text-sm font-medium text-gray-400 mb-4 uppercase tracking-wide">
-            Current Context
-          </h3>
+          <div className="text-center mb-6">
+            <h2 className="text-lg font-semibold text-white">
+              Your Context
+            </h2>
+          </div>
           {threadsLoading ? (
             <div className="text-center py-8">
               <div className="animate-spin rounded-full h-6 w-6 border border-gray-400 border-t-blue-500 mx-auto mb-2"></div>
               <p className="text-xs text-gray-500">Loading context...</p>
             </div>
           ) : contextThreads.length > 0 ? (
-            <div className="space-y-4">
+            <div className="space-y-8">
               {contextThreads.map((thread) => (
                 <div key={thread.id} className="w-full">
                   <ThreadCard 
                     {...thread}
-                    height="200px"
-                    className="text-xs"
+                    height="260px"
+                    className="text-xs cursor-pointer hover:bg-gray-800/50 transition-colors"
                     style={{
                       fontSize: '11px',
                       backgroundColor: 'var(--card-bg)',
                       borderColor: 'var(--card-border)'
                     }}
+                    summary=""
                   />
                 </div>
               ))}
@@ -643,6 +646,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       >
         <SettingsPage />
       </Modal>
+
     </div>
   );
 };
