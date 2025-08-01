@@ -11,7 +11,53 @@ import { logger } from '../../utils/logger';
 import { Modal } from './Modal';
 import { ActivityPage } from './ActivityPage';
 import { SettingsPage } from './SettingsPage';
-import { FeedPage } from './FeedPage';
+import { ThreadCard } from './ThreadCard';
+
+// ThreadCard data interface
+interface ThreadCardData {
+  id: number;
+  cumulative_karma: number;
+  comment_count: number;
+  theme: string;
+  category: string;
+  story_id: number;
+  story_title: string;
+  story_url: string;
+  anchor: string;
+  summary: string;
+  updated_at: string;
+}
+
+// API configuration for fetching thread cards
+const API_BASE_URL = 'https://techne-pipeline-func-prod.azurewebsites.net/api';
+
+const fetchThreadCards = async (numCards: number = 3): Promise<ThreadCardData[]> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/thread-cards`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        num_cards: numCards,
+        hours_back: 24,
+        sort_by: 'karma_density',
+        density_min_comment_constant: 100,
+        exclude_categories: ['General Discussion', 'Discussion']
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    logger.error('Error fetching thread cards:', error);
+    return [];
+  }
+};
 
 // Helper function to convert technical errors to user-friendly messages
 const getUserFriendlyErrorMessage = (error: string): string => {
@@ -45,8 +91,9 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   const [modelLoadingProgress, setModelLoadingProgress] = useState(0);
   const [isMemoryModalOpen, setIsMemoryModalOpen] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
-  const [isFeedModalOpen, setIsFeedModalOpen] = useState(false);
   const [isCreatingConversation, setIsCreatingConversation] = useState(false);
+  const [contextThreads, setContextThreads] = useState<ThreadCardData[]>([]);
+  const [threadsLoading, setThreadsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll to bottom when new messages arrive
@@ -80,6 +127,23 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       setLoadedModelName(activeConversation.modelDisplayName);
     }
   }, [activeConversation]);
+
+  // Load context threads on component mount
+  useEffect(() => {
+    const loadContextThreads = async () => {
+      setThreadsLoading(true);
+      try {
+        const threads = await fetchThreadCards(3);
+        setContextThreads(threads);
+      } catch (error) {
+        logger.error('Error loading context threads:', error);
+      } finally {
+        setThreadsLoading(false);
+      }
+    };
+
+    loadContextThreads();
+  }, []);
 
   // Handle search request with streaming - reuse existing assistant message
   const handleSearchRequest = async (searchQuery: string, assistantMessageId: string) => {
@@ -393,141 +457,151 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   }
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-gray-900">
-      {/* Header */}
-      <div className="flex-shrink-0 p-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-lg font-semibold text-white truncate">
-              {activeConversation.title}
-            </h2>
-          </div>
-          <div className="flex items-center space-x-2">
-            {/* New Conversation Button */}
-            <button
-              onClick={createNewConversation}
-              disabled={isCreatingConversation}
-              className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              title={isCreatingConversation ? "Creating..." : "New Conversation"}
-            >
-              {isCreatingConversation ? (
-                <div className="animate-spin rounded-full h-5 w-5 border border-gray-400 border-t-blue-500"></div>
-              ) : (
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                </svg>
-              )}
-            </button>
-            
-            {/* Feed Icon */}
-            <button
-              onClick={() => setIsFeedModalOpen(true)}
-              className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
-              title="Feed"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-              </svg>
-            </button>
-            
-            {/* Memory Icon */}
-            <button
-              onClick={() => setIsMemoryModalOpen(true)}
-              className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
-              title="Memory"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-              </svg>
-            </button>
-            
-            {/* Settings Icon */}
-            <button
-              onClick={() => setIsSettingsModalOpen(true)}
-              className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
-              title="Settings"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Chat Messages */}
-      <div className="flex-1 overflow-auto p-4">
-        <div className="max-w-4xl mx-auto">
-          
-          {activeConversation.messages.map((msg) => (
-            <MessageBubble key={msg.id} message={msg} />
-          ))}
-          {streamingMessage && (
-            <MessageBubble message={streamingMessage} />
-          )}
-          <div ref={messagesEndRef} />
-        </div>
-      </div>
-
-      {/* Input Area */}
-      <div className="flex-shrink-0 p-4">
-        <div className="max-w-4xl mx-auto">
-          <textarea
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            onKeyDown={handleKeyPress}
-            placeholder={isModelLoading ? "Loading model, please wait..." : "Enter to send"}
-            disabled={isLoading || isModelLoading}
-            className="w-full p-3 bg-gray-800 text-white rounded border border-gray-600 resize-none focus:outline-none focus:border-blue-500"
-            rows={1}
-            style={{ minHeight: '44px', maxHeight: '120px' }}
-          />
-          
-          {/* Status indicator - small reserved space, prominent when active */}
-          <div className="flex items-center justify-center mt-2 h-6">
-            {isModelLoading && (
-              <div className="flex items-center gap-2 text-xs text-gray-400">
-                <div className="animate-spin rounded-full h-3 w-3 border border-gray-400 border-t-blue-500"></div>
-                <span>Loading model...</span>
-                <div className="w-24 h-1 bg-gray-600 rounded-full">
-                  <div 
-                    className="h-1 bg-blue-500 rounded-full transition-all duration-300"
-                    style={{ width: `${Math.round(modelLoadingProgress * 100)}%` }}
+    <div className="flex-1 flex h-full bg-gray-900">
+      {/* Left Sidebar - Context Thread Cards */}
+      <div className="w-80 flex-shrink-0 border-r border-gray-700 overflow-y-auto">
+        <div className="p-4">
+          <h3 className="text-sm font-medium text-gray-400 mb-4 uppercase tracking-wide">
+            Current Context
+          </h3>
+          {threadsLoading ? (
+            <div className="text-center py-8">
+              <div className="animate-spin rounded-full h-6 w-6 border border-gray-400 border-t-blue-500 mx-auto mb-2"></div>
+              <p className="text-xs text-gray-500">Loading context...</p>
+            </div>
+          ) : contextThreads.length > 0 ? (
+            <div className="space-y-4">
+              {contextThreads.map((thread) => (
+                <div key={thread.id} className="w-full">
+                  <ThreadCard 
+                    {...thread}
+                    height="200px"
+                    className="text-xs"
+                    style={{
+                      fontSize: '11px',
+                      backgroundColor: 'var(--card-bg)',
+                      borderColor: 'var(--card-border)'
+                    }}
                   />
                 </div>
-                <span>{Math.round(modelLoadingProgress * 100)}%</span>
-              </div>
-            )}
-            {error && (
-              <div className="flex items-center gap-2 text-xs text-red-400">
-                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                </svg>
-                <span>{getUserFriendlyErrorMessage(error)}</span>
-              </div>
-            )}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <p className="text-xs text-gray-500">No context available</p>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Feed Modal */}
-      <Modal
-        isOpen={isFeedModalOpen}
-        onClose={() => setIsFeedModalOpen(false)}
-        title="Feed"
-      >
-        <div className="min-h-full bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900">
-          <FeedPage
-            feedId="personalized"
-            title=""
-            description=""
-            hoursBack={24}
-            numCards={3}
-            sortBy="karma_density"
-          />
+      {/* Main Chat Area */}
+      <div className="flex-1 flex flex-col">
+        {/* Header */}
+        <div className="flex-shrink-0 p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-semibold text-white truncate">
+                {activeConversation.title}
+              </h2>
+            </div>
+            <div className="flex items-center space-x-2">
+              {/* New Conversation Button */}
+              <button
+                onClick={createNewConversation}
+                disabled={isCreatingConversation}
+                className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                title={isCreatingConversation ? "Creating..." : "New Conversation"}
+              >
+                {isCreatingConversation ? (
+                  <div className="animate-spin rounded-full h-5 w-5 border border-gray-400 border-t-blue-500"></div>
+                ) : (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                )}
+              </button>
+              
+              {/* Memory Icon */}
+              <button
+                onClick={() => setIsMemoryModalOpen(true)}
+                className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
+                title="Memory"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                </svg>
+              </button>
+              
+              {/* Settings Icon */}
+              <button
+                onClick={() => setIsSettingsModalOpen(true)}
+                className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
+                title="Settings"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+              </button>
+            </div>
+          </div>
         </div>
-      </Modal>
+
+        {/* Chat Messages */}
+        <div className="flex-1 overflow-auto p-4">
+          <div className="max-w-4xl mx-auto">
+            
+            {activeConversation.messages.map((msg) => (
+              <MessageBubble key={msg.id} message={msg} />
+            ))}
+            {streamingMessage && (
+              <MessageBubble message={streamingMessage} />
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+        </div>
+
+        {/* Input Area */}
+        <div className="flex-shrink-0 p-4">
+          <div className="max-w-4xl mx-auto">
+            <textarea
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              onKeyDown={handleKeyPress}
+              placeholder={isModelLoading ? "Loading model, please wait..." : "Enter to send"}
+              disabled={isLoading || isModelLoading}
+              className="w-full p-3 bg-gray-800 text-white rounded border border-gray-600 resize-none focus:outline-none focus:border-blue-500"
+              rows={1}
+              style={{ minHeight: '44px', maxHeight: '120px' }}
+            />
+            
+            {/* Status indicator - small reserved space, prominent when active */}
+            <div className="flex items-center justify-center mt-2 h-6">
+              {isModelLoading && (
+                <div className="flex items-center gap-2 text-xs text-gray-400">
+                  <div className="animate-spin rounded-full h-3 w-3 border border-gray-400 border-t-blue-500"></div>
+                  <span>Loading model...</span>
+                  <div className="w-24 h-1 bg-gray-600 rounded-full">
+                    <div 
+                      className="h-1 bg-blue-500 rounded-full transition-all duration-300"
+                      style={{ width: `${Math.round(modelLoadingProgress * 100)}%` }}
+                    />
+                  </div>
+                  <span>{Math.round(modelLoadingProgress * 100)}%</span>
+                </div>
+              )}
+              {error && (
+                <div className="flex items-center gap-2 text-xs text-red-400">
+                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                  <span>{getUserFriendlyErrorMessage(error)}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Memory Modal */}
       <Modal
