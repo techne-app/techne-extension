@@ -429,24 +429,50 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
 
   if (!activeConversation) {
     return (
-      <div className="flex-1 flex items-center justify-center text-gray-400">
+      <div className="flex-1 flex items-center justify-center chat-container" style={{ color: 'var(--text-secondary)' }}>
         <div className="text-center">
-          <svg className="w-16 h-16 mx-auto mb-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-16 h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: 'var(--hn-border)' }}>
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
           </svg>
-          <p className="text-lg font-medium">Ready to start chatting</p>
+          <p className="text-lg font-medium" style={{ color: 'var(--text-primary)' }}>Ready to start chatting</p>
           <p className="text-sm mt-2 mb-4">Create a new conversation or browse your conversation history</p>
           <div className="flex flex-col items-center space-y-3">
             <button
               onClick={createNewConversation}
               disabled={isCreatingConversation}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-500 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-6 py-3 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              style={{ 
+                backgroundColor: 'var(--hn-blue)', 
+                color: 'white'
+              }}
+              onMouseEnter={(e) => {
+                if (!isCreatingConversation) {
+                  e.currentTarget.style.backgroundColor = '#0052a3';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isCreatingConversation) {
+                  e.currentTarget.style.backgroundColor = 'var(--hn-blue)';
+                }
+              }}
             >
               {isCreatingConversation ? 'Creating...' : 'Start New Conversation'}
             </button>
             <button
               onClick={() => setIsMemoryModalOpen(true)}
-              className="px-4 py-2 text-gray-400 hover:text-white border border-gray-600 rounded-lg hover:border-gray-500 transition-colors"
+              className="px-4 py-2 border rounded-lg transition-colors"
+              style={{ 
+                color: 'var(--text-secondary)',
+                borderColor: 'var(--hn-border)'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = 'var(--text-primary)';
+                e.currentTarget.style.borderColor = 'var(--text-secondary)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = 'var(--text-secondary)';
+                e.currentTarget.style.borderColor = 'var(--hn-border)';
+              }}
             >
               Browse Conversation History
             </button>
@@ -457,41 +483,55 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   }
 
   return (
-    <div className="flex-1 flex h-full bg-gray-900">
+    <div className="flex-1 flex h-full chat-container">
       {/* Left Sidebar - Context Thread Cards */}
-      <div className="w-80 flex-shrink-0 border-r border-gray-700 overflow-y-auto">
+      <div className="w-80 flex-shrink-0 border-r overflow-y-auto" style={{ borderColor: 'var(--hn-border)' }}>
         <div className="p-4">
           <div className="text-center mb-6">
-            <h2 className="text-lg font-semibold text-white">
+            <h2 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>
               Your Context
             </h2>
           </div>
           {threadsLoading ? (
             <div className="text-center py-8">
-              <div className="animate-spin rounded-full h-6 w-6 border border-gray-400 border-t-blue-500 mx-auto mb-2"></div>
-              <p className="text-xs text-gray-500">Loading context...</p>
+              <div className="animate-spin rounded-full h-6 w-6 border mx-auto mb-2" style={{ borderColor: 'var(--text-secondary)', borderTopColor: 'var(--hn-blue)' }}></div>
+              <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Loading context...</p>
             </div>
           ) : contextThreads.length > 0 ? (
             <div className="space-y-8">
               {contextThreads.map((thread) => (
                 <div key={thread.id} className="w-full">
-                  <ThreadCard 
-                    {...thread}
-                    height="260px"
-                    className="text-xs cursor-pointer hover:bg-gray-800/50 transition-colors"
+                  <div
+                    className="text-xs cursor-pointer transition-colors"
                     style={{
-                      fontSize: '11px',
                       backgroundColor: 'var(--card-bg)',
                       borderColor: 'var(--card-border)'
                     }}
-                    summary=""
-                  />
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = 'var(--dark-bg)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = 'var(--card-bg)';
+                    }}
+                  >
+                    <ThreadCard 
+                      {...thread}
+                      height="260px"
+                      className="text-xs"
+                      style={{
+                        fontSize: '11px',
+                        backgroundColor: 'transparent',
+                        borderColor: 'transparent'
+                      }}
+                      summary=""
+                    />
+                  </div>
                 </div>
               ))}
             </div>
           ) : (
             <div className="text-center py-8">
-              <p className="text-xs text-gray-500">No context available</p>
+              <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>No context available</p>
             </div>
           )}
         </div>
@@ -503,7 +543,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         <div className="flex-shrink-0 p-4">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-lg font-semibold text-white truncate">
+              <h2 className="text-lg font-semibold truncate" style={{ color: 'var(--text-primary)' }}>
                 {activeConversation.title}
               </h2>
             </div>
@@ -512,11 +552,23 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
               <button
                 onClick={createNewConversation}
                 disabled={isCreatingConversation}
-                className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="p-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{ 
+                  color: 'var(--text-secondary)',
+                  backgroundColor: 'transparent'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color = 'var(--text-primary)';
+                  e.currentTarget.style.backgroundColor = 'var(--dark-card)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color = 'var(--text-secondary)';
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                }}
                 title={isCreatingConversation ? "Creating..." : "New Conversation"}
               >
                 {isCreatingConversation ? (
-                  <div className="animate-spin rounded-full h-5 w-5 border border-gray-400 border-t-blue-500"></div>
+                  <div className="animate-spin rounded-full h-5 w-5 border" style={{ borderColor: 'var(--text-secondary)', borderTopColor: 'var(--hn-blue)' }}></div>
                 ) : (
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -527,7 +579,19 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
               {/* Memory Icon */}
               <button
                 onClick={() => setIsMemoryModalOpen(true)}
-                className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
+                className="p-2 rounded-lg transition-colors"
+                style={{ 
+                  color: 'var(--text-secondary)',
+                  backgroundColor: 'transparent'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color = 'var(--text-primary)';
+                  e.currentTarget.style.backgroundColor = 'var(--dark-card)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color = 'var(--text-secondary)';
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                }}
                 title="Memory"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -538,7 +602,19 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
               {/* Settings Icon */}
               <button
                 onClick={() => setIsSettingsModalOpen(true)}
-                className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
+                className="p-2 rounded-lg transition-colors"
+                style={{ 
+                  color: 'var(--text-secondary)',
+                  backgroundColor: 'transparent'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color = 'var(--text-primary)';
+                  e.currentTarget.style.backgroundColor = 'var(--dark-card)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color = 'var(--text-secondary)';
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                }}
                 title="Settings"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -573,7 +649,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
               onKeyDown={handleKeyPress}
               placeholder={isModelLoading ? "Loading model, please wait..." : "Enter to send"}
               disabled={isLoading || isModelLoading}
-              className="w-full p-3 bg-gray-800 text-white rounded border border-gray-600 resize-none focus:outline-none focus:border-blue-500"
+              className="chat-input w-full p-3 rounded resize-none focus:outline-none"
               rows={1}
               style={{ minHeight: '44px', maxHeight: '120px' }}
             />
@@ -581,20 +657,23 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
             {/* Status indicator - small reserved space, prominent when active */}
             <div className="flex items-center justify-center mt-2 h-6">
               {isModelLoading && (
-                <div className="flex items-center gap-2 text-xs text-gray-400">
-                  <div className="animate-spin rounded-full h-3 w-3 border border-gray-400 border-t-blue-500"></div>
+                <div className="flex items-center gap-2 text-xs" style={{ color: 'var(--text-secondary)' }}>
+                  <div className="animate-spin rounded-full h-3 w-3 border" style={{ borderColor: 'var(--text-secondary)', borderTopColor: 'var(--hn-blue)' }}></div>
                   <span>Loading model...</span>
-                  <div className="w-24 h-1 bg-gray-600 rounded-full">
+                  <div className="w-24 h-1 rounded-full" style={{ backgroundColor: 'var(--hn-border)' }}>
                     <div 
-                      className="h-1 bg-blue-500 rounded-full transition-all duration-300"
-                      style={{ width: `${Math.round(modelLoadingProgress * 100)}%` }}
+                      className="h-1 rounded-full transition-all duration-300"
+                      style={{ 
+                        width: `${Math.round(modelLoadingProgress * 100)}%`,
+                        backgroundColor: 'var(--hn-blue)'
+                      }}
                     />
                   </div>
                   <span>{Math.round(modelLoadingProgress * 100)}%</span>
                 </div>
               )}
               {error && (
-                <div className="flex items-center gap-2 text-xs text-red-400">
+                <div className="flex items-center gap-2 text-xs" style={{ color: '#ef4444' }}>
                   <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                   </svg>

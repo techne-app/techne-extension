@@ -15,9 +15,16 @@ export const ActivityPage: React.FC<ActivityPageProps> = ({
   onDeleteConversation
 }) => {
   return (
-    <div className="h-full flex flex-col">
+    <div 
+      className="h-full flex flex-col"
+      style={{ 
+        fontFamily: 'var(--font-sans)',
+        backgroundColor: 'var(--dark-bg)',
+        color: 'var(--text-primary)'
+      }}
+    >
       <div className="flex-1 overflow-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 h-full min-h-full">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 h-full min-h-full p-4">
           <div className="overflow-auto">
             <ConversationHistory 
               activeConversationId={activeConversationId}

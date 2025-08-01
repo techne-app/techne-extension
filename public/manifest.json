@@ -40,7 +40,7 @@
     }
   },
   "content_security_policy": {
-    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'"
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; font-src 'self' https://fonts.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com"
   },
   "icons": {
     "48": "images/icon-48.png"

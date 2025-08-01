@@ -3,30 +3,66 @@
 @import "tailwindcss/components"; 
 @import "tailwindcss/utilities";
 
+/* Inter font loaded via HTML link tag for better extension compatibility */
+
 /* Design tokens for Techne components */
 :root {
-  /* HN-style color palette */
-  --hn-bg: #f6f6ef;           /* HN beige background */
-  --hn-text: #333;            /* Primary text color */
-  --hn-orange: #ff6600;       /* HN accent color */
-  --hn-link: #0066cc;         /* Link color */
-  --hn-gray: #999;            /* Secondary text */
-  --hn-border: #e0e0e0;       /* Borders and dividers */
+  /* Deep HN Color Palette */
+  --hn-blue: #0066cc;         /* Keep existing HN blue */
+  --dark-bg: #1a1a1a;         /* Slightly warmer than gray-900 */
+  --dark-card: #2a2a2a;       /* Card backgrounds */
+  --text-primary: #f5f5f5;    /* Softer white */
+  --text-secondary: #a0a0a0;  /* Mid-gray */
+  --accent-orange: #ff6600;   /* HN orange for highlights */
+  
+  /* Legacy HN-style colors (for card compatibility) */
+  --hn-bg: var(--dark-card);     /* Card backgrounds use dark cards */
+  --hn-text: var(--text-primary); /* Primary text color */
+  --hn-orange: var(--accent-orange); /* HN accent color */
+  --hn-link: var(--hn-blue);     /* Link color */
+  --hn-gray: var(--text-secondary); /* Secondary text */
+  --hn-border: #404040;           /* Borders for dark theme */
   
   /* Card components */
-  --card-bg: var(--hn-bg);    /* Card backgrounds */
-  --card-text: var(--hn-text); /* Card text */
+  --card-bg: var(--dark-card);    /* Card backgrounds */
+  --card-text: var(--text-primary); /* Card text */
   --card-border: var(--hn-border); /* Card borders */
   --card-padding: 1rem;
   --card-radius: 0.5rem;
-  --card-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --card-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -1px rgb(0 0 0 / 0.06);
+  
+  /* Typography - System fonts optimized for modern, clean appearance */
+  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI Variable", "Segoe UI", Roboto, "Helvetica Neue", "Arial Nova", "Noto Sans", Arial, sans-serif;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --letter-spacing-tight: -0.025em;
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.625;
   
   /* Text and link colors */
-  --tag-text: white;           /* Tag text color (white on orange) */
-  --meta-text: var(--hn-gray); /* Meta text like timestamps */
-  --link-color: var(--hn-link); /* Link color */
-  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --tag-text: var(--dark-bg);  /* Tag text color (dark on orange) */
+  --meta-text: var(--text-secondary); /* Meta text like timestamps */
+  --link-color: var(--hn-blue); /* Link color */
 }
+
+/* Global font application with font loading optimization */
+* {
+  font-family: var(--font-sans);
+}
+
+/* Ensure body and main containers use the custom font with optimized rendering */
+body, html, .chat-container, .modal-container {
+  font-family: var(--font-sans) !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: "kern" 1, "liga" 1, "calt" 1, "pnum" 1, "tnum" 0, "onum" 0, "lnum" 0, "dlig" 0;
+  font-variant-numeric: proportional-nums;
+  text-rendering: optimizeLegibility;
+}
+
 
 /* Thread card styles */
 .techne-card {
@@ -37,29 +73,39 @@
   box-shadow: var(--card-shadow);
   border: 1px solid var(--hn-border);
   margin-bottom: 0.75rem;
+  font-family: var(--font-sans);
+  letter-spacing: var(--letter-spacing-tight);
+  line-height: var(--line-height-normal);
 }
 
 .techne-link {
   color: var(--hn-link);
   text-decoration: none;
+  font-weight: var(--font-weight-medium);
+  transition: color 0.2s ease;
 }
 
 .techne-link:hover {
   text-decoration: underline;
+  color: var(--hn-blue);
 }
 
 .techne-text-secondary {
-  color: var(--hn-gray);
+  color: var(--text-secondary);
   font-size: 0.875rem;
+  font-weight: var(--font-weight-normal);
+  line-height: var(--line-height-relaxed);
 }
 
 .techne-text-primary {
-  color: var(--hn-text);
+  color: var(--text-primary);
+  font-weight: var(--font-weight-normal);
+  line-height: var(--line-height-normal);
 }
 
 .techne-accent {
-  color: var(--hn-orange);
-  font-weight: 500;
+  color: var(--accent-orange);
+  font-weight: var(--font-weight-semibold);
 }
 
 /* Tag styles */
@@ -67,9 +113,106 @@
   display: inline-block;
   padding: 0.25rem 0.5rem;
   font-size: 0.75rem;
-  background-color: var(--hn-orange);
-  color: white;
+  font-weight: var(--font-weight-medium);
+  background-color: var(--accent-orange);
+  color: var(--tag-text);
   border-radius: 0.25rem;
   margin-right: 0.25rem;
   margin-bottom: 0.25rem;
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+/* Chat interface enhancements */
+.chat-container {
+  font-family: var(--font-sans);
+  background-color: var(--dark-bg);
+  color: var(--text-primary);
+}
+
+.chat-message {
+  font-family: var(--font-sans);
+  line-height: var(--line-height-relaxed);
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+.chat-input {
+  font-family: var(--font-sans);
+  background-color: var(--dark-card);
+  color: var(--text-primary);
+  border-color: var(--hn-border);
+}
+
+.chat-input:focus {
+  border-color: var(--hn-blue);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.2);
+}
+
+/* Modal-specific styles */
+.modal-container {
+  font-family: var(--font-sans);
+  background-color: var(--dark-bg);
+  color: var(--text-primary);
+}
+
+.modal-header {
+  border-color: var(--hn-border);
+  background-color: var(--dark-bg);
+}
+
+.modal-title {
+  color: var(--text-primary);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+.modal-content {
+  background-color: var(--dark-bg);
+  color: var(--text-primary);
+}
+
+.modal-section-header {
+  color: var(--text-primary);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+.modal-text-secondary {
+  color: var(--text-secondary);
+  line-height: var(--line-height-relaxed);
+}
+
+.modal-button {
+  font-family: var(--font-sans);
+  font-weight: var(--font-weight-medium);
+  transition: all 0.2s ease;
+}
+
+.modal-button-primary {
+  background-color: var(--hn-blue);
+  color: white;
+}
+
+.modal-button-primary:hover {
+  background-color: #0052a3;
+}
+
+.modal-button-secondary {
+  color: var(--text-secondary);
+  border-color: var(--hn-border);
+}
+
+.modal-button-secondary:hover {
+  color: var(--text-primary);
+  border-color: var(--text-secondary);
+}
+
+.modal-card {
+  background-color: var(--dark-card);
+  border: 1px solid var(--hn-border);
+  font-family: var(--font-sans);
+}
+
+.modal-card:hover {
+  background-color: var(--dark-bg);
 }

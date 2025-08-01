@@ -40,14 +40,27 @@ export const SettingsPage: React.FC = () => {
 
 
   return (
-    <div className="h-full flex flex-col">
-      
-      <div className="flex-1 overflow-auto p-4">
+    <div 
+      className="h-full flex flex-col"
+      style={{ 
+        fontFamily: 'var(--font-sans)',
+        backgroundColor: 'var(--dark-bg)',
+        color: 'var(--text-primary)'
+      }}
+    >
+      <div className="flex-1 overflow-auto p-6">
         <div className="space-y-6">
           {/* Personalization Setting */}
           <div>
             <div className="flex items-center">
-              <label htmlFor="personalization" className="text-sm text-gray-700 mr-3">
+              <label 
+                htmlFor="personalization" 
+                className="text-sm mr-3"
+                style={{ 
+                  color: 'var(--text-primary)',
+                  fontWeight: 'var(--font-weight-medium)'
+                }}
+              >
                 Enable Personalization
               </label>
               
@@ -55,25 +68,51 @@ export const SettingsPage: React.FC = () => {
               <button 
                 onClick={handlePersonalizationToggle}
                 disabled={isSaving}
-                className="relative inline-flex items-center h-6 rounded-full w-11 focus:outline-none"
+                className="relative inline-flex items-center h-6 rounded-full w-11 focus:outline-none transition-all duration-200"
                 aria-pressed={isPersonalizationEnabled}
+                style={{
+                  backgroundColor: isPersonalizationEnabled ? 'var(--hn-blue)' : 'var(--hn-border)'
+                }}
               >
                 <span 
                   className={`${
-                    isPersonalizationEnabled ? 'bg-gray-300' : 'bg-gray-300'
-                  } absolute h-6 w-11 mx-auto rounded-full transition-colors duration-200 ease-in-out`}
-                  style={isPersonalizationEnabled ? { backgroundColor: '#0000ED' } : {}}
-                ></span>
-                <span 
-                  className={`${
                     isPersonalizationEnabled ? 'translate-x-6' : 'translate-x-1'
-                  } inline-block h-4 w-4 rounded-full bg-white transform transition-transform duration-200 ease-in-out`}
+                  } inline-block h-4 w-4 rounded-full bg-white transform transition-transform duration-200 ease-in-out shadow-sm`}
                 ></span>
               </button>
             </div>
             
-            <p className="text-xs text-gray-500 mt-2">
-              When enabled, the navigation will be personalized.
+            <p 
+              className="text-xs mt-2"
+              style={{ 
+                color: 'var(--text-secondary)',
+                lineHeight: 'var(--line-height-relaxed)'
+              }}
+            >
+              When enabled, the navigation will be personalized based on your browsing patterns.
+            </p>
+          </div>
+
+          {/* Additional Settings Section */}
+          <div className="pt-4 border-t" style={{ borderColor: 'var(--hn-border)' }}>
+            <h3 
+              className="text-sm font-medium mb-3"
+              style={{ 
+                color: 'var(--text-primary)',
+                fontWeight: 'var(--font-weight-semibold)'
+              }}
+            >
+              About Techne
+            </h3>
+            <p 
+              className="text-xs"
+              style={{ 
+                color: 'var(--text-secondary)',
+                lineHeight: 'var(--line-height-relaxed)'
+              }}
+            >
+              Techne enhances your Hacker News experience with AI-powered insights and personalized content discovery. 
+              All data is stored locally in your browser for privacy.
             </p>
           </div>
         </div>
