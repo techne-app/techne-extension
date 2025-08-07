@@ -376,9 +376,32 @@ h1, h2, h3, h4, h5, h6 {
   animation: subtle-glow 2s ease-in-out;
 }
 
+/* Logo glow animation - Match landing page logo */
+@keyframes logoGlow {
+  0% { 
+    transform: scale(1);
+    opacity: 0.4;
+  }
+  50% { 
+    transform: scale(1.5);
+    opacity: 0.8;
+  }
+  100% { 
+    transform: scale(1);
+    opacity: 0.4;
+  }
+}
+
 /* Respect reduced motion preferences */
 @media (prefers-reduced-motion: reduce) {
   .animate-subtle-glow {
     animation: none !important;
+  }
+  
+  @keyframes logoGlow {
+    0%, 100% { 
+      transform: scale(1);
+      opacity: 0.4;
+    }
   }
 }

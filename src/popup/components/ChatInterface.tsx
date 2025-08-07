@@ -488,10 +488,39 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       {/* Left Sidebar - Context Thread Cards */}
       <div className="w-80 flex-shrink-0 border-r overflow-y-auto" style={{ borderColor: 'var(--hn-border)' }}>
         <div className="p-4">
-          <div className="text-center mb-6">
-            <h2 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>
-              Your Context
-            </h2>
+          {/* Logo Section */}
+          <div className="flex justify-center mb-6">
+            <div className="relative w-16 h-16">
+              {/* Background glow layer */}
+              <div
+                className="absolute inset-0 rounded-full opacity-60"
+                style={{
+                  background: "radial-gradient(circle, rgba(59, 130, 246, 0.3) 0%, rgba(59, 130, 246, 0.1) 40%, transparent 70%)",
+                  mixBlendMode: "screen",
+                  animation: "logoGlow 6s ease-in-out infinite"
+                }}
+              />
+              
+              {/* Logo */}
+              <div
+                className="relative z-10"
+                style={{
+                  filter: "blur(0px) contrast(1.0) saturate(1.0) drop-shadow(0 0 15px rgba(59, 130, 246, 0.5))",
+                  mixBlendMode: "normal"
+                }}
+              >
+                <img 
+                  src="/logo.png" 
+                  alt="Techne Logo" 
+                  width={64}
+                  height={64}
+                  className="w-full h-full rounded-full border-2 border-white/30"
+                  style={{
+                    clipPath: "circle(44% at 50% 50%)"
+                  }}
+                />
+              </div>
+            </div>
           </div>
           {threadsLoading ? (
             <div className="text-center py-8">
