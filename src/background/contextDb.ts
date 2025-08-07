@@ -52,6 +52,10 @@ class ContextDB extends Dexie {
     await this.tags.clear();
   }
 
+  async deleteTag(id: number): Promise<void> {
+    await this.tags.delete(id);
+  }
+
   async getRecentTags(k: number): Promise<Tag[]> {
     return await this.tags
       .orderBy('timestamp')
@@ -74,6 +78,10 @@ class ContextDB extends Dexie {
 
   async clearSearches(): Promise<void> {
     await this.searches.clear();
+  }
+
+  async deleteSearch(id: number): Promise<void> {
+    await this.searches.delete(id);
   }
 
   async getRecentSearches(k: number): Promise<Search[]> {

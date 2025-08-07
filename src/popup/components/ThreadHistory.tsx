@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { contextDb, type Tag } from '../../background/contextDb';
 import { MessageType } from '../../types/messages';
-import { TagHistoryCard } from './TagHistoryCard';
+import { MemoryCard } from './MemoryCard';
 import { logger } from '../../utils/logger';
 
 export const ThreadHistory: React.FC = () => {
@@ -37,6 +37,17 @@ export const ThreadHistory: React.FC = () => {
     }
   };
 
+  // Handle delete individual tag
+  const handleDeleteTag = async (tagId: number) => {
+    try {
+      await contextDb.deleteTag(tagId);
+      setTags(prevTags => prevTags.filter(tag => tag.id !== tagId));
+    } catch (err) {
+      logger.error('Failed to delete tag:', err);
+      setError(err instanceof Error ? err.message : 'Unknown error');
+    }
+  };
+
   // Load tags on component mount and set up message listener
   useEffect(() => {
     loadTags();
@@ -60,12 +71,28 @@ export const ThreadHistory: React.FC = () => {
   }, []);
 
   return (
-    <div className="p-4">
+    <div className="p-4" style={{ fontFamily: 'var(--font-sans)' }}>
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold text-white">Visited Threads</h2>
+        <h2 
+          className="text-xl font-bold"
+          style={{ 
+            color: 'var(--text-primary)',
+            fontWeight: 'var(--font-weight-bold)',
+            letterSpacing: 'var(--letter-spacing-tight)'
+          }}
+        >
+          Visited Threads
+        </h2>
         <button
           onClick={handleClearAll}
-          className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+          className="px-4 py-2 rounded transition-colors disabled:opacity-50"
+          style={{ 
+            backgroundColor: '#ef4444',
+            color: 'white'
+          }}
+          onMouseEnter={(e) => !e.currentTarget.disabled && (e.currentTarget.style.backgroundColor = '#dc2626')}
+          onMouseLeave={(e) => !e.currentTarget.disabled && (e.currentTarget.style.backgroundColor = '#ef4444')}
+          disabled={loading || tags.length === 0}
         >
           Clear
         </button>
@@ -74,19 +101,21 @@ export const ThreadHistory: React.FC = () => {
       {/* Content area */}
       <div className="space-y-2">
         {loading ? (
-          <div className="text-gray-400">Loading tags...</div>
+          <div style={{ color: 'var(--text-secondary)' }}>Loading tags...</div>
         ) : error ? (
-          <div className="text-red-400">Error: {error}</div>
+          <div style={{ color: '#ef4444' }}>Error: {error}</div>
         ) : !tags.length ? (
-          <div className="text-gray-400">No threads visited yet. Try some.</div>
+          <div style={{ color: 'var(--text-secondary)' }}>No threads visited yet.</div>
         ) : (
           tags.map((tag) => (
-            <TagHistoryCard
+            <MemoryCard
               key={tag.id}
-              tag={tag.tag || ''}
-              type={tag.type || ''}
-              anchor={tag.anchor || ''}
-              timestamp={tag.timestamp}
+              title={tag.tag || ''}
+              subtitle={tag.type ? `Category: ${tag.type}` : undefined}
+              timestamp={tag.timestamp ? new Date(tag.timestamp).toLocaleString() : ''}
+              href={tag.anchor}
+              primaryActionLabel="Go to thread"
+              onDelete={() => handleDeleteTag(tag.id!)}
             />
           ))
         )}

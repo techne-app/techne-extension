@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { contextDb, type Search } from '../../background/contextDb';
 import { MessageType } from '../../types/messages';
+import { MemoryCard } from './MemoryCard';
 import { logger } from '../../utils/logger';
 
 export const SearchArchive: React.FC = () => {
@@ -32,6 +33,17 @@ export const SearchArchive: React.FC = () => {
     }
   };
 
+  // Handle delete individual search
+  const handleDeleteSearch = async (searchId: number) => {
+    try {
+      await contextDb.deleteSearch(searchId);
+      setSearches(prevSearches => prevSearches.filter(search => search.id !== searchId));
+    } catch (err) {
+      logger.error('Failed to delete search:', err);
+      setError(err instanceof Error ? err.message : 'Unknown error');
+    }
+  };
+
   // Load searches on component mount and set up message listener
   useEffect(() => {
     loadSearches();
@@ -53,12 +65,28 @@ export const SearchArchive: React.FC = () => {
   }, []);
 
   return (
-    <div className="p-4">
+    <div className="p-4" style={{ fontFamily: 'var(--font-sans)' }}>
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold text-white">Recent Searches</h2>
+        <h2 
+          className="text-xl font-bold"
+          style={{ 
+            color: 'var(--text-primary)',
+            fontWeight: 'var(--font-weight-bold)',
+            letterSpacing: 'var(--letter-spacing-tight)'
+          }}
+        >
+          Recent Searches
+        </h2>
         <button
           onClick={handleClearAll}
-          className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+          className="px-4 py-2 rounded transition-colors disabled:opacity-50"
+          style={{ 
+            backgroundColor: '#ef4444',
+            color: 'white'
+          }}
+          onMouseEnter={(e) => !e.currentTarget.disabled && (e.currentTarget.style.backgroundColor = '#dc2626')}
+          onMouseLeave={(e) => !e.currentTarget.disabled && (e.currentTarget.style.backgroundColor = '#ef4444')}
+          disabled={loading || searches.length === 0}
         >
           Clear
         </button>
@@ -67,23 +95,19 @@ export const SearchArchive: React.FC = () => {
       {/* Content area */}
       <div className="space-y-2">
         {loading ? (
-          <div className="text-gray-400">Loading search history...</div>
+          <div style={{ color: 'var(--text-secondary)' }}>Loading search history...</div>
         ) : error ? (
-          <div className="text-red-400">Error: {error}</div>
+          <div style={{ color: '#ef4444' }}>Error: {error}</div>
         ) : !searches.length ? (
-          <div className="text-gray-400">No search history yet.</div>
+          <div style={{ color: 'var(--text-secondary)' }}>No search history yet.</div>
         ) : (
           searches.map((search) => (
-            <div key={search.id} className="bg-gray-800 border border-gray-600 p-3 rounded-lg hover:bg-gray-750 transition-colors">
-              <div className="flex justify-between items-center">
-                <div className="font-medium text-white">
-                  {search.query}
-                </div>
-                <div className="text-sm text-gray-400">
-                  {new Date(search.timestamp).toLocaleString()}
-                </div>
-              </div>
-            </div>
+            <MemoryCard
+              key={search.id}
+              title={search.query}
+              timestamp={new Date(search.timestamp).toLocaleString()}
+              onDelete={() => handleDeleteSearch(search.id!)}
+            />
           ))
         )}
       </div>
