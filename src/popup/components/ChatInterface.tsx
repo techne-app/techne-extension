@@ -505,24 +505,16 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                   <div
                     className="text-xs cursor-pointer transition-colors"
                     style={{
-                      backgroundColor: 'var(--card-bg)',
-                      borderColor: 'var(--card-border)'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = 'var(--dark-bg)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = 'var(--card-bg)';
+                      backgroundColor: 'transparent', // Let ThreadCard control its own background
+                      borderColor: 'transparent'
                     }}
                   >
                     <ThreadCard 
                       {...thread}
                       height="260px"
-                      className="text-xs"
+                      className="text-xs sidebar-thread-card"
                       style={{
-                        fontSize: '11px',
-                        backgroundColor: 'transparent',
-                        borderColor: 'transparent'
+                        fontSize: '11px'
                       }}
                       summary=""
                     />

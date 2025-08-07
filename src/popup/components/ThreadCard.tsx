@@ -41,19 +41,10 @@ const Card: React.FC<{
   </div>
 );
 
-// Simple local Tag component matching HN styling
+// Simple local Tag component matching landing page styling
 const Tag: React.FC<{ label: string }> = ({ label }) => (
   <span 
-    style={{
-      backgroundColor: 'var(--hn-orange)',
-      color: 'var(--tag-text)',
-      padding: '4px 8px',
-      borderRadius: '4px',
-      fontSize: '12px',
-      fontWeight: '500',
-      textTransform: 'uppercase',
-      letterSpacing: '0.5px'
-    }}
+    className="text-[11px] tracking-wide uppercase font-semibold rounded px-2 py-1 text-white transition-all duration-500 bg-[#ff6600]"
   >
     {label}
   </span>
@@ -147,11 +138,9 @@ export const ThreadCard: React.FC<ThreadCardProps> = ({
     });
   };
 
-  // Combine height-related styles
+  // Combine height-related styles - Match landing page exactly  
   const cardStyle: React.CSSProperties = {
-    backgroundColor: 'var(--card-bg)',
-    borderColor: 'var(--card-border)',
-    border: '1px solid var(--card-border)',
+    backgroundColor: '#f6f6ef', // HN beige background like landing page
     height,
     minHeight,
     maxHeight,
@@ -160,7 +149,7 @@ export const ThreadCard: React.FC<ThreadCardProps> = ({
 
   return (
     <Card 
-      className={`w-full h-full rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden ${
+      className={`w-full h-full border border-[#e0e0e0] rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden ${
         isAnimating ? 'animate-subtle-glow' : ''
       } ${onClick ? 'cursor-pointer' : ''} ${className}`}
       style={cardStyle}
@@ -171,15 +160,15 @@ export const ThreadCard: React.FC<ThreadCardProps> = ({
           {/* Header: Category and Time */}
           <div className={`flex items-center justify-between ${summary ? 'mb-3' : 'mb-5'} text-sm`}>
             <Tag label={category} />
-            <span className="text-xs" style={{ color: 'var(--meta-text)' }}>{formatTimeAgo(updated_at)}</span>
+            <span className="text-[#999] text-xs">{formatTimeAgo(updated_at)}</span>
           </div>
           
           {/* Divider */}
-          <div className={`border-b ${summary ? 'mb-3' : 'mb-5'}`} style={{ borderColor: 'var(--card-border)' }}></div>
+          <div className={`border-b border-[#e0e0e0] ${summary ? 'mb-3' : 'mb-5'}`}></div>
           
           {/* Theme Title */}
           <div className={`${summary ? 'mb-3' : 'mb-6'} text-center`}>
-            <h2 className="text-base font-semibold leading-tight" style={{ color: 'var(--hn-orange)' }}>
+            <h2 className="text-base font-semibold leading-tight" style={{ color: 'var(--primary)' }}>
               {theme}
             </h2>
           </div>
@@ -187,13 +176,7 @@ export const ThreadCard: React.FC<ThreadCardProps> = ({
           {/* Summary - only show if provided */}
           {summary && (
             <div className="flex-1 mb-4">
-              <p 
-                className="text-sm leading-6 line-clamp-7 text-center"
-                style={{ 
-                  color: 'var(--card-text)',
-                  fontFamily: 'var(--font-sans)'
-                }}
-              >
+              <p className="text-[#333] text-sm leading-6 line-clamp-7 text-center font-['Inter','-apple-system','BlinkMacSystemFont','Segoe_UI','Roboto','sans-serif']">
                 {summary}
               </p>
             </div>
@@ -205,33 +188,24 @@ export const ThreadCard: React.FC<ThreadCardProps> = ({
               href={anchor}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1 hover:underline"
-              style={{ color: 'var(--link-color)' }}
+              className="flex items-center gap-1 text-[#0066cc] hover:underline"
               onClick={handleThreadClick}
             >
-              <MessageCircle 
-                className={`w-3 h-3 transition-all duration-500 ${
-                  isAnimating ? 'animate-pulse' : ''
-                }`} 
-                style={{ 
-                  color: isAnimating ? 'var(--hn-orange)' : 'inherit'
-                }}
-              />
-              <span 
-                className={`transition-all duration-500 ${
-                  isAnimating ? 'font-medium bg-orange-50/50 px-1 rounded-sm' : ''
-                }`}
-                style={{
-                  color: isAnimating ? 'var(--hn-orange)' : 'inherit'
-                }}
-              >
+              <MessageCircle className={`w-3 h-3 transition-all duration-500 ${
+                isAnimating ? 'text-[#ff6600] animate-pulse' : ''
+              }`} />
+              <span className={`transition-all duration-500 ${
+                isAnimating 
+                  ? 'text-[#ff6600] font-medium bg-orange-50/50 px-1 rounded-sm' 
+                  : ''
+              }`}>
                 Join the thread - {comment_count} comments
               </span>
             </a>
           </div>
 
           {/* Divider */}
-          <div className={`border-b ${summary ? 'mb-3' : 'mb-5'}`} style={{ borderColor: 'var(--card-border)' }}></div>
+          <div className={`border-b border-[#e0e0e0] ${summary ? 'mb-3' : 'mb-5'}`}></div>
         </div>
 
         {/* Source Story - Fixed to bottom with consistent spacing */}
@@ -240,11 +214,10 @@ export const ThreadCard: React.FC<ThreadCardProps> = ({
             href={story_url}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-xs hover:underline inline-flex items-start gap-1 leading-tight line-clamp-2"
-            style={{ color: 'var(--link-color)' }}
+            className="text-[#0066cc] text-xs hover:underline inline-flex items-start gap-1 leading-tight line-clamp-2"
           >
             🔗 <span className="line-clamp-2">{story_title}</span>
-            <ExternalLink className="w-3 h-3 flex-shrink-0 mt-0.5" style={{ color: 'var(--meta-text)' }} />
+            <ExternalLink className="w-3 h-3 text-[#999] flex-shrink-0 mt-0.5" />
           </a>
         </div>
       </div>
