@@ -31,19 +31,26 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
           </div>
           
           {/* Message content */}
-          <div className={`inline-block px-4 py-2 rounded-lg ${
-            isUser
-              ? 'bg-blue-600 text-white'
-              : 'bg-gray-700 text-gray-100'
-          }`}>
+          <div 
+            className={`inline-block px-4 py-2 rounded-lg border ${
+              isUser
+                ? 'bg-blue-600 text-white border-blue-600'
+                : ''
+            }`}
+            style={isUser ? {} : { 
+              backgroundColor: '#f6f6ef', 
+              borderColor: '#e0e0e0',
+              color: 'var(--primary)'
+            }}
+          >
             {isUser ? (
               <div className="whitespace-pre-wrap">{message.content}</div>
             ) : (
-              <div className="prose prose-invert prose-sm max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0 prose-a:text-blue-400 hover:prose-a:text-blue-300">
+              <div className="prose prose-sm max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0" style={{ color: 'var(--primary)' }}>
                 <ReactMarkdown 
                   components={{
                     a: ({ node, ...props }) => (
-                      <a {...props} target="_blank" rel="noopener noreferrer" className="underline hover:no-underline" />
+                      <a {...props} target="_blank" rel="noopener noreferrer" className="underline hover:no-underline" style={{ color: 'var(--primary)' }} />
                     )
                   }}
                 >
