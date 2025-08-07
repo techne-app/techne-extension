@@ -3,59 +3,105 @@
 @import "tailwindcss/components"; 
 @import "tailwindcss/utilities";
 
-/* Inter font loaded via HTML link tag for better extension compatibility */
+/* Google Fonts - Match landing page typography */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Lexend:wght@400;500;600;700;800;900&family=Geist+Mono:wght@400;500;600;700&display=swap');
 
-/* Design tokens for Techne components */
+/* Unified Design Tokens - Match landing page */
 :root {
-  /* Deep HN Color Palette */
-  --hn-blue: #0066cc;         /* Keep existing HN blue */
-  --dark-bg: #1a1a1a;         /* Slightly warmer than gray-900 */
-  --dark-card: #2a2a2a;       /* Card backgrounds */
-  --text-primary: #f5f5f5;    /* Softer white */
-  --text-secondary: #a0a0a0;  /* Mid-gray */
-  --accent-orange: #ff6600;   /* HN orange for highlights */
+  /* Core colors - Landing page compatibility */
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
   
-  /* Legacy HN-style colors (for card compatibility) */
-  --hn-bg: var(--dark-card);     /* Card backgrounds use dark cards */
-  --hn-text: var(--text-primary); /* Primary text color */
-  --hn-orange: var(--accent-orange); /* HN accent color */
-  --hn-link: var(--hn-blue);     /* Link color */
-  --hn-gray: var(--text-secondary); /* Secondary text */
-  --hn-border: #404040;           /* Borders for dark theme */
+  /* Dark theme adaptation for extension */
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  
+  /* Landing page gradient backgrounds */
+  --bg-gradient-main: linear-gradient(to bottom right, #0f172a, #172554, #0f172a);
+  --bg-gradient-glow: radial-gradient(circle, rgba(59, 130, 246, 0.3) 0%, rgba(59, 130, 246, 0.1) 40%, transparent 70%);
+  --bg-gradient-subtle: radial-gradient(circle at center, rgba(59, 130, 246, 0.1) 0%, transparent 50%);
+  
+  /* Color palette - Landing page Tailwind colors */
+  --slate-900: #0f172a;
+  --slate-800: #1e293b;
+  --slate-700: #334155;
+  --blue-950: #172554;
+  --blue-900: #1e3a8a;
+  --blue-500: #3b82f6;
+  
+  /* Surface colors */
+  --surface-card: rgba(255, 255, 255, 0.1);
+  --surface-border: rgba(255, 255, 255, 0.2);
+  
+  /* Text colors - Dark theme variants */
+  --text-primary: #ededed;
+  --text-secondary: #a0a0a0;
+  --text-muted: #6b7280;
+  --text-white: #ffffff;
+  --text-white-muted: rgba(255, 255, 255, 0.8);
+  --text-white-subtle: rgba(255, 255, 255, 0.6);
+  
+  /* Typography - Match landing page tokens */
+  --font-inter: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI Variable", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-lexend: 'Lexend', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI Variable", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-geist-mono: 'Geist Mono', 'SF Mono', Monaco, 'Inconsolata', 'Roboto Mono', 'Source Code Pro', monospace;
+  --letter-spacing-tight: -0.02em;
+  --line-height-tight: 1.2;
+  --line-height-normal: 1.3;
+  --line-height-relaxed: 1.7;
+  
+  /* Font weights - Match landing page */
+  --weight-normal: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+  --weight-black: 900;
+  
+  /* HN-specific colors (legacy compatibility) */
+  --hn-blue: var(--primary);
+  --hn-orange: #ff6600;
+  --accent-orange: var(--hn-orange);
+  
+  /* Component tokens */
+  --dark-bg: var(--bg-gradient-main);
+  --dark-card: rgba(26, 26, 26, 0.8);
+  --hn-bg: var(--dark-card);
+  --hn-text: var(--text-primary);
+  --hn-link: var(--primary);
+  --hn-gray: var(--text-secondary);
+  --hn-border: rgba(255, 255, 255, 0.1);
   
   /* Card components */
-  --card-bg: var(--dark-card);    /* Card backgrounds */
-  --card-text: var(--text-primary); /* Card text */
-  --card-border: var(--hn-border); /* Card borders */
+  --card-bg: var(--dark-card);
+  --card-text: var(--text-primary);
+  --card-border: var(--hn-border);
   --card-padding: 1rem;
   --card-radius: 0.5rem;
   --card-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -1px rgb(0 0 0 / 0.06);
   
-  /* Typography - System fonts optimized for modern, clean appearance */
-  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI Variable", "Segoe UI", Roboto, "Helvetica Neue", "Arial Nova", "Noto Sans", Arial, sans-serif;
-  --font-weight-normal: 400;
-  --font-weight-medium: 500;
-  --font-weight-semibold: 600;
-  --font-weight-bold: 700;
-  --letter-spacing-tight: -0.025em;
-  --line-height-tight: 1.25;
-  --line-height-normal: 1.5;
-  --line-height-relaxed: 1.625;
-  
   /* Text and link colors */
-  --tag-text: var(--dark-bg);  /* Tag text color (dark on orange) */
-  --meta-text: var(--text-secondary); /* Meta text like timestamps */
-  --link-color: var(--hn-blue); /* Link color */
+  --tag-text: var(--background);
+  --meta-text: var(--text-secondary);
+  --link-color: var(--primary);
 }
 
-/* Global font application with font loading optimization */
+/* Global font application with gradient background everywhere */
 * {
-  font-family: var(--font-sans);
+  font-family: var(--font-inter);
 }
 
-/* Ensure body and main containers use the custom font with optimized rendering */
-body, html, .chat-container, .modal-container {
-  font-family: var(--font-sans) !important;
+/* Apply gradient background to all major containers */
+#root, .App, .popup-container, .main-container {
+  background: var(--bg-gradient-main);
+  color: var(--foreground);
+  min-height: 100vh;
+}
+
+/* Ensure body and main containers use the gradient background and custom font */
+body, html {
+  background: var(--bg-gradient-main);
+  color: var(--foreground);
+  font-family: var(--font-inter) !important;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-feature-settings: "kern" 1, "liga" 1, "calt" 1, "pnum" 1, "tnum" 0, "onum" 0, "lnum" 0, "dlig" 0;
@@ -63,49 +109,87 @@ body, html, .chat-container, .modal-container {
   text-rendering: optimizeLegibility;
 }
 
+.chat-container, .modal-container {
+  background: var(--bg-gradient-main);
+  color: var(--foreground);
+  font-family: var(--font-inter) !important;
+  min-height: 100vh;
+}
 
-/* Thread card styles */
+/* Headings use Lexend for improved readability - Match landing page */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-lexend);
+}
+
+
+/* Thread card styles - Now with gradient background */
 .techne-card {
-  background-color: var(--card-bg);
+  background: var(--bg-gradient-main);
+  position: relative;
   color: var(--card-text);
   padding: var(--card-padding);
   border-radius: var(--card-radius);
   box-shadow: var(--card-shadow);
-  border: 1px solid var(--hn-border);
+  border: 1px solid rgba(59, 130, 246, 0.2);
   margin-bottom: 0.75rem;
-  font-family: var(--font-sans);
+  font-family: var(--font-inter);
   letter-spacing: var(--letter-spacing-tight);
   line-height: var(--line-height-normal);
+  overflow: hidden;
+}
+
+/* Add subtle glow to thread cards */
+.techne-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--bg-gradient-subtle);
+  mix-blend-mode: screen;
+  opacity: 0.3;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.techne-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.techne-card:hover::before {
+  opacity: 0.5;
 }
 
 .techne-link {
   color: var(--hn-link);
   text-decoration: none;
-  font-weight: var(--font-weight-medium);
+  font-weight: var(--weight-medium);
   transition: color 0.2s ease;
 }
 
 .techne-link:hover {
   text-decoration: underline;
-  color: var(--hn-blue);
+  color: var(--primary-hover);
 }
 
 .techne-text-secondary {
   color: var(--text-secondary);
   font-size: 0.875rem;
-  font-weight: var(--font-weight-normal);
+  font-weight: var(--weight-normal);
   line-height: var(--line-height-relaxed);
 }
 
 .techne-text-primary {
   color: var(--text-primary);
-  font-weight: var(--font-weight-normal);
+  font-weight: var(--weight-normal);
   line-height: var(--line-height-normal);
 }
 
 .techne-accent {
   color: var(--accent-orange);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--weight-semibold);
 }
 
 /* Tag styles */
@@ -113,7 +197,7 @@ body, html, .chat-container, .modal-container {
   display: inline-block;
   padding: 0.25rem 0.5rem;
   font-size: 0.75rem;
-  font-weight: var(--font-weight-medium);
+  font-weight: var(--weight-medium);
   background-color: var(--accent-orange);
   color: var(--tag-text);
   border-radius: 0.25rem;
@@ -124,57 +208,89 @@ body, html, .chat-container, .modal-container {
 
 /* Chat interface enhancements */
 .chat-container {
-  font-family: var(--font-sans);
-  background-color: var(--dark-bg);
+  font-family: var(--font-inter);
+  background: var(--bg-gradient-main);
   color: var(--text-primary);
+  position: relative;
+}
+
+/* Add subtle glow overlay for depth */
+.chat-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--bg-gradient-glow);
+  mix-blend-mode: screen;
+  opacity: 0.6;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.chat-container > * {
+  position: relative;
+  z-index: 1;
 }
 
 .chat-message {
-  font-family: var(--font-sans);
+  font-family: var(--font-inter);
   line-height: var(--line-height-relaxed);
   letter-spacing: var(--letter-spacing-tight);
 }
 
 .chat-input {
-  font-family: var(--font-sans);
+  font-family: var(--font-inter);
   background-color: var(--dark-card);
   color: var(--text-primary);
   border-color: var(--hn-border);
 }
 
 .chat-input:focus {
-  border-color: var(--hn-blue);
+  border-color: var(--primary);
   outline: none;
-  box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.2);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
 }
 
-/* Modal-specific styles */
+/* Modal-specific styles - Minimal interference with Tailwind */
 .modal-container {
-  font-family: var(--font-sans);
-  background-color: var(--dark-bg);
-  color: var(--text-primary);
+  font-family: var(--font-inter);
+  /* Let Tailwind handle positioning - don't override background here */
 }
 
 .modal-header {
   border-color: var(--hn-border);
-  background-color: var(--dark-bg);
+  background: rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(8px);
 }
 
 .modal-title {
   color: var(--text-primary);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--weight-semibold);
   letter-spacing: var(--letter-spacing-tight);
+  font-family: var(--font-lexend);
 }
 
-.modal-content {
-  background-color: var(--dark-bg);
+/* Modal dialog - the main modal box (don't interfere with positioning) */
+.modal-dialog {
+  background: var(--bg-gradient-main);
+  backdrop-filter: blur(12px);
+  color: var(--text-primary);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+/* Modal body - content area inside dialog */
+.modal-body {
+  background: rgba(15, 23, 42, 0.4);
   color: var(--text-primary);
 }
 
 .modal-section-header {
   color: var(--text-primary);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--weight-semibold);
   letter-spacing: var(--letter-spacing-tight);
+  font-family: var(--font-lexend);
 }
 
 .modal-text-secondary {
@@ -183,18 +299,38 @@ body, html, .chat-container, .modal-container {
 }
 
 .modal-button {
-  font-family: var(--font-sans);
-  font-weight: var(--font-weight-medium);
+  font-family: var(--font-inter);
+  font-weight: var(--weight-medium);
   transition: all 0.2s ease;
 }
 
 .modal-button-primary {
-  background-color: var(--hn-blue);
+  background: linear-gradient(135deg, var(--primary), var(--primary-hover));
   color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.modal-button-primary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--bg-gradient-glow);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
 }
 
 .modal-button-primary:hover {
-  background-color: #0052a3;
+  background: linear-gradient(135deg, var(--primary-hover), #1e40af);
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+}
+
+.modal-button-primary:hover::before {
+  opacity: 0.8;
 }
 
 .modal-button-secondary {
@@ -208,11 +344,35 @@ body, html, .chat-container, .modal-container {
 }
 
 .modal-card {
-  background-color: var(--dark-card);
-  border: 1px solid var(--hn-border);
-  font-family: var(--font-sans);
+  background: rgba(26, 26, 26, 0.8);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  font-family: var(--font-inter);
+  transition: all 0.3s ease;
 }
 
 .modal-card:hover {
-  background-color: var(--dark-bg);
+  background: rgba(26, 26, 26, 0.9);
+  border-color: rgba(59, 130, 246, 0.3);
+  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.15);
+  transform: translateY(-2px);
+}
+
+/* Landing page animations - Match subtle glow from globals.css */
+@keyframes subtle-glow {
+  0% { box-shadow: 0 0 0 0 rgba(255, 102, 0, 0.15); }
+  50% { box-shadow: 0 0 4px 1px rgba(255, 102, 0, 0.1); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 102, 0, 0); }
+}
+
+.animate-subtle-glow {
+  animation: subtle-glow 2s ease-in-out;
+}
+
+/* Respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .animate-subtle-glow {
+    animation: none !important;
+  }
 }

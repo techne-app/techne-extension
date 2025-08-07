@@ -11,7 +11,7 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center modal-container">
       {/* Backdrop */}
       <div 
         className="absolute inset-0 bg-black bg-opacity-60"
@@ -19,32 +19,15 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }
       />
       
       {/* Modal */}
-      <div 
-        className="relative rounded-lg shadow-xl max-w-6xl w-full mx-4 max-h-[80vh] overflow-hidden"
-        style={{ 
-          backgroundColor: 'var(--dark-bg)',
-          fontFamily: 'var(--font-sans)'
-        }}
-      >
+      <div className="relative rounded-lg shadow-xl max-w-6xl w-full mx-4 max-h-[80vh] overflow-hidden modal-dialog">
         {/* Header */}
-        <div 
-          className="flex items-center justify-between p-4 border-b"
-          style={{ borderColor: 'var(--hn-border)' }}
-        >
-          <h2 
-            className="text-lg font-semibold"
-            style={{ 
-              color: 'var(--text-primary)',
-              fontWeight: 'var(--font-weight-semibold)',
-              letterSpacing: 'var(--letter-spacing-tight)'
-            }}
-          >
+        <div className="flex items-center justify-between p-4 border-b modal-header">
+          <h2 className="text-lg font-semibold modal-title">
             {title}
           </h2>
           <button
             onClick={onClose}
-            className="p-1 rounded transition-colors"
-            style={{ color: 'var(--text-secondary)' }}
+            className="p-1 rounded transition-colors modal-button-secondary"
             onMouseEnter={(e) => {
               e.currentTarget.style.color = 'var(--text-primary)';
               e.currentTarget.style.backgroundColor = 'var(--dark-card)';
@@ -61,13 +44,7 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }
         </div>
         
         {/* Content */}
-        <div 
-          className="p-0 overflow-y-auto h-[calc(80vh-4rem)]"
-          style={{ 
-            backgroundColor: 'var(--dark-bg)',
-            color: 'var(--text-primary)'
-          }}
-        >
+        <div className="p-0 overflow-y-auto h-[calc(80vh-4rem)] modal-body">
           {children}
         </div>
       </div>

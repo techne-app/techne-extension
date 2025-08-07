@@ -483,6 +483,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   }
 
   return (
+    <>
     <div className="flex-1 flex h-full chat-container">
       {/* Left Sidebar - Context Thread Cards */}
       <div className="w-80 flex-shrink-0 border-r overflow-y-auto" style={{ borderColor: 'var(--hn-border)' }}>
@@ -685,47 +686,49 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         </div>
       </div>
 
-      {/* Memory Modal */}
-      <Modal
-        isOpen={isMemoryModalOpen}
-        onClose={() => setIsMemoryModalOpen(false)}
-        title="Memory"
-      >
-        <ActivityPage 
-          activeConversationId={activeConversation?.id}
-          onSelectConversation={(id) => {
-            const conversation = conversations.find(conv => conv.id === id);
-            if (conversation) {
-              onConversationUpdated(conversation);
-              setIsMemoryModalOpen(false);
-            }
-          }}
-          onDeleteConversation={async (id) => {
-            try {
-              await ConversationManager.deleteConversation(id);
-              
-              // If deleted conversation was active, we need to handle this at the parent level
-              if (activeConversation?.id === id) {
-                // Close modal and let parent handle conversation switching
-                setIsMemoryModalOpen(false);
-                window.location.reload(); // Simple way to reset to initial state
-              }
-            } catch (error) {
-              logger.error('Error deleting conversation:', error);
-            }
-          }}
-        />
-      </Modal>
-
-      {/* Settings Modal */}
-      <Modal
-        isOpen={isSettingsModalOpen}
-        onClose={() => setIsSettingsModalOpen(false)}
-        title="Settings"
-      >
-        <SettingsPage />
-      </Modal>
-
     </div>
+
+    {/* Modals rendered outside the main layout container */}
+    {/* Memory Modal */}
+    <Modal
+      isOpen={isMemoryModalOpen}
+      onClose={() => setIsMemoryModalOpen(false)}
+      title="Memory"
+    >
+      <ActivityPage 
+        activeConversationId={activeConversation?.id}
+        onSelectConversation={(id) => {
+          const conversation = conversations.find(conv => conv.id === id);
+          if (conversation) {
+            onConversationUpdated(conversation);
+            setIsMemoryModalOpen(false);
+          }
+        }}
+        onDeleteConversation={async (id) => {
+          try {
+            await ConversationManager.deleteConversation(id);
+            
+            // If deleted conversation was active, we need to handle this at the parent level
+            if (activeConversation?.id === id) {
+              // Close modal and let parent handle conversation switching
+              setIsMemoryModalOpen(false);
+              window.location.reload(); // Simple way to reset to initial state
+            }
+          } catch (error) {
+            logger.error('Error deleting conversation:', error);
+          }
+        }}
+      />
+    </Modal>
+
+    {/* Settings Modal */}
+    <Modal
+      isOpen={isSettingsModalOpen}
+      onClose={() => setIsSettingsModalOpen(false)}
+      title="Settings"
+    >
+      <SettingsPage />
+    </Modal>
+    </>
   );
 };
