@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Conversation } from '../../types/chat';
 import { ConversationManager } from '../../utils/conversationUtils';
+import { MemoryCard } from './MemoryCard';
 import { logger } from '../../utils/logger';
 
 interface ConversationHistoryProps {
@@ -93,80 +94,15 @@ export const ConversationHistory: React.FC<ConversationHistoryProps> = ({
           {conversations.map((conversation) => {
             const preview = ConversationManager.formatConversationPreview(conversation);
             return (
-              <div
+              <MemoryCard
                 key={conversation.id}
-                className="group relative p-3 rounded-lg transition-colors"
-                style={{
-                  backgroundColor: 'var(--dark-card)',
-                  borderWidth: '1px',
-                  borderStyle: 'solid',
-                  borderColor: activeConversationId === conversation.id ? 'var(--hn-blue)' : 'var(--hn-border)',
-                  boxShadow: activeConversationId === conversation.id ? '0 0 0 2px rgba(0, 102, 204, 0.2)' : 'none'
-                }}
-                onMouseEnter={(e) => {
-                  if (activeConversationId !== conversation.id) {
-                    e.currentTarget.style.backgroundColor = 'var(--dark-bg)';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (activeConversationId !== conversation.id) {
-                    e.currentTarget.style.backgroundColor = 'var(--dark-card)';
-                  }
-                }}
-              >
-                <div className="flex items-start justify-between">
-                  <div className="flex-1 min-w-0">
-                    <div 
-                      className="font-medium truncate"
-                      style={{ 
-                        color: 'var(--text-primary)',
-                        fontWeight: 'var(--font-weight-medium)'
-                      }}
-                    >
-                      {preview.title}
-                    </div>
-                    <div 
-                      className="text-sm"
-                      style={{ color: 'var(--text-secondary)' }}
-                    >
-                      {new Date(conversation.createdAt).toLocaleString()}
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    {onSelectConversation && (
-                      <button
-                        onClick={() => onSelectConversation(conversation.id)}
-                        className="text-sm transition-colors"
-                        style={{ color: 'var(--hn-blue)' }}
-                        onMouseEnter={(e) => e.currentTarget.style.color = '#0052a3'}
-                        onMouseLeave={(e) => e.currentTarget.style.color = 'var(--hn-blue)'}
-                      >
-                        Open
-                      </button>
-                    )}
-                    {onDeleteConversation && (
-                      <button
-                        onClick={() => onDeleteConversation(conversation.id)}
-                        className="opacity-0 group-hover:opacity-100 p-1 rounded transition-all"
-                        title="Delete conversation"
-                        style={{ color: 'var(--text-secondary)' }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.backgroundColor = 'var(--hn-border)';
-                          e.currentTarget.style.color = '#ef4444';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.backgroundColor = 'transparent';
-                          e.currentTarget.style.color = 'var(--text-secondary)';
-                        }}
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
+                title={preview.title}
+                timestamp={new Date(conversation.createdAt).toLocaleString()}
+                isActive={activeConversationId === conversation.id}
+                onPrimaryAction={onSelectConversation ? () => onSelectConversation(conversation.id) : undefined}
+                onDelete={onDeleteConversation ? () => onDeleteConversation(conversation.id) : undefined}
+                primaryActionLabel="Open"
+              />
             );
           })}
         </div>

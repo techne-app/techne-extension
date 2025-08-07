@@ -111,7 +111,6 @@ export const ThreadHistory: React.FC = () => {
             <MemoryCard
               key={tag.id}
               title={tag.tag || ''}
-              subtitle={tag.type ? `Category: ${tag.type}` : undefined}
               timestamp={tag.timestamp ? new Date(tag.timestamp).toLocaleString() : ''}
               href={tag.anchor}
               primaryActionLabel="Go to thread"

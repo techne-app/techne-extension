@@ -82,39 +82,8 @@ export const SettingsPage: React.FC = () => {
               </button>
             </div>
             
-            <p 
-              className="text-xs mt-2"
-              style={{ 
-                color: 'var(--text-secondary)',
-                lineHeight: 'var(--line-height-relaxed)'
-              }}
-            >
-              When enabled, the navigation will be personalized based on your browsing patterns.
-            </p>
           </div>
 
-          {/* Additional Settings Section */}
-          <div className="pt-4 border-t" style={{ borderColor: 'var(--hn-border)' }}>
-            <h3 
-              className="text-sm font-medium mb-3"
-              style={{ 
-                color: 'var(--text-primary)',
-                fontWeight: 'var(--font-weight-semibold)'
-              }}
-            >
-              About Techne
-            </h3>
-            <p 
-              className="text-xs"
-              style={{ 
-                color: 'var(--text-secondary)',
-                lineHeight: 'var(--line-height-relaxed)'
-              }}
-            >
-              Techne enhances your Hacker News experience with AI-powered insights and personalized content discovery. 
-              All data is stored locally in your browser for privacy.
-            </p>
-          </div>
         </div>
       </div>
     </div>
