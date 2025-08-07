@@ -41,10 +41,14 @@ const Card: React.FC<{
   </div>
 );
 
-// Simple local Tag component matching landing page styling
+// Simple local Tag component matching landing page styling exactly
 const Tag: React.FC<{ label: string }> = ({ label }) => (
   <span 
     className="text-[11px] tracking-wide uppercase font-semibold rounded px-2 py-1 text-white transition-all duration-500 bg-[#ff6600]"
+    style={{
+      lineHeight: '1',
+      fontFamily: 'Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+    }}
   >
     {label}
   </span>
