@@ -155,19 +155,19 @@ export const ThreadCard: React.FC<ThreadCardProps> = ({
       style={cardStyle}
       onClick={onClick}
     >
-      <div className={`${summary ? 'p-4' : 'p-6'} h-full flex flex-col justify-between`}>
+      <div className={`p-4 ${height ? 'h-full' : ''} flex flex-col justify-between`}>
         <div className="flex-1 flex flex-col">
           {/* Header: Category and Time */}
-          <div className={`flex items-center justify-between ${summary ? 'mb-3' : 'mb-5'} text-sm`}>
+          <div className="flex items-center justify-between mb-3 text-sm">
             <Tag label={category} />
             <span className="text-[#999] text-xs">{formatTimeAgo(updated_at)}</span>
           </div>
           
           {/* Divider */}
-          <div className={`border-b border-[#e0e0e0] ${summary ? 'mb-3' : 'mb-5'}`}></div>
+          <div className="border-b border-[#e0e0e0] mb-3"></div>
           
           {/* Theme Title */}
-          <div className={`${summary ? 'mb-3' : 'mb-6'} text-center`}>
+          <div className="mb-3 text-center">
             <h2 className="text-base font-semibold leading-tight" style={{ color: 'var(--primary)' }}>
               {theme}
             </h2>
@@ -183,7 +183,7 @@ export const ThreadCard: React.FC<ThreadCardProps> = ({
           )}
 
           {/* Metrics Row */}
-          <div className={`${summary ? 'mb-3' : 'mb-5'} flex justify-center text-xs font-mono`}>
+          <div className="mb-3 flex justify-center text-xs font-mono">
             <a
               href={anchor}
               target="_blank"
@@ -205,7 +205,7 @@ export const ThreadCard: React.FC<ThreadCardProps> = ({
           </div>
 
           {/* Divider */}
-          <div className={`border-b border-[#e0e0e0] ${summary ? 'mb-3' : 'mb-5'}`}></div>
+          <div className="border-b border-[#e0e0e0] mb-3"></div>
         </div>
 
         {/* Source Story - Fixed to bottom with consistent spacing */}

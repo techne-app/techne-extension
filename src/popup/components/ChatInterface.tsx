@@ -499,7 +499,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
               <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>Loading context...</p>
             </div>
           ) : contextThreads.length > 0 ? (
-            <div className="space-y-8">
+            <div className="space-y-4">
               {contextThreads.map((thread) => (
                 <div key={thread.id} className="w-full">
                   <div
@@ -511,7 +511,6 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                   >
                     <ThreadCard 
                       {...thread}
-                      height="260px"
                       className="text-xs sidebar-thread-card"
                       style={{
                         fontSize: '11px'
