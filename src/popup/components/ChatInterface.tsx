@@ -486,11 +486,11 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
     <>
     <div className="flex-1 flex h-full chat-container">
       {/* Left Sidebar - Context Thread Cards */}
-      <div className="w-80 flex-shrink-0 border-r overflow-y-auto" style={{ borderColor: 'var(--hn-border)' }}>
+      <div className="w-80 flex-shrink-0 overflow-y-auto">
         <div className="p-4">
           {/* Logo Section */}
           <div className="flex justify-center mb-6">
-            <div className="relative w-16 h-16">
+            <div className="relative w-24 h-24">
               {/* Background glow layer */}
               <div
                 className="absolute inset-0 rounded-full opacity-60"
@@ -512,8 +512,8 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                 <img 
                   src="/logo.png" 
                   alt="Techne Logo" 
-                  width={64}
-                  height={64}
+                  width={96}
+                  height={96}
                   className="w-full h-full rounded-full border-2 border-white/30"
                   style={{
                     clipPath: "circle(44% at 50% 50%)"
