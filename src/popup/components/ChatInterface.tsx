@@ -703,6 +703,11 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                   <span>{getUserFriendlyErrorMessage(error)}</span>
                 </div>
               )}
+              {!isModelLoading && !error && (
+                <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+                  💬 Search Hacker News or start chatting
+                </div>
+              )}
             </div>
           </div>
         </div>
