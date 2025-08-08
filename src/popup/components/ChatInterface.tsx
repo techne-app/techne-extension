@@ -94,12 +94,19 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   const [isCreatingConversation, setIsCreatingConversation] = useState(false);
   const [contextThreads, setContextThreads] = useState<ThreadCardData[]>([]);
   const [threadsLoading, setThreadsLoading] = useState(false);
+  const [tempStatus, setTempStatus] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [activeConversation?.messages, streamingMessage]);
+
+  // Helper function to show temporary status messages
+  const showTempStatus = (message: string, duration: number = 2000) => {
+    setTempStatus(message);
+    setTimeout(() => setTempStatus(null), duration);
+  };
 
   // Reusable function to create new conversation (as draft)
   const createNewConversation = async () => {
@@ -275,11 +282,15 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       if (isModelLoaded) {
         logger.model('Model already loaded, checking for search intent...');
         try {
+          showTempStatus('💭 Understanding your request...', 800);
           const intentResult = await IntentDetector.detectSearchIntent(userMessage);
           logger.intent('Intent detection result:', intentResult);
           
           if (intentResult.isSearch && intentResult.searchQuery && intentResult.confidence > 0.5) {
             logger.search('Search intent detected with high confidence, executing search for:', intentResult.searchQuery);
+            // Show temporary status in bottom bar
+            showTempStatus(`🔍 Searching for "${intentResult.searchQuery}"...`, 1500);
+            
             // Update both streaming message and database with search status
             const searchStatusContent = `🔍 Searching for "${intentResult.searchQuery}"...`;
             setStreamingMessage(prev => prev ? {
@@ -342,11 +353,15 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
           // Perform intent detection after model loads
           logger.model('Model loading complete, now checking for search intent...');
           try {
+            showTempStatus('💭 Understanding your request...', 800);
             const intentResult = await IntentDetector.detectSearchIntent(userMessage);
             logger.intent('Intent detection result:', intentResult);
             
             if (intentResult.isSearch && intentResult.searchQuery && intentResult.confidence > 0.5) {
               logger.search('Search intent detected with high confidence, executing search for:', intentResult.searchQuery);
+              // Show temporary status in bottom bar
+              showTempStatus(`🔍 Searching for "${intentResult.searchQuery}"...`, 1500);
+              
               // Update both streaming message and database with search status
               const searchStatusContent = `🔍 Searching for "${intentResult.searchQuery}"...`;
               setStreamingMessage(prev => prev ? {
@@ -703,7 +718,12 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                   <span>{getUserFriendlyErrorMessage(error)}</span>
                 </div>
               )}
-              {!isModelLoading && !error && (
+              {tempStatus && !isModelLoading && !error && (
+                <div className="text-xs transition-opacity duration-200" style={{ color: 'var(--hn-blue)' }}>
+                  {tempStatus}
+                </div>
+              )}
+              {!tempStatus && !isModelLoading && !error && (
                 <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>
                   💬 Search Hacker News or start chatting
                 </div>
