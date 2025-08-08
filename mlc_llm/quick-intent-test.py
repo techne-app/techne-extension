@@ -44,8 +44,37 @@ TEST_QUERIES = [
     "what is blockchain?"
 ]
 
-# Prompt template - original search intent detection that works well
-PROMPT_TEMPLATE = """You are an intelligent assistant that determines if a user message is asking to search for something.
+def load_prompt_from_typescript():
+    """Load the shared prompt from TypeScript file"""
+    try:
+        # Path to the TypeScript prompt file
+        script_dir = Path(__file__).parent
+        ts_file = script_dir.parent / "src" / "prompts" / "searchIntent.ts"
+        
+        if not ts_file.exists():
+            raise FileNotFoundError(f"Prompt file not found: {ts_file}")
+        
+        content = ts_file.read_text()
+        
+        # Extract prompt from between backticks using regex
+        # Match the export const SEARCH_INTENT_PROMPT = `...`;
+        match = re.search(r'export const SEARCH_INTENT_PROMPT = `(.*?)`;', content, re.DOTALL)
+        if not match:
+            raise ValueError("Could not find SEARCH_INTENT_PROMPT in TypeScript file")
+        
+        prompt_template = match.group(1)
+        
+        # Clean up the template - remove any leading/trailing whitespace
+        prompt_template = prompt_template.strip()
+        print(f"✅ Loaded prompt template from: {ts_file.relative_to(script_dir.parent)}")
+        return prompt_template
+        
+    except Exception as e:
+        print(f"❌ Failed to load prompt from TypeScript: {e}")
+        print("💡 Falling back to embedded prompt")
+        
+        # Fallback prompt if TypeScript file can't be loaded
+        return """You are an intelligent assistant that determines if a user message is asking to search for something.
 
 Analyze this message and determine:
 1. Is the user asking to search for, find, or look up information?
@@ -69,6 +98,20 @@ Examples:
 - "can you help me understand React" → {{"isSearch": false, "searchQuery": null, "confidence": 0.7, "reasoning": "Asking for explanation, not search"}}
 
 JSON Response:"""
+
+# Load the shared prompt template
+PROMPT_TEMPLATE = load_prompt_from_typescript()
+
+def build_prompt_with_message(template, message):
+    """Build prompt by replacing {message} placeholder safely"""
+    # Use simple string replacement to avoid conflicts with JSON braces
+    return template.replace('{message}', message)
+
+# Debug: check what was loaded
+print(f"🔍 PROMPT_TEMPLATE type: {type(PROMPT_TEMPLATE)}")
+print(f"🔍 PROMPT_TEMPLATE length: {len(PROMPT_TEMPLATE) if PROMPT_TEMPLATE else 'None'}")
+if PROMPT_TEMPLATE:
+    print(f"🔍 PROMPT_TEMPLATE end (last 100 chars): {repr(PROMPT_TEMPLATE[-100:])}")
 
 class IntentTester:
     def __init__(self):
@@ -145,7 +188,13 @@ class IntentTester:
             return content
             
         except Exception as e:
-            print(f"❌ Model call failed: {e}")
+            print(f"❌ Model call failed!")
+            print(f"❌ Error type: {type(e).__name__}")
+            print(f"❌ Error message: {str(e)}")
+            print(f"❌ Error repr: {repr(e)}")
+            import traceback
+            print("❌ Full traceback:")
+            traceback.print_exc()
             return None
     
     def parse_response(self, response):
@@ -159,7 +208,10 @@ class IntentTester:
             if not json_match:
                 return {"error": "No JSON found in response", "raw": response}
             
-            parsed = json.loads(json_match.group())
+            json_text = json_match.group()
+            print(f"🔍 Extracted JSON: {repr(json_text[:200])}")  # Debug what JSON we're trying to parse
+            
+            parsed = json.loads(json_text)
             
             # Validate original format fields
             if "isSearch" not in parsed:
@@ -196,8 +248,12 @@ class IntentTester:
         print(f"\n🧪 Testing: \"{query}\"")
         print(f"🌡️  Temperature: {temperature}")
         
-        # Build prompt
-        prompt = PROMPT_TEMPLATE.format(message=query)
+        # Build prompt - use safe replacement function
+        prompt = build_prompt_with_message(PROMPT_TEMPLATE, query)
+        
+        # Debug: show the formatted prompt
+        print(f"🔍 Formatted prompt preview (last 100 chars):")
+        print(repr(prompt[-100:]))
         
         # Call model
         response = self.call_model(prompt, temperature)
@@ -290,7 +346,12 @@ def main():
     except KeyboardInterrupt:
         print("\n👋 Interrupted by user")
     except Exception as e:
-        print(f"❌ Error: {e}")
+        print(f"❌ Error in main(): {e}")
+        print(f"❌ Error type: {type(e).__name__}")
+        print(f"❌ Error repr: {repr(e)}")
+        import traceback
+        print("❌ Full traceback:")
+        traceback.print_exc()
         return 1
     
     return 0
