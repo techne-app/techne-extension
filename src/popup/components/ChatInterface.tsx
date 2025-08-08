@@ -484,18 +484,18 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
 
   return (
     <>
-    <div className="flex-1 flex h-full chat-container">
+    <div className="flex-1 flex h-full chat-container min-h-0">
       {/* Left Sidebar - Context Thread Cards */}
-      <div className="w-80 flex-shrink-0 overflow-y-auto">
+      <div className="w-80 flex-shrink-0 overflow-y-auto" style={{ minWidth: '240px' }}>
         <div className="p-4">
-          {/* Logo Section */}
-          <div className="flex justify-center mb-6">
-            <div className="relative w-24 h-24">
+          {/* Logo Section - Compact */}
+          <div className="flex justify-center mb-4">
+            <div className="relative w-12 h-12">
               {/* Background glow layer */}
               <div
-                className="absolute inset-0 rounded-full opacity-60"
+                className="absolute inset-0 rounded-full opacity-50"
                 style={{
-                  background: "radial-gradient(circle, rgba(59, 130, 246, 0.3) 0%, rgba(59, 130, 246, 0.1) 40%, transparent 70%)",
+                  background: "radial-gradient(circle, rgba(59, 130, 246, 0.2) 0%, rgba(59, 130, 246, 0.05) 40%, transparent 70%)",
                   mixBlendMode: "screen",
                   animation: "logoGlow 6s ease-in-out infinite"
                 }}
@@ -505,16 +505,16 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
               <div
                 className="relative z-10"
                 style={{
-                  filter: "blur(0px) contrast(1.0) saturate(1.0) drop-shadow(0 0 15px rgba(59, 130, 246, 0.5))",
+                  filter: "blur(0px) contrast(1.0) saturate(1.0) drop-shadow(0 0 8px rgba(59, 130, 246, 0.3))",
                   mixBlendMode: "normal"
                 }}
               >
                 <img 
                   src="/logo.png" 
                   alt="Techne Logo" 
-                  width={96}
-                  height={96}
-                  className="w-full h-full rounded-full border-2 border-white/30"
+                  width={48}
+                  height={48}
+                  className="w-full h-full rounded-full border border-white/20"
                   style={{
                     clipPath: "circle(44% at 50% 50%)"
                   }}
@@ -559,16 +559,16 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
       </div>
 
       {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col min-h-0">
         {/* Header */}
-        <div className="flex-shrink-0 p-4">
-          <div className="flex items-center justify-between">
-            <div>
+        <div className="flex-shrink-0 p-4 border-b" style={{ borderColor: 'var(--hn-border)' }}>
+          <div className="flex items-center justify-between min-w-0">
+            <div className="flex-1 min-w-0 pr-4">
               <h2 className="text-lg font-semibold truncate" style={{ color: 'var(--text-primary)' }}>
                 {activeConversation.title}
               </h2>
             </div>
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 flex-shrink-0">
               {/* New Conversation Button */}
               <button
                 onClick={createNewConversation}
@@ -648,22 +648,24 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         </div>
 
         {/* Chat Messages */}
-        <div className="flex-1 overflow-auto p-4">
-          <div className="max-w-4xl mx-auto">
-            
-            {activeConversation.messages.map((msg) => (
-              <MessageBubble key={msg.id} message={msg} />
-            ))}
-            {streamingMessage && (
-              <MessageBubble message={streamingMessage} />
-            )}
-            <div ref={messagesEndRef} />
+        <div className="flex-1 overflow-auto p-4 min-h-0">
+          <div className="flex flex-col justify-end min-h-full">
+            <div className="flex-1"></div> {/* Spacer to push messages to bottom when few messages */}
+            <div className="space-y-4">
+              {activeConversation.messages.map((msg) => (
+                <MessageBubble key={msg.id} message={msg} />
+              ))}
+              {streamingMessage && (
+                <MessageBubble message={streamingMessage} />
+              )}
+              <div ref={messagesEndRef} />
+            </div>
           </div>
         </div>
 
         {/* Input Area */}
-        <div className="flex-shrink-0 p-4">
-          <div className="max-w-4xl mx-auto">
+        <div className="flex-shrink-0 p-4 border-t" style={{ borderColor: 'var(--hn-border)' }}>
+          <div className="w-full">
             <textarea
               value={message}
               onChange={(e) => setMessage(e.target.value)}
