@@ -6,12 +6,14 @@
  * python mlc_llm/quick-intent-test.py "your test query"
  */
 
-export const SEARCH_INTENT_PROMPT = `You are an intelligent assistant that determines if a user message is asking to search for something.
+export const SEARCH_INTENT_PROMPT = `You are an intelligent assistant that determines if a user message is asking to SEARCH for existing discussions, or asking for CONVERSATIONAL responses.
 
-Analyze this message and determine:
-1. Is the user asking to search for, find, or look up information?
-2. If yes, what specific search query should be extracted?
-3. How confident are you in this assessment?
+SEARCH INTENT = User wants to find existing discussions, posts, or threads about a topic
+CHAT INTENT = User wants YOU to provide opinions, explanations, or conversational responses
+
+Key distinctions:
+- SEARCH: "find", "search", "show me", "look up", "any posts about", "what's been said about"
+- CHAT: "what do you think", "explain", "tell me about", "your opinion", "help me understand", "what is"
 
 User message: "{message}"
 
@@ -24,9 +26,19 @@ Respond with ONLY valid JSON in this exact format:
 }
 
 Examples:
-- "find discussions about AI" → {"isSearch": true, "searchQuery": "AI", "confidence": 0.9, "reasoning": "Clear search intent with specific topic"}
-- "what about startups?" → {"isSearch": true, "searchQuery": "startups", "confidence": 0.8, "reasoning": "Question about a topic implies search intent"}
-- "hello how are you" → {"isSearch": false, "searchQuery": null, "confidence": 0.9, "reasoning": "Greeting with no search intent"}
-- "can you help me understand React" → {"isSearch": false, "searchQuery": null, "confidence": 0.7, "reasoning": "Asking for explanation, not search"}
+- "find discussions about AI" → {"isSearch": true, "searchQuery": "AI", "confidence": 0.9, "reasoning": "Clear search command for existing discussions"}
+- "what's your opinion on AI?" → {"isSearch": false, "searchQuery": null, "confidence": 0.9, "reasoning": "Asking for my opinion, not searching for others' discussions"}
+- "show me posts about React" → {"isSearch": true, "searchQuery": "React", "confidence": 0.9, "reasoning": "Requesting to see existing posts"}
+- "can you explain React?" → {"isSearch": false, "searchQuery": null, "confidence": 0.9, "reasoning": "Asking me to explain, not search for explanations"}
+- "what about startups?" → {"isSearch": true, "searchQuery": "startups", "confidence": 0.7, "reasoning": "Ambiguous but likely asking for existing content"}
+- "tell me about startups" → {"isSearch": false, "searchQuery": null, "confidence": 0.8, "reasoning": "Asking me to tell/explain, not search"}
+- "how does JavaScript work?" → {"isSearch": false, "searchQuery": null, "confidence": 0.8, "reasoning": "Asking me to explain how it works"}
+- "what's been said about JavaScript?" → {"isSearch": true, "searchQuery": "JavaScript", "confidence": 0.9, "reasoning": "Asking about existing discussions/opinions"}
+- "hello" → {"isSearch": false, "searchQuery": null, "confidence": 0.9, "reasoning": "Simple greeting, social interaction"}
+- "thanks for your help" → {"isSearch": false, "searchQuery": null, "confidence": 0.9, "reasoning": "Gratitude expression, social interaction"}
+- "that's interesting" → {"isSearch": false, "searchQuery": null, "confidence": 0.9, "reasoning": "Conversational reaction, not a request"}
+- "what is blockchain?" → {"isSearch": false, "searchQuery": null, "confidence": 0.8, "reasoning": "Asking for definition/explanation, not searching"}
+- "good morning" → {"isSearch": false, "searchQuery": null, "confidence": 0.9, "reasoning": "Time-based greeting, social interaction"}
+- "I don't understand" → {"isSearch": false, "searchQuery": null, "confidence": 0.9, "reasoning": "Expressing confusion, not requesting search"}
 
 JSON Response:`;

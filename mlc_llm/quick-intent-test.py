@@ -16,6 +16,9 @@ import re
 import sys
 from pathlib import Path
 
+MODEL = "Llama-3.2-3B-Instruct-q4f16_1-MLC"
+# MODEL = "Phi-4-mini-instruct-q4f16_1-MLC"
+
 try:
     from mlc_llm import MLCEngine
     MLC_AVAILABLE = True
@@ -43,6 +46,8 @@ TEST_QUERIES = [
     "how does JavaScript work?",
     "what is blockchain?"
 ]
+
+
 
 def load_prompt_from_typescript():
     """Load the shared prompt from TypeScript file"""
@@ -123,7 +128,7 @@ class IntentTester:
         """Find the local model path"""
         # Try from current directory first (extension root)
         current_dir = Path.cwd()
-        model_dir = current_dir / "models" / "Llama-3.2-3B-Instruct-q4f16_1-MLC"
+        model_dir = current_dir / "models" / MODEL
         
         if model_dir.exists():
             self.model_path = str(model_dir)
@@ -134,7 +139,7 @@ class IntentTester:
         script_dir = Path(__file__).parent
         if script_dir.name == "mlc_llm":
             repo_root = script_dir.parent
-            model_dir = repo_root / "models" / "Llama-3.2-3B-Instruct-q4f16_1-MLC"
+            model_dir = repo_root / "models" / MODEL
             
             if model_dir.exists():
                 self.model_path = str(model_dir)
@@ -142,10 +147,10 @@ class IntentTester:
                 return
         
         print(f"❌ Model not found. Tried:")
-        print(f"   - {current_dir / 'models' / 'Llama-3.2-3B-Instruct-q4f16_1-MLC'}")
+        print(f"   - {current_dir / 'models' / MODEL}")
         if script_dir.name == "mlc_llm":
             repo_root = script_dir.parent
-            print(f"   - {repo_root / 'models' / 'Llama-3.2-3B-Instruct-q4f16_1-MLC'}")
+            print(f"   - {repo_root / 'models' / MODEL}")
         print("💡 Make sure you're running from the repo root directory")
         print("💡 Or that the models/ folder exists with the Llama model")
         sys.exit(1)
